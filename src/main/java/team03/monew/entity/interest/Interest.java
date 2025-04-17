@@ -2,36 +2,20 @@ package team03.monew.entity.interest;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.Instant;
-import java.util.UUID;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import team03.monew.entity.base.BaseEntity;
 
 @Entity
 @NoArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "interests")
-public class Interest {
+public class Interest extends BaseEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
-
-  @Column(nullable = false, length = 200)
+  @Column(nullable = false, length = 60)    // JPA와 postgreSQL에서 길이는 글자 수(한글, 영어 관계없음)
   private String name;
 
   @Column(nullable = false)
   private long subscriberCount;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
-  private Instant createdAt;
 
   public Interest(String name) {
     this.name = name;

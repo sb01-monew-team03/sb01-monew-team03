@@ -18,7 +18,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EntityListeners(EnableJpaAuditing.class)
 @Table(name = "subscriptions")
 @IdClass(SubscriptionId.class)
-public class Subscription {
+public class Subscription {   // 복합 키를 사용하기 때문에 BaseEntity 상속하지 않음
 
   // TODO: User 엔티티 추가 후 작성
 //  @Id
