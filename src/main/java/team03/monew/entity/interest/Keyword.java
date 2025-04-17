@@ -2,6 +2,7 @@ package team03.monew.entity.interest;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -14,7 +15,7 @@ import team03.monew.entity.base.BaseEntity;
 @Table(name = "keywords")
 public class Keyword extends BaseEntity {
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "interest_id", nullable = false)
   private Interest interest;
 

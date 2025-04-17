@@ -3,6 +3,7 @@ package team03.monew.entity.interest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -23,12 +24,12 @@ public class Subscription {   // 복합 키를 사용하기 때문에 BaseEntity
 
   // TODO: User 엔티티 추가 후 작성
 //  @Id
-//  @ManyToOne
+//  @ManyToOne(fetch = FetchType.LAZY, optional = false)
 //  @JoinColumn(name = "user_id", nullable = false)
 //  private User user;
 
   @Id
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "interest_id", nullable = false)
   private Interest interest;
 
