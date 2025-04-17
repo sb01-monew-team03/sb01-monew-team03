@@ -5,6 +5,9 @@ spring:
     password: 1234
   jpa:
     hibernate:
-      ddl-auto: update #'update'로 처음 실행 후 'none'으로 변경
+      ddl-auto: none #'update'로 처음 실행 후 'none'으로 변경
     show-sql: true
     open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
