@@ -11,7 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @MappedSuperclass
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BaseUpdatableEntity extends BaseEntity {
+public abstract class BaseUpdatableEntity extends BaseEntity {
 
   @UpdateTimestamp
   @Column(name = "updated_at")
