@@ -1,4 +1,4 @@
-package team03.monyu.dto;
+package team03.monew.dto;
 
 public class gitpush {
 

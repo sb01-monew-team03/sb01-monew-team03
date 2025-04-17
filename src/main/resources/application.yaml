@@ -1,5 +1,5 @@
 spring:
   application:
-    name: monyu
+    name: monew
   profiles:
     active: dev
