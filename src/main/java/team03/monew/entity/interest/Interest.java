@@ -3,11 +3,12 @@ package team03.monew.entity.interest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import team03.monew.entity.base.BaseEntity;
 
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "interests")
 public class Interest extends BaseEntity {
 
