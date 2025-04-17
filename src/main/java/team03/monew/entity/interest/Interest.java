@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.UUID;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,14 +20,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Interest {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   @Column(nullable = false, length = 200)
   private String name;
 
   @Column(nullable = false)
-  private long subscribers;
+  private long subscriberCount;
 
   @CreatedDate
   @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
@@ -34,16 +35,16 @@ public class Interest {
 
   public Interest(String name) {
     this.name = name;
-    this.subscribers = 0;
+    this.subscriberCount = 0;
   }
 
   public void increaseSubscribers() {
-    this.subscribers++;
+    this.subscriberCount++;
   }
 
   public void decreaseSubscribers() {
-    if (this.subscribers > 0) {
-      this.subscribers--;
+    if (this.subscriberCount > 0) {
+      this.subscriberCount--;
     }
   }
 }

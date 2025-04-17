@@ -2,6 +2,7 @@ package team03.monew.entity.interest;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -10,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SubscriptionId implements Serializable {
 
-  private Long userId;
-  private Long InterestId;
+  private UUID userId;
+  private UUID InterestId;
 
   @Override
   public boolean equals(Object obj) {
