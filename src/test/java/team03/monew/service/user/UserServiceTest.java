@@ -6,7 +6,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +43,6 @@ class UserServiceTest {
     @DisplayName("사용자 등록 성공")
     void createUser_success() {
       // given
-      UUID id = UUID.randomUUID();
       UserRegisterRequest request = new UserRegisterRequest("test@gmail.com", "test", "qwer1234");
       User user = new User(request.nickname(), request.email(), request.password());
       UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(), user.getCreatedAt());
@@ -80,8 +78,6 @@ class UserServiceTest {
   @DisplayName("모든 사용자 조회")
   void findAll_success() {
     // given
-    UUID user1Id = UUID.randomUUID();
-    UUID user2Id = UUID.randomUUID();
     User user1 = new User("user1", "user1@gmail.com", "qwer1234");
     User user2 = new User("user2", "user2@gmail.com", "qwer1234");
 
