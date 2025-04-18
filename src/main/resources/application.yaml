@@ -3,3 +3,9 @@ spring:
     name: monew
   profiles:
     active: dev
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+logging:
+  level:
+    root: info
