@@ -10,22 +10,24 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import team03.monew.entity.user.User;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(EnableJpaAuditing.class)
 @Table(name = "subscriptions")
 @IdClass(SubscriptionId.class)
+@Getter
 public class Subscription {   // 복합 키를 사용하기 때문에 BaseEntity 상속하지 않음
 
-  // TODO: User 엔티티 추가 후 작성
-//  @Id
-//  @ManyToOne
-//  @JoinColumn(name = "user_id", nullable = false)
-//  private User user;
+  @Id
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
   @Id
   @ManyToOne
