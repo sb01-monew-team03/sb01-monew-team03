@@ -3,7 +3,6 @@ package team03.monew.util.exception;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
