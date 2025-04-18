@@ -3,6 +3,7 @@ package team03.monew.service.interest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,8 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.entity.interest.Interest;
+import team03.monew.mapper.InterestMapper;
 import team03.monew.repository.InterestRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +28,9 @@ public class InterestServiceTest {
 
   @Mock
   private InterestRepository interestRepository;
+
+  @Mock
+  private InterestMapper interestMapper;
 
   @InjectMocks
   private InterestServiceImpl interestService;
@@ -35,7 +41,7 @@ public class InterestServiceTest {
 
     @Test
     @DisplayName("[success] InterestRespository의 save()를 호출하고, 키워드를 포함한 결과를 반환해야 함")
-    void interestServiceCreateTest() {
+    void successTest() {
       // given
       String name = "test";
       List<String> keywords = List.of("java", "spring");
@@ -47,21 +53,23 @@ public class InterestServiceTest {
       }
 
       when(interestRepository.save(any(Interest.class))).thenReturn(interest);
+      when(interestMapper.toDto(any(Interest.class), anyBoolean()))
+          .thenReturn(new InterestDto(null, interest.getName(), keywords, interest.getSubscriberCount(), false));
 
       // when
-      Interest result = interestService.create(request);
+      InterestDto result = interestService.create(request);
 
       // then
       verify(interestRepository).save(any(Interest.class));   // 레포지토리의 save()를 호출했는지 확인
-      assertThat(result.getName()).isEqualTo("test");   // 결과물의 내용이 작성한 것과 동일한지 확인
-      assertThat(result.getKeywords()).hasSize(2);    // 결과물의 키워드 사이즈가 입력한 것과 동일한지 확인
-      assertThat(result.getKeywords()).extracting("name")
-          .containsExactlyInAnyOrder("java", "spring");  // 결과물의 키워드가 작성한 것과 동일한지 확인
+      assertThat(result.name()).isEqualTo("test");   // 결과물의 내용이 작성한 것과 동일한지 확인
+      assertThat(result.keywords()).hasSize(2);    // 결과물의 키워드 사이즈가 입력한 것과 동일한지 확인
+      assertThat(result.keywords())
+          .contains("java", "spring");  // 결과물의 키워드가 작성한 것과 동일한지 확인
     }
 
     @Test
     @DisplayName("[fail] interest에 키워드가 하나도 없을 경우, InterestRespository의 save()를 호출하지 않아야 함")
-    void interestServiceCreateFailKeywordTest() {
+    void failKeywordTest() {
       // given
       String name = "test";
       List<String> keywords = new ArrayList<>();
@@ -75,7 +83,7 @@ public class InterestServiceTest {
 
     @Test
     @DisplayName("[fail] 이미 존재하는 관심사와 80% 이상 유사한 이름의 관심사를 등록하려는 경우, 저장되지 않아야 함")
-    void interestServiceCreateFailInterestNameTest() {
+    void failInterestNameTest() {
       // given
       String existingName = "test1";
       List<String> existingKeywords = List.of("java", "spring");

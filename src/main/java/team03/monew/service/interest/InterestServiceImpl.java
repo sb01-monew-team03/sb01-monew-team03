@@ -3,17 +3,22 @@ package team03.monew.service.interest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.springframework.stereotype.Service;
+import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.entity.interest.Interest;
+import team03.monew.mapper.InterestMapper;
 import team03.monew.repository.InterestRepository;
 
+@Service
 @RequiredArgsConstructor
 public class InterestServiceImpl implements InterestService {
 
   private final InterestRepository interestRepository;
+  private final InterestMapper interestMapper;
 
   @Override
-  public Interest create(InterestRegisterRequest request) {
+  public InterestDto create(InterestRegisterRequest request) {
 
     // request 쪼개기
     String name = request.name();
@@ -43,7 +48,7 @@ public class InterestServiceImpl implements InterestService {
     interestRepository.save(interest);
 
     // 결과물 반환
-    return interest;
+    return interestMapper.toDto(interest, false);
   }
 
   private void calculateSimilarity(String a, String b) {
