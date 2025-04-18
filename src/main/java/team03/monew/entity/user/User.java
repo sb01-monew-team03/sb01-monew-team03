@@ -73,4 +73,3 @@ public class User {
     USER, ADMIN
   }
 }
-
