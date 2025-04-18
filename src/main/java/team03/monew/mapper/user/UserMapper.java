@@ -1,4 +1,4 @@
-package team03.monew.mapper;
+package team03.monew.mapper.user;
 
 import org.mapstruct.Mapper;
 import team03.monew.dto.user.UserDto;

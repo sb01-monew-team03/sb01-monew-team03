@@ -1,4 +1,4 @@
-package team03.monew.repository;
+package team03.monew.repository.user;
 
 import java.util.Optional;
 import java.util.UUID;
