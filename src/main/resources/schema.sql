@@ -55,7 +55,7 @@ ALTER TABLE subscriptions
 
 
 -- 댓글 테이블 생성
-CREATE TABLE comments 
+CREATE TABLE comments
 (
     id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id UUID NOT NULL,
@@ -76,7 +76,7 @@ ALTER TABLE comments
 
 
 -- 댓글 좋아요 테이블 생성
-CREATE TABLE comment_likes 
+CREATE TABLE comment_likes
 (
     id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     comment_id UUID NOT NULL,
@@ -99,7 +99,7 @@ ALTER TABLE comment_likes
 
 
 -- articles 테이블 생성
-CREATE TABLE articles 
+CREATE TABLE articles
 (
     id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     source VARCHAR NOT NULL,
@@ -134,7 +134,7 @@ ALTER TABLE articles ADD CONSTRAINT chk_articles_updated
 
 
 -- activity 테이블 생성
-CREATE TABLE activity 
+CREATE TABLE activity
 (
     id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id UUID NOT NULL,
@@ -152,7 +152,7 @@ ALTER TABLE activity ADD CONSTRAINT chk_activity_updated
 
 
 -- article_view 테이블 생성
-CREATE TABLE article_view 
+CREATE TABLE article_view
 (
     id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     article_id UUID NOT NULL,
@@ -168,29 +168,8 @@ ALTER TABLE article_view ADD CONSTRAINT fk_article_view_users
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
 
 
--- article_interest 테이블 생성
-CREATE TABLE article_interest 
-(
-    id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    article_id UUID NOT NULL,
-    interest_id UUID NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ
-);
-
--- article_interest 제약 조건 추가
-ALTER TABLE article_interest ADD CONSTRAINT fk_article_interest_news
-    FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE;
-
-ALTER TABLE article_interest ADD CONSTRAINT fk_article_interest_interest
-    FOREIGN KEY (interest_id) REFERENCES interests(id) ON DELETE CASCADE;
-
-ALTER TABLE article_interest ADD CONSTRAINT uq_article_interest_news_interest
-    UNIQUE (article_id, interest_id);
-
-
 -- notification 테이블 생성
-CREATE TABLE notification 
+CREATE TABLE notification
 (
     id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id UUID NOT NULL,
