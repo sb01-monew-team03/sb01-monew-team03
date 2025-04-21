@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserRegisterRequest;
+import team03.monew.dto.user.UserUpdateRequest;
 import team03.monew.entity.user.User;
 import team03.monew.mapper.user.UserMapper;
 import team03.monew.repository.user.UserRepository;
@@ -150,14 +151,14 @@ class UserServiceTest {
     void update_success() {
       // given
       UUID id = UUID.randomUUID();
-      String newNickname = "updatedUser";
+      UserUpdateRequest request = new UserUpdateRequest("updatedUser");
       User user = new User("user", "user@gmail.com", "qwer1234");
-      UserDto userDto = new UserDto(user.getId(), user.getEmail(), newNickname, user.getCreatedAt());
+      UserDto userDto = new UserDto(user.getId(), user.getEmail(), request.nickname(), user.getCreatedAt());
       given(userRepository.findById(id)).willReturn(Optional.of(user));
       given(userMapper.toDto(user)).willReturn(userDto);
 
       // when
-      UserDto result = userService.update(id, newNickname);
+      UserDto result = userService.update(id, request);
 
       // then
       assertNotNull(result);
@@ -171,11 +172,11 @@ class UserServiceTest {
     void update_userNotFound() {
       // given
       UUID userId = UUID.randomUUID();
-      String newNickname = "updatedUser";
+      UserUpdateRequest request = new UserUpdateRequest("updatedUser");
       given(userRepository.findById(userId)).willReturn(Optional.empty());
 
       // when, then
-      assertThrows(UserNotFoundException.class, () -> userService.update(userId, newNickname));
+      assertThrows(UserNotFoundException.class, () -> userService.update(userId, request));
     }
   }
 
