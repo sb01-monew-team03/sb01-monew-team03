@@ -31,6 +31,7 @@ public class Keyword extends BaseEntity {
   private String name;  // 키워드 이름
 
   public Keyword(Interest interest, String name) {
+    this.interest = interest;
     this.name = name;
   }
 
@@ -46,10 +47,5 @@ public class Keyword extends BaseEntity {
     Keyword keyword = (Keyword) o;
     return Objects.equals(interest, keyword.interest) && Objects.equals(name,
         keyword.name);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(interest, name);
   }
 }

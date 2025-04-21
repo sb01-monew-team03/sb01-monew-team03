@@ -19,10 +19,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.xmlunit.builder.Input;
 import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
+import team03.monew.entity.interest.Keyword;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
 
@@ -107,15 +109,30 @@ public class InterestServiceTest {
   class UpdateTest {
 
     @Test
-    @DisplayName("[success] InterestRespository의 findById()를 호출하고, 키워드가 추가된 InterestDto가 반환되어야 함")
+    @DisplayName("[success] InterestRespository의 findById()를 호출하고, 새로운 키워드로 교체된 InterestDto가 반환되어야 함")
     void successTest() {
       // given
       UUID interestId = UUID.randomUUID();
       Interest interest = new Interest("test");
       interest.updateKeywords(List.of("java"));
-      InterestUpdateRequest request = new InterestUpdateRequest(List.of("spring", "boot"));
+      InterestUpdateRequest request = new InterestUpdateRequest(List.of("java", "spring", "boot"));
 
       given(interestRepository.findById(interestId)).willReturn(Optional.of(interest));
+      given(interestMapper.toDto(any(Interest.class), anyBoolean()))
+          .willAnswer(
+          Input -> {
+            Interest inputInterest = Input.getArgument(0);
+            return new InterestDto(
+                interestId.toString(),
+                inputInterest.getName(),
+                inputInterest.getKeywords().stream()
+                    .map(Keyword::getName)
+                    .toList(),
+                inputInterest.getSubscriberCount(),
+                Input.getArgument(1)
+            );
+          }
+      );
 
       // when
       InterestDto result = interestService.update(interestId, request);

@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +21,8 @@ import team03.monew.entity.base.BaseEntity;
 @Getter
 public class Interest extends BaseEntity {
 
-  @Column(unique = true, nullable = false, length = 60)    // JPA와 postgreSQL에서 길이는 글자 수(한글, 영어 관계없음)
+  @Column(unique = true, nullable = false, length = 60)
+  // JPA와 postgreSQL에서 길이는 글자 수(한글, 영어 관계없음)
   private String name;  // 관심사명
 
   @Column(nullable = false)
