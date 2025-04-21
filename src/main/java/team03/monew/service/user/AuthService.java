@@ -1,6 +1,7 @@
 package team03.monew.service.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.user.UserDto;
@@ -11,6 +12,7 @@ import team03.monew.repository.user.UserRepository;
 import team03.monew.util.exception.user.InvalidException;
 import team03.monew.util.exception.user.UserNotFoundException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -20,12 +22,14 @@ public class AuthService {
   private final UserMapper userMapper;
 
   public UserDto login(UserLoginRequest request) {
+    log.debug("로그인 시작: email={}", request.email());
     User user = userRepository.findByEmail(request.email())
         .orElseThrow(() -> UserNotFoundException.withEmail(request.email()));
 
     if (!user.getPassword().equals(request.password())) {
       throw InvalidException.wrongPassword();
     }
+    log.info("로그인 완료: userId={}, email={}", user.getId(), user.getEmail());
     return userMapper.toDto(user);
   }
 }

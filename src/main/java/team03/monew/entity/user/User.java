@@ -17,18 +17,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import team03.monew.entity.base.BaseDeletableEntity;
 
 @Entity
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class User {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
-  private UUID id;
+public class User extends BaseDeletableEntity {
 
   @Column(length = 100, nullable = false)
   private String nickname;
@@ -39,34 +35,18 @@ public class User {
   @Column(length = 100, updatable = false, nullable = false)
   private String password;
 
-  @CreatedDate
-  @Column(updatable = false, nullable = false)
-  private Instant createdAt;
-
-  @LastModifiedDate
-  private Instant updatedAt;
-
-  private Instant deletedAt;
-
   @Enumerated(EnumType.STRING)
   private Role role;
-
-  public boolean isDeleted() {
-    return deletedAt != null;
-  }
 
   public User(String nickname, String email, String password) {
     this.nickname = nickname;
     this.email = email;
     this.password = password;
+    this.role = Role.USER;
   }
 
   public void update(String nickname) {
     this.nickname = nickname;
-  }
-
-  public void delete() {
-    deletedAt = Instant.now();
   }
 
   public enum Role {
