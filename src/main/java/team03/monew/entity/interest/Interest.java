@@ -29,7 +29,7 @@ public class Interest extends BaseEntity {
   private long subscriberCount; // 구독자 수
 
   // 부모 객체 삭제 시 자식 객체도 삭제, 고아 객체 삭제
-  @OneToMany(mappedBy = "interest", orphanRemoval = true, cascade = CascadeType.REMOVE)
+  @OneToMany(mappedBy = "interest", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
   private List<Keyword> keywords;   // 키워드
 
   public Interest(String name) {
@@ -56,8 +56,9 @@ public class Interest extends BaseEntity {
 
     Set<String> keywordsSet = new LinkedHashSet<>(keywords);    // 중복 제거, 사용자 요청 순서 보장
 
-    for (String keyword : keywordsSet) {    // keywords 내부 다시 채움
-      addKeyword(keyword);
+    for (String keywordName : keywordsSet) {    // keywords 내부 다시 채움
+      Keyword keyword = new Keyword(this, keywordName);
+      this.keywords.add(keyword);
     }
   }
 
@@ -77,12 +78,5 @@ public class Interest extends BaseEntity {
   @Override
   public int hashCode() {
     return Objects.hashCode(name);
-  }
-
-
-  // 키워드 추가
-  private void addKeyword(String keywordName) {
-    Keyword keyword = new Keyword(this, keywordName);
-    keywords.add(keyword);
   }
 }

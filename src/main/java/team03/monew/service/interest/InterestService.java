@@ -12,4 +12,7 @@ public interface InterestService {
 
   // 관심사 수정
   InterestDto update(UUID interestId, InterestUpdateRequest request);
+
+  // 관심사 삭제
+  void deleteById(UUID interestId);
 }

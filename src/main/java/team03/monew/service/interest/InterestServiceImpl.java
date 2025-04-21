@@ -65,6 +65,11 @@ public class InterestServiceImpl implements InterestService {
     return interestMapper.toDto(interest, true);
   }
 
+  @Override
+  public void deleteById(UUID interestId) {
+    interestRepository.deleteById(interestId);
+  }
+
   // 단어 유사성 검사 - 80% 미만일 경우 예외처리
   private void calculateSimilarity(String a, String b) {
     int maxLength = Math.max(a.length(), b.length());

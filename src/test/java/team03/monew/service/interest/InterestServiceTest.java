@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.xmlunit.builder.Input;
 import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.dto.interest.InterestUpdateRequest;
@@ -57,7 +56,9 @@ public class InterestServiceTest {
 
       given(interestRepository.save(any(Interest.class))).willReturn(interest);
       given(interestMapper.toDto(any(Interest.class), anyBoolean()))
-          .willReturn(new InterestDto(null, interest.getName(), keywords, interest.getSubscriberCount(), false));
+          .willReturn(
+              new InterestDto(null, interest.getName(), keywords, interest.getSubscriberCount(),
+                  false));
 
       // when
       InterestDto result = interestService.create(request);
@@ -120,19 +121,19 @@ public class InterestServiceTest {
       given(interestRepository.findById(interestId)).willReturn(Optional.of(interest));
       given(interestMapper.toDto(any(Interest.class), anyBoolean()))
           .willAnswer(
-          Input -> {
-            Interest inputInterest = Input.getArgument(0);
-            return new InterestDto(
-                interestId.toString(),
-                inputInterest.getName(),
-                inputInterest.getKeywords().stream()
-                    .map(Keyword::getName)
-                    .toList(),
-                inputInterest.getSubscriberCount(),
-                Input.getArgument(1)
-            );
-          }
-      );
+              Input -> {
+                Interest inputInterest = Input.getArgument(0);
+                return new InterestDto(
+                    interestId.toString(),
+                    inputInterest.getName(),
+                    inputInterest.getKeywords().stream()
+                        .map(Keyword::getName)
+                        .toList(),
+                    inputInterest.getSubscriberCount(),
+                    Input.getArgument(1)
+                );
+              }
+          );
 
       // when
       InterestDto result = interestService.update(interestId, request);
@@ -141,6 +142,40 @@ public class InterestServiceTest {
       verify(interestRepository).findById(any(UUID.class));
       assertThat(result.keywords()).hasSize(3);
       assertThat(result.keywords()).contains("java", "spring", "boot");
+    }
+  }
+
+  @Nested
+  @DisplayName("delete() - 관심사 삭제 테스트")
+  class DeleteTest {
+
+    @Test
+    @DisplayName("[success] InterestRepository의 deleteById()를 호출해야 함")
+    void successTest() {
+      // given
+      UUID id = UUID.randomUUID();
+
+      // when
+      interestService.deleteById(id);
+
+      // then
+      verify(interestRepository).deleteById(id);
+    }
+  }
+
+  @Nested
+  @DisplayName("findAll() - 관심사 목록 조회 테스트")
+  class FindTest {
+
+    @Test
+    @DisplayName("[success] InterestRepository의 findAll()을 호출하고, CursorPageResponse를 반환해야 함")
+    void successTest() {
+      // given
+
+
+      // when
+
+      // then
     }
   }
 }
