@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.interest.InterestDto;
+import team03.monew.dto.interest.InterestFindRequest;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
@@ -164,18 +167,31 @@ public class InterestServiceTest {
   }
 
   @Nested
-  @DisplayName("findAll() - 관심사 목록 조회 테스트")
+  @DisplayName("find() - 관심사 목록 조회 테스트")
   class FindTest {
 
     @Test
-    @DisplayName("[success] InterestRepository의 findAll()을 호출하고, CursorPageResponse를 반환해야 함")
+    @DisplayName("[success] CustomInterestRepository의 findInterest()를 호출해야 함")
     void successTest() {
       // given
+      UUID cursor = UUID.randomUUID();
+      UUID userId = UUID.randomUUID();
 
+      InterestFindRequest request = new InterestFindRequest(
+          "test",
+          "name",
+          "asc",
+          String.valueOf(cursor),
+          String.valueOf(Instant.now()),
+          50,
+          String.valueOf(userId)
+      );
 
       // when
+      List<CursorPageResponse<InterestDto>> results = interestService.find(request);
 
       // then
+      verify(CustomInterestRepository).findInterest(request);
     }
   }
 }

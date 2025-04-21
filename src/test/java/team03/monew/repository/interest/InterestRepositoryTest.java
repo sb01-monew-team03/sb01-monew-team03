@@ -69,4 +69,7 @@ public class InterestRepositoryTest {
     // then
     assertThat(interestRepository.findById(saved.getId())).isEmpty();
   }
+
+  @Test
+  @DisplayName("관심사 목록 조회 테스트")
 }
