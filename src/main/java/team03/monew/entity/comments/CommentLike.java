@@ -48,12 +48,12 @@ public class CommentLike {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-//    /**
-//     * 댓글이 속한 기사. 다대일 관계.
-//     */
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "article_id", nullable = false)
-//    private Article article;
+    /**
+     * 댓글이 속한 기사. 다대일 관계.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "article_id", nullable = false)
+    private Article article;
 
     /**
      * 좋아요 생성 시간. 수정 불가능.
@@ -61,16 +61,16 @@ public class CommentLike {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-//    /**
-//     * 좋아요 생성자.
-//     *
-//     * @param comment 좋아요 대상 댓글
-//     * @param user 좋아요를 누른 사용자
-//     * @param article 댓글이 속한 기사
-//     */
-//    public CommentLike(Comment comment, User user, Article article) {
-//        this.comment = comment;
-//        this.user = user;
-//        this.article = article;
-//    }
+    /**
+     * 좋아요 생성자.
+     *
+     * @param comment 좋아요 대상 댓글
+     * @param user 좋아요를 누른 사용자
+     * @param article 댓글이 속한 기사
+     */
+    public CommentLike(Comment comment, User user, Article article) {
+        this.comment = comment;
+        this.user = user;
+        this.article = article;
+    }
 }
