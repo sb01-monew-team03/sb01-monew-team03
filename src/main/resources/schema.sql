@@ -55,15 +55,16 @@ ALTER TABLE subscriptions
 
 
 -- 댓글 테이블 생성
-CREATE TABLE comments (
-                          id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                          user_id UUID NOT NULL,
-                          article_id UUID NOT NULL,
-                          content VARCHAR(500) NOT NULL,
-                          like_count INTEGER NOT NULL DEFAULT 0,
-                          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                          updated_at TIMESTAMPTZ,
-                          deleted_at TIMESTAMPTZ
+CREATE TABLE comments 
+(
+    id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id UUID NOT NULL,
+    article_id UUID NOT NULL,
+    content VARCHAR(500) NOT NULL,
+    like_count INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ
 );
 
 -- 제약 조건 추가
@@ -75,14 +76,15 @@ ALTER TABLE comments
 
 
 -- 댓글 좋아요 테이블 생성
-CREATE TABLE comment_likes (
-                               id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                               comment_id UUID NOT NULL,
-                               user_id UUID NOT NULL,
-                               article_id UUID NOT NULL,
-                               created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                               updated_at TIMESTAMPTZ,
-                               UNIQUE (comment_id, user_id)
+CREATE TABLE comment_likes 
+(
+    id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    comment_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    article_id UUID NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ,
+    UNIQUE (comment_id, user_id)
 );
 
 -- 제약 조건 추가
@@ -97,17 +99,18 @@ ALTER TABLE comment_likes
 
 
 -- articles 테이블 생성
-CREATE TABLE articles (
-                          id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                          source VARCHAR NOT NULL,
-                          original_link VARCHAR NOT NULL,
-                          title VARCHAR NOT NULL,
-                          published_at TIMESTAMPTZ NOT NULL,
-                          summary VARCHAR NOT NULL,
-                          views INT NOT NULL DEFAULT 0,
-                          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                          updated_at TIMESTAMPTZ NULL,
-                          deleted_at TIMESTAMPTZ NULL
+CREATE TABLE articles 
+(
+    id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    source VARCHAR NOT NULL,
+    original_link VARCHAR NOT NULL,
+    title VARCHAR NOT NULL,
+    published_at TIMESTAMPTZ NOT NULL,
+    summary VARCHAR NOT NULL,
+    views INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NULL,
+    deleted_at TIMESTAMPTZ NULL
 );
 
 -- articles 테이블 제약 조건 추가
@@ -131,11 +134,12 @@ ALTER TABLE articles ADD CONSTRAINT chk_articles_updated
 
 
 -- activity 테이블 생성
-CREATE TABLE activity (
-                          id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                          user_id UUID NOT NULL,
-                          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                          updated_at TIMESTAMPTZ NULL
+CREATE TABLE activity 
+(
+    id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id UUID NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NULL
 );
 
 -- activity 제약 조건 추가
@@ -148,11 +152,12 @@ ALTER TABLE activity ADD CONSTRAINT chk_activity_updated
 
 
 -- article_view 테이블 생성
-CREATE TABLE article_view (
-                              id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                              article_id UUID NOT NULL,
-                              user_id UUID,
-                              viewed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE article_view 
+(
+    id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    article_id UUID NOT NULL,
+    user_id UUID,
+    viewed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- article_view 제약 조건 추가
@@ -164,12 +169,13 @@ ALTER TABLE article_view ADD CONSTRAINT fk_article_view_users
 
 
 -- article_interest 테이블 생성
-CREATE TABLE article_interest (
-                                  id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                  article_id UUID NOT NULL,
-                                  interest_id UUID NOT NULL,
-                                  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                                  updated_at TIMESTAMPTZ
+CREATE TABLE article_interest 
+(
+    id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    article_id UUID NOT NULL,
+    interest_id UUID NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ
 );
 
 -- article_interest 제약 조건 추가
@@ -184,15 +190,16 @@ ALTER TABLE article_interest ADD CONSTRAINT uq_article_interest_news_interest
 
 
 -- notification 테이블 생성
-CREATE TABLE notification (
-                              id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                              user_id UUID NOT NULL,
-                              content VARCHAR(255) NOT NULL,
-                              read BOOLEAN NOT NULL DEFAULT FALSE,
-                              message_id UUID,
-                              notification_type VARCHAR(50) NOT NULL CHECK ( notification_type IN ('INTEREST', 'COMMENT'),
-                              created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                              updated_at TIMESTAMPTZ
+CREATE TABLE notification 
+(
+    id UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id UUID NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    read BOOLEAN NOT NULL DEFAULT FALSE,
+    message_id UUID,
+    notification_type VARCHAR(50) NOT NULL CHECK ( notification_type IN ('INTEREST', 'COMMENT'),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ
 );
 
 -- notification 제약 조건 추가

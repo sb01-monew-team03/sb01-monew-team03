@@ -14,4 +14,12 @@ public abstract class BaseDeletableEntity extends BaseUpdatableEntity{
 
   @Column(name = "deleted_at")
   private Instant deletedAt;
+
+  public boolean isDeleted() {
+    return deletedAt != null;
+  }
+
+  public void delete() {
+    deletedAt = Instant.now();
+  }
 }
