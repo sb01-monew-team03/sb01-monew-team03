@@ -1,4 +1,4 @@
-package team03.monew.repository;
+package team03.monew.repository.interest;
 
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

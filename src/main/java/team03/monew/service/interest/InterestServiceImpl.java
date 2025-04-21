@@ -1,17 +1,21 @@
 package team03.monew.service.interest;
 
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestRegisterRequest;
+import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
-import team03.monew.mapper.InterestMapper;
-import team03.monew.repository.InterestRepository;
+import team03.monew.mapper.interest.InterestMapper;
+import team03.monew.repository.interest.InterestRepository;
 
 @Service
 @RequiredArgsConstructor
+@Transactional    // 모든 public 메서드에 적용됨
 public class InterestServiceImpl implements InterestService {
 
   private final InterestRepository interestRepository;
@@ -35,9 +39,7 @@ public class InterestServiceImpl implements InterestService {
     Interest interest = new Interest(name);
 
     // interest에 keyword 추가
-    for (String keyword : keywords) {
-      interest.addKeyword(keyword);
-    }
+    interest.updateKeywords(keywords);
 
     // 예외처리 - 키워드 하나 이상 있어야 함
     if (interest.getKeywords().isEmpty()) {
@@ -51,6 +53,19 @@ public class InterestServiceImpl implements InterestService {
     return interestMapper.toDto(interest, false);
   }
 
+  @Override
+  public InterestDto update(UUID interestId, InterestUpdateRequest request) {
+
+    Interest interest = interestRepository.findById(interestId).orElseThrow(() -> new IllegalArgumentException("해당 관심사가 존재하지 않습니다."));
+    List<String> keywords = request.keywords();
+
+    interest.updateKeywords(keywords);
+    
+    // TODO: 구독 구현 후 subscribedByMe 수정
+    return interestMapper.toDto(interest, true);
+  }
+
+  // 단어 유사성 검사 - 80% 미만일 경우 예외처리
   private void calculateSimilarity(String a, String b) {
     int maxLength = Math.max(a.length(), b.length());
 

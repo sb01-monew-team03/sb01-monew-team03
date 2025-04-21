@@ -6,8 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,20 +50,15 @@ public class Interest extends BaseEntity {
     }
   }
 
-  // 키워드 추가
-  public void addKeyword(String keywordName) {
-    Keyword keyword = new Keyword(this, keywordName);
+  // 키워드 수정
+  public void updateKeywords(List<String> keywords) {
+    this.keywords.clear();    // keywords 내부 비움
 
-    if (keywords.contains(keyword)) {
-      throw new IllegalArgumentException("이미 존재하는 키워드입니다.");
+    Set<String> keywordsSet = new LinkedHashSet<>(keywords);    // 중복 제거, 사용자 요청 순서 보장
+
+    for (String keyword : keywordsSet) {    // keywords 내부 다시 채움
+      addKeyword(keyword);
     }
-
-    keywords.add(keyword);
-  }
-
-  // 키워드 삭제
-  public void removeKeyword(Keyword keyword) {
-    keywords.remove(keyword);
   }
 
   // name 같은 경우 동일 객체로 취급
@@ -79,5 +77,12 @@ public class Interest extends BaseEntity {
   @Override
   public int hashCode() {
     return Objects.hashCode(name);
+  }
+
+
+  // 키워드 추가
+  private void addKeyword(String keywordName) {
+    Keyword keyword = new Keyword(this, keywordName);
+    keywords.add(keyword);
   }
 }

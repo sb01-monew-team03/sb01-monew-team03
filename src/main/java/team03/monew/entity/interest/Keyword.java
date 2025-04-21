@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,7 +14,12 @@ import team03.monew.entity.base.BaseEntity;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "keywords")
+@Table(
+    name = "keywords",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"interest_id", "name"})
+    }
+)
 @Getter
 public class Keyword extends BaseEntity {
 

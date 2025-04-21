@@ -4,12 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,9 +21,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestRegisterRequest;
+import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
-import team03.monew.mapper.InterestMapper;
-import team03.monew.repository.InterestRepository;
+import team03.monew.mapper.interest.InterestMapper;
+import team03.monew.repository.interest.InterestRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class InterestServiceTest {
@@ -36,8 +39,8 @@ public class InterestServiceTest {
   private InterestServiceImpl interestService;
 
   @Nested
-  @DisplayName("create()")
-  class interestServiceCreateTest {
+  @DisplayName("create() - 관심사 등록 테스트")
+  class CreateTest {
 
     @Test
     @DisplayName("[success] InterestRespository의 save()를 호출하고, 키워드를 포함한 결과를 반환해야 함")
@@ -48,13 +51,11 @@ public class InterestServiceTest {
       InterestRegisterRequest request = new InterestRegisterRequest(name, keywords);
 
       Interest interest = new Interest(name);
-      for (String keyword : keywords) {
-        interest.addKeyword(keyword);
-      }
+      interest.updateKeywords(keywords);
 
-      when(interestRepository.save(any(Interest.class))).thenReturn(interest);
-      when(interestMapper.toDto(any(Interest.class), anyBoolean()))
-          .thenReturn(new InterestDto(null, interest.getName(), keywords, interest.getSubscriberCount(), false));
+      given(interestRepository.save(any(Interest.class))).willReturn(interest);
+      given(interestMapper.toDto(any(Interest.class), anyBoolean()))
+          .willReturn(new InterestDto(null, interest.getName(), keywords, interest.getSubscriberCount(), false));
 
       // when
       InterestDto result = interestService.create(request);
@@ -63,8 +64,7 @@ public class InterestServiceTest {
       verify(interestRepository).save(any(Interest.class));   // 레포지토리의 save()를 호출했는지 확인
       assertThat(result.name()).isEqualTo("test");   // 결과물의 내용이 작성한 것과 동일한지 확인
       assertThat(result.keywords()).hasSize(2);    // 결과물의 키워드 사이즈가 입력한 것과 동일한지 확인
-      assertThat(result.keywords())
-          .contains("java", "spring");  // 결과물의 키워드가 작성한 것과 동일한지 확인
+      assertThat(result.keywords()).contains("java", "spring");  // 결과물의 키워드가 작성한 것과 동일한지 확인
     }
 
     @Test
@@ -88,11 +88,9 @@ public class InterestServiceTest {
       String existingName = "test1";
       List<String> existingKeywords = List.of("java", "spring");
       Interest existingInterest = new Interest(existingName);
-      for (String keyword : existingKeywords) {
-        existingInterest.addKeyword(keyword);
-      }
+      existingInterest.updateKeywords(existingKeywords);
 
-      when(interestRepository.findAll()).thenReturn(List.of(existingInterest));
+      given(interestRepository.findAll()).willReturn(List.of(existingInterest));
 
       String newName = "test2";
       List<String> newKeywords = List.of("java", "spring");
@@ -101,6 +99,31 @@ public class InterestServiceTest {
       // when & then
       assertThrows(IllegalArgumentException.class, () -> interestService.create(request));
       verify(interestRepository, never()).save(any(Interest.class));
+    }
+  }
+
+  @Nested
+  @DisplayName("update() - 관심사 수정 테스트")
+  class UpdateTest {
+
+    @Test
+    @DisplayName("[success] InterestRespository의 findById()를 호출하고, 키워드가 추가된 InterestDto가 반환되어야 함")
+    void successTest() {
+      // given
+      UUID interestId = UUID.randomUUID();
+      Interest interest = new Interest("test");
+      interest.updateKeywords(List.of("java"));
+      InterestUpdateRequest request = new InterestUpdateRequest(List.of("spring", "boot"));
+
+      given(interestRepository.findById(interestId)).willReturn(Optional.of(interest));
+
+      // when
+      InterestDto result = interestService.update(interestId, request);
+
+      // then
+      verify(interestRepository).findById(any(UUID.class));
+      assertThat(result.keywords()).hasSize(3);
+      assertThat(result.keywords()).contains("java", "spring", "boot");
     }
   }
 }
