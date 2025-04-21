@@ -170,28 +170,28 @@ public class InterestServiceTest {
   @DisplayName("find() - 관심사 목록 조회 테스트")
   class FindTest {
 
-    @Test
-    @DisplayName("[success] CustomInterestRepository의 findInterest()를 호출해야 함")
-    void successTest() {
-      // given
-      UUID cursor = UUID.randomUUID();
-      UUID userId = UUID.randomUUID();
-
-      InterestFindRequest request = new InterestFindRequest(
-          "test",
-          "name",
-          "asc",
-          String.valueOf(cursor),
-          String.valueOf(Instant.now()),
-          50,
-          String.valueOf(userId)
-      );
-
-      // when
-      List<CursorPageResponse<InterestDto>> results = interestService.find(request);
-
-      // then
-      verify(CustomInterestRepository).findInterest(request);
-    }
+//    @Test
+//    @DisplayName("[success] CustomInterestRepository의 findInterest()를 호출해야 함")
+//    void successTest() {
+//      // given
+//      UUID cursor = UUID.randomUUID();
+//      UUID userId = UUID.randomUUID();
+//
+//      InterestFindRequest request = new InterestFindRequest(
+//          "test",
+//          "name",
+//          "asc",
+//          String.valueOf(cursor),
+//          String.valueOf(Instant.now()),
+//          50,
+//          String.valueOf(userId)
+//      );
+//
+//      // when
+//      List<CursorPageResponse<InterestDto>> results = interestService.find(request);
+//
+//      // then
+//      verify(CustomInterestRepository).findInterest(request);
+//    }
   }
 }

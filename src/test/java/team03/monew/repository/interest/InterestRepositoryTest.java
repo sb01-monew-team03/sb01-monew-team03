@@ -22,6 +22,9 @@ public class InterestRepositoryTest {
   @Autowired
   InterestRepository interestRepository;
 
+  @Autowired
+  CustomInterestRepository customInterestRepository;
+
   @Test
   @DisplayName("관심사 저장 테스트")
   void saveTest() {
@@ -72,4 +75,12 @@ public class InterestRepositoryTest {
 
   @Test
   @DisplayName("관심사 목록 조회 테스트")
+  void findTest() {
+    // given
+
+    // when
+
+    // then
+
+  }
 }
