@@ -1,4 +1,4 @@
-package team03.monew.dto.comments.request;
+package team03.monew.dto.comments;
 
 import jakarta.validation.constraints.NotBlank;
 

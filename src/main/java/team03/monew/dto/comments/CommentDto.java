@@ -1,4 +1,4 @@
-package team03.monew.dto.comments.data;
+package team03.monew.dto.comments;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
