@@ -15,6 +15,10 @@ import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
+import team03.monew.util.exception.interest.EmptyKeywordListException;
+import team03.monew.util.exception.interest.InterestAlreadyExistException;
+import team03.monew.util.exception.interest.InterestNotFoundException;
+import team03.monew.util.exception.interest.OrderByValueException;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +49,7 @@ public class InterestServiceImpl implements InterestService {
 
     // 예외처리 - 키워드 하나 이상 있어야 함
     if (interest.getKeywords().isEmpty()) {
-      throw new IllegalArgumentException("키워드는 최소 1개 이상이어야 합니다.");
+      throw new EmptyKeywordListException();
     }
 
     // 레포지토리 저장
@@ -59,7 +63,7 @@ public class InterestServiceImpl implements InterestService {
   public InterestDto update(UUID interestId, InterestUpdateRequest request) {
 
     Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> new IllegalArgumentException("해당 관심사가 존재하지 않습니다."));
+        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
     List<String> keywords = request.keywords();
 
     interest.updateKeywords(keywords);
@@ -69,8 +73,12 @@ public class InterestServiceImpl implements InterestService {
   }
 
   @Override
-  public void deleteById(UUID interestId) {
-    interestRepository.deleteById(interestId);
+  public void delete(UUID interestId) {
+
+    Interest interest = interestRepository.findById(interestId)
+        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
+
+    interestRepository.delete(interest);
   }
 
   @Override
@@ -106,18 +114,17 @@ public class InterestServiceImpl implements InterestService {
 
 
   // 단어 유사성 검사 - 80% 미만일 경우 예외처리
-  private void calculateSimilarity(String a, String b) {
-    int maxLength = Math.max(a.length(), b.length());
+  private void calculateSimilarity(String interestName, String existingInterestName) {
+    int maxLength = Math.max(interestName.length(), existingInterestName.length());
 
     LevenshteinDistance ld = new LevenshteinDistance();
 
     double result = 0;
-    double temp = ld.apply(a, b);   // 두 문자열 간의 최소 편집 거리 계산 - a를 b로 만들기 위해 필요한 최소 삽입/삭제/수정 횟수
+    double temp = ld.apply(interestName, existingInterestName);   // 두 문자열 간의 최소 편집 거리 계산 - a를 b로 만들기 위해 필요한 최소 삽입/삭제/수정 횟수
     result = (maxLength - temp) / maxLength;
 
     if (result >= 0.8) {
-      throw new IllegalArgumentException(
-          "작성하신 관심사 " + a + "가 이미 존재하는 관심사인 " + b + "와 80% 이상(" + (result * 100) + "%) 유사합니다.");
+      throw InterestAlreadyExistException.withInterestName(interestName, existingInterestName);
     }
   }
 
@@ -128,6 +135,6 @@ public class InterestServiceImpl implements InterestService {
       case "subscriberCount":
         return String.valueOf(lastInterest.getSubscriberCount());
     }
-    throw new IllegalArgumentException("orderBy는 name, subscriberCount만 가능합니다.");
+    throw OrderByValueException.withOrderBy(orderBy);
   }
 }

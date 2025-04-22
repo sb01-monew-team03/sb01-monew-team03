@@ -1,6 +1,5 @@
 package team03.monew.service.interest;
 
-import java.util.List;
 import java.util.UUID;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.interest.InterestDto;
@@ -17,7 +16,7 @@ public interface InterestService {
   InterestDto update(UUID interestId, InterestUpdateRequest request);
 
   // 관심사 삭제
-  void deleteById(UUID interestId);
+  void delete(UUID interestId);
 
   // 관심사 검색
   CursorPageResponse<InterestDto> find(InterestFindRequest request);

@@ -154,13 +154,13 @@ public class InterestServiceTest {
   class DeleteTest {
 
     @Test
-    @DisplayName("[success] InterestRepository의 deleteById()를 호출해야 함")
+    @DisplayName("[success] InterestRepository의 delete()를 호출해야 함")
     void successTest() {
       // given
       UUID id = UUID.randomUUID();
 
       // when
-      interestService.deleteById(id);
+      interestService.delete(id);
 
       // then
       verify(interestRepository).deleteById(id);

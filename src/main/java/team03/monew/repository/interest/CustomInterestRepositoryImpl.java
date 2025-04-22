@@ -24,19 +24,12 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
   @Override
   public List<Interest> findInterest(InterestFindRequest request) {
 
-    BooleanExpression where = null;
-
-    if (!StringUtils.isNullOrEmpty(request.keyword())) {
-      where = containsInterestName(request.keyword())
-          .or(containsKeywordsName(request.keyword()));
-    }
-
     return queryFactory
         .select(qInterest).distinct() // 중복 제거(키워드 수만큼 row 반복 막음)
         .from(qInterest)
         .join(qInterest.keywords, qKeyword).fetchJoin()
         .where(
-            where,
+            getWhere(request.keyword()),
             cursorCondition(request.cursor(), request.orderBy(), request.direction(),
                 request.after())
         )
@@ -50,25 +43,29 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
   @Override
   public long totalCountInterest(InterestFindRequest request) {
 
-
-    BooleanExpression where = null;
-
-    if (!StringUtils.isNullOrEmpty(request.keyword())) {
-      where = containsInterestName(request.keyword())
-          .or(containsKeywordsName(request.keyword()));
-    }
-
     Long count = queryFactory
         .select(qInterest.countDistinct())  // 중복 제거를 통해 순수 관심사 개수 반환
         .from(qInterest)
         .join(qInterest.keywords, qKeyword)
-        .where(where)
+        .where(getWhere(request.keyword()))
         .fetchOne();
 
     return count == null ? 0 : count;
   }
 
   // where
+  // 조건절 취합
+  private BooleanExpression getWhere(String keyword) {
+    BooleanExpression where = null;
+
+    if (!StringUtils.isNullOrEmpty(keyword)) {
+      where = containsInterestName(keyword)
+          .or(containsKeywordsName(keyword));
+    }
+
+    return where;
+  }
+
   // 관심사 이름
   private BooleanExpression containsInterestName(String keyword) {
 
