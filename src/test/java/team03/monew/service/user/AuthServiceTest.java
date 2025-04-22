@@ -14,8 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserLoginRequest;
 import team03.monew.entity.user.User;
+import team03.monew.entity.user.User.Role;
 import team03.monew.mapper.user.UserMapper;
 import team03.monew.repository.user.UserRepository;
+import team03.monew.service.user.impl.AuthServiceImpl;
 import team03.monew.util.exception.user.InvalidException;
 import team03.monew.util.exception.user.UserNotFoundException;
 
@@ -23,7 +25,7 @@ import team03.monew.util.exception.user.UserNotFoundException;
 class AuthServiceTest {
 
   @InjectMocks
-  private AuthService authService;
+  private AuthServiceImpl authService;
 
   @Mock
   private UserRepository userRepository;
@@ -36,7 +38,7 @@ class AuthServiceTest {
   void login_success() {
     // given
     UserLoginRequest request = new UserLoginRequest("user@gmail.com", "qwer1234");
-    User user = new User("user", "user@gmail.com", "qwer1234");
+    User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
     UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(), user.getCreatedAt());
     given(userRepository.findByEmail(request.email())).willReturn(Optional.of(user));
     given(userMapper.toDto(user)).willReturn(userDto);
@@ -66,7 +68,7 @@ class AuthServiceTest {
   void login_invalidPassword() {
     // given
     UserLoginRequest request = new UserLoginRequest("user@gmail.com", "fail");
-    User user = new User("user", "user@gmail.com", "qwer1234");
+    User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
     given(userRepository.findByEmail(request.email())).willReturn(Optional.of(user));
 
     // when, then

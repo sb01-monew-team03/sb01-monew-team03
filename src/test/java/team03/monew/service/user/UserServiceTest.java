@@ -19,8 +19,10 @@ import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserRegisterRequest;
 import team03.monew.dto.user.UserUpdateRequest;
 import team03.monew.entity.user.User;
+import team03.monew.entity.user.User.Role;
 import team03.monew.mapper.user.UserMapper;
 import team03.monew.repository.user.UserRepository;
+import team03.monew.service.user.impl.UserServiceImpl;
 import team03.monew.util.exception.user.UserAlreadyExistsException;
 import team03.monew.util.exception.user.UserNotFoundException;
 
@@ -28,7 +30,7 @@ import team03.monew.util.exception.user.UserNotFoundException;
 class UserServiceTest {
 
   @InjectMocks
-  private UserService userService;
+  private UserServiceImpl userService;
 
   @Mock
   private UserRepository userRepository;
@@ -45,7 +47,7 @@ class UserServiceTest {
     void createUser_success() {
       // given
       UserRegisterRequest request = new UserRegisterRequest("test@gmail.com", "test", "qwer1234");
-      User user = new User(request.nickname(), request.email(), request.password());
+      User user = new User(request.nickname(), request.email(), request.password(), Role.USER);
       UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(), user.getCreatedAt());
 
       given(userRepository.existsByEmail(user.getEmail())).willReturn(false);
@@ -79,8 +81,8 @@ class UserServiceTest {
   @DisplayName("모든 사용자 조회")
   void findAll_success() {
     // given
-    User user1 = new User("user1", "user1@gmail.com", "qwer1234");
-    User user2 = new User("user2", "user2@gmail.com", "qwer1234");
+    User user1 = new User("user1", "user1@gmail.com", "qwer1234", Role.USER);
+    User user2 = new User("user2", "user2@gmail.com", "qwer1234", Role.USER);
 
     List<User> users = List.of(user1, user2);
 
@@ -113,7 +115,7 @@ class UserServiceTest {
     void findById_success() {
       // given
       UUID userId = UUID.randomUUID();
-      User user = new User("user", "user@gmail.com", "qwer1234");
+      User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
       UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(), user.getCreatedAt());
       given(userRepository.findById(userId)).willReturn(Optional.of(user));
       given(userMapper.toDto(user)).willReturn(userDto);
@@ -152,7 +154,7 @@ class UserServiceTest {
       // given
       UUID id = UUID.randomUUID();
       UserUpdateRequest request = new UserUpdateRequest("updatedUser");
-      User user = new User("user", "user@gmail.com", "qwer1234");
+      User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
       UserDto userDto = new UserDto(user.getId(), user.getEmail(), request.nickname(), user.getCreatedAt());
       given(userRepository.findById(id)).willReturn(Optional.of(user));
       given(userMapper.toDto(user)).willReturn(userDto);
@@ -189,7 +191,7 @@ class UserServiceTest {
     void softDelete_success() {
       // given
       UUID id = UUID.randomUUID();
-      User user =new User("user", "user@gmail.com", "qwer1234");
+      User user =new User("user", "user@gmail.com", "qwer1234", Role.USER);
       given(userRepository.findById(id)).willReturn(Optional.of(user));
 
       // when
@@ -221,7 +223,7 @@ class UserServiceTest {
     void hardDelete_success() {
       // given
       UUID id = UUID.randomUUID();
-      User user = new User("user", "user@gmail.com", "qwer1234");
+      User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
       given(userRepository.findById(id)).willReturn(Optional.of(user));
 
       // when

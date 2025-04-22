@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.test.context.ActiveProfiles;
 import team03.monew.entity.user.User;
+import team03.monew.entity.user.User.Role;
 
 @DataJpaTest
 @EnableJpaAuditing
@@ -34,7 +35,7 @@ class UserRepositoryTest {
     void existsByEmail_success() {
       // given
       String email = "user@gmail.com";
-      User user = new User("user", email, "qwer1234");
+      User user = new User("user", email, "qwer1234", Role.USER);
       userRepository.save(user);
       entityManager.flush();
       entityManager.clear();
@@ -69,7 +70,7 @@ class UserRepositoryTest {
     void findByEmail_success() {
       // given
       String email = "user@gmail.com";
-      User user = new User("user", email, "qwer1234");
+      User user = new User("user", email, "qwer1234", Role.USER);
       userRepository.save(user);
       entityManager.flush();
       entityManager.clear();
