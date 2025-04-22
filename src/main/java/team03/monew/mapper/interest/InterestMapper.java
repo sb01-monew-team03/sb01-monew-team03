@@ -1,4 +1,4 @@
-package team03.monew.mapper;
+package team03.monew.mapper.interest;
 
 import java.util.List;
 import java.util.stream.Collectors;

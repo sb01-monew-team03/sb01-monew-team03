@@ -10,6 +10,8 @@ import team03.monew.entity.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import team03.monew.entity.article.Article;
+import team03.monew.entity.user.User;
 
 /**
  * 뉴스 기사 댓글 엔티티

@@ -8,7 +8,6 @@ import team03.monew.entity.article.Article;
 import team03.monew.entity.base.BaseEntity;
 import team03.monew.entity.user.User;
 
-
 @Entity
 @Table(name = "comment_likes")
 @Getter
