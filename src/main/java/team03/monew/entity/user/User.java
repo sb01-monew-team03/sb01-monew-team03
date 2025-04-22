@@ -38,11 +38,11 @@ public class User extends BaseDeletableEntity {
   @Enumerated(EnumType.STRING)
   private Role role;
 
-  public User(String nickname, String email, String password) {
+  public User(String nickname, String email, String password, Role role) {
     this.nickname = nickname;
     this.email = email;
     this.password = password;
-    this.role = Role.USER;
+    this.role = role;
   }
 
   public void update(String nickname) {
