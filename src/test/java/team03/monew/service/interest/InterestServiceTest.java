@@ -30,6 +30,8 @@ import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Keyword;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
+import team03.monew.util.exception.interest.EmptyKeywordListException;
+import team03.monew.util.exception.interest.InterestAlreadyExistException;
 
 @ExtendWith(MockitoExtension.class)
 public class InterestServiceTest {
@@ -83,7 +85,7 @@ public class InterestServiceTest {
       InterestRegisterRequest request = new InterestRegisterRequest(name, keywords);
 
       // when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(EmptyKeywordListException.class,
           () -> interestService.create(request));  // 해당 종류의 예외가 발생해야 테스트 성공
       verify(interestRepository, never()).save(any(Interest.class));  // 메서드 호출 실패 시 테스트 성공
     }
@@ -104,7 +106,7 @@ public class InterestServiceTest {
       InterestRegisterRequest request = new InterestRegisterRequest(newName, newKeywords);
 
       // when & then
-      assertThrows(IllegalArgumentException.class, () -> interestService.create(request));
+      assertThrows(InterestAlreadyExistException.class, () -> interestService.create(request));
       verify(interestRepository, never()).save(any(Interest.class));
     }
   }
