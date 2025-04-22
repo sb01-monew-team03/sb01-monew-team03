@@ -8,4 +8,7 @@ public interface CustomInterestRepository {
 
   // 조건에 맞는 관심사 검색
   List<Interest> findInterest(InterestFindRequest request);
+
+  // 조건에 맞는 관심사 총 개수
+  long totalCountInterest(InterestFindRequest request);
 }

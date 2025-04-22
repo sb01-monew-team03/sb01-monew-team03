@@ -32,7 +32,7 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
     }
 
     return queryFactory
-        .select(qInterest)
+        .select(qInterest).distinct() // 중복 제거(키워드 수만큼 row 반복 막음)
         .from(qInterest)
         .join(qInterest.keywords, qKeyword).fetchJoin()
         .where(
@@ -43,10 +43,30 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
         .orderBy(
             getOrderBy(request.orderBy(), request.direction()),
             qInterest.createdAt.asc())
-        .limit(request.limit())
+        .limit(request.limit() + 1) // 다음 페이지 확인용으로 1개 더 읽어옴
         .fetch();
   }
 
+  @Override
+  public long totalCountInterest(InterestFindRequest request) {
+
+
+    BooleanExpression where = null;
+
+    if (!StringUtils.isNullOrEmpty(request.keyword())) {
+      where = containsInterestName(request.keyword())
+          .or(containsKeywordsName(request.keyword()));
+    }
+
+    Long count = queryFactory
+        .select(qInterest.countDistinct())  // 중복 제거를 통해 순수 관심사 개수 반환
+        .from(qInterest)
+        .join(qInterest.keywords, qKeyword)
+        .where(where)
+        .fetchOne();
+
+    return count == null ? 0 : count;
+  }
 
   // where
   // 관심사 이름

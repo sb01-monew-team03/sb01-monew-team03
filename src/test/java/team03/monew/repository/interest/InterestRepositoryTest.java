@@ -7,8 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -80,28 +78,31 @@ public class InterestRepositoryTest {
   }
 
   @Nested
-  @DisplayName("관심사 목록 조회 테스트")
-  @TestInstance(Lifecycle.PER_CLASS)
+  @DisplayName("관심사 목록 조회 테스트 - CustomInterestRepository")
   class FindTest {
 
     @BeforeEach
     void setUp() {
       Interest interest1 = new Interest("관심사1");
       interest1.updateKeywords(List.of("키워드1", "키워드2", "키워드3"));
-      interestRepository.save(interest1);
+      Interest saved1 = interestRepository.save(interest1);
 
       Interest interest2 = new Interest("관심사2");
       interest2.updateKeywords(List.of("키워드1", "키워드5"));
-      interestRepository.save(interest2);
+      Interest saved2 = interestRepository.save(interest2);
 
       Interest interest3 = new Interest("관심사3");
       interest3.updateKeywords(List.of("키워드1"));
-      interestRepository.save(interest3);
+      Interest saved3 = interestRepository.save(interest3);
+
+      Interest interest4 = new Interest("관심사4");
+      interest4.updateKeywords(List.of("키워드4"));
+      Interest saved4 = interestRepository.save(interest4);
     }
 
     @Test
-    @DisplayName("[success] 관심사 이름을 이용한 검색")
-    void successInterestNameTest() {
+    @DisplayName("[findInterest()] 관심사 이름을 이용한 검색")
+    void findInterestInterestNameTest() {
       // given
       InterestFindRequest request = new InterestFindRequest(
           "관심사",
@@ -117,23 +118,23 @@ public class InterestRepositoryTest {
       List<Interest> result = interestRepository.findInterest(request);
 
       // then
-      assertThat(result).hasSize(2);
+      assertThat(result).hasSize(3);
       assertThat(result.get(0).getKeywords()).hasSize(3);
       assertThat(result.get(1).getKeywords().stream()
           .map(Keyword::getName)).contains("키워드1", "키워드5");
     }
 
     @Test
-    @DisplayName("[success] 키워드 이름을 이용한 검색")
-    void successKeywordNameTest() {
+    @DisplayName("[findInterest()] 키워드 이름을 이용한 검색")
+    void findInterestKeywordNameTest() {
       // given
       InterestFindRequest request = new InterestFindRequest(
-          "키워드5",
+          "키워드1",
           "name",
           "asc",
           null,
           null,
-          3,
+          2,
           null
       );
 
@@ -141,10 +142,31 @@ public class InterestRepositoryTest {
       List<Interest> result = interestRepository.findInterest(request);
 
       // then
-      assertThat(result).hasSize(1);
-      assertThat(result.get(0).getName()).isEqualTo("관심사2");
-      assertThat(result.get(0).getKeywords().stream()
+      assertThat(result).hasSize(3);
+      assertThat(result.get(1).getName()).isEqualTo("관심사2");
+      assertThat(result.get(1).getKeywords().stream()
           .map(Keyword::getName)).contains("키워드1", "키워드5");
+    }
+
+    @Test
+    @DisplayName("[totalCountInterest()] 검색어에 해당하는 요소 총 개수")
+    void totalCountInterestTest() {
+      // given
+      InterestFindRequest request = new InterestFindRequest(
+          "관심사",
+          "name",
+          "asc",
+          null,
+          null,
+          2,
+          null
+      );
+
+      // when
+      long result = interestRepository.totalCountInterest(request);
+
+      // then
+      assertThat(result).isEqualTo(4);
     }
   }
 }

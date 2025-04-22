@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,7 +29,6 @@ import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Keyword;
 import team03.monew.mapper.interest.InterestMapper;
-import team03.monew.repository.interest.CustomInterestRepositoryImpl;
 import team03.monew.repository.interest.InterestRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,9 +39,6 @@ public class InterestServiceTest {
 
   @Mock
   private InterestMapper interestMapper;
-
-  @Mock
-  private CustomInterestRepositoryImpl customInterestRepository;
 
   @InjectMocks
   private InterestServiceImpl interestService;
@@ -174,28 +171,37 @@ public class InterestServiceTest {
   @DisplayName("find() - 관심사 목록 조회 테스트")
   class FindTest {
 
-//    @Test
-//    @DisplayName("[success] CustomInterestRepository의 findInterest()를 호출해야 함")
-//    void successTest() {
-//      // given
-//      UUID cursor = UUID.randomUUID();
-//      UUID userId = UUID.randomUUID();
-//
-//      InterestFindRequest request = new InterestFindRequest(
-//          "test",
-//          "name",
-//          "asc",
-//          String.valueOf(cursor),
-//          String.valueOf(Instant.now()),
-//          50,
-//          String.valueOf(userId)
-//      );
-//
-//      // when
-//      List<CursorPageResponse<InterestDto>> results = interestService.find(request);
-//
-//      // then
-//      verify(CustomInterestRepository).findInterest(request);
-//    }
+    @Test
+    @DisplayName("[success] CustomInterestRepository의 findInterest()를 호출하고, CursorPageResponse를 반환해야 함")
+    void successTest() {
+      // given
+      InterestFindRequest request = new InterestFindRequest(
+          "test",
+          "name",
+          "asc",
+          "cursor",
+          String.valueOf(Instant.now()),
+          50,
+          UUID.randomUUID().toString()
+      );
+
+      List<Interest> fakeResults = List.of(new Interest("test"));
+      given(interestRepository.findInterest(eq(request))).willReturn(fakeResults);
+      given(interestRepository.totalCountInterest(eq(request))).willReturn(1L);
+      given(interestMapper.toDto(any(), anyBoolean())).willReturn(new InterestDto(
+          UUID.randomUUID().toString(),
+          "관심사 검색 테스트",
+          List.of("키워드1", "키워드2"),
+          0,
+          false));
+
+      // when
+      CursorPageResponse<InterestDto> results = interestService.find(request);
+
+      // then
+      verify(interestRepository).findInterest(eq(request));
+      assertThat(results.content()).hasSize(1);
+      assertThat(results.content().get(0).name()).isEqualTo("관심사 검색 테스트");
+    }
   }
 }
