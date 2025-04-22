@@ -2,14 +2,9 @@ package team03.monew.service.user;
 
 import java.util.List;
 import java.util.UUID;
-import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserRegisterRequest;
 import team03.monew.dto.user.UserUpdateRequest;
-import team03.monew.entity.user.User;
-import team03.monew.entity.user.User.Role;
-import team03.monew.util.exception.user.UserAlreadyExistsException;
-import team03.monew.util.exception.user.UserNotFoundException;
 
 public interface UserService {
 
