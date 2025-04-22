@@ -78,10 +78,11 @@ public class Comment extends BaseDeletableEntity {
     }
 
 
-    // 삭제 처리 - 연관된 좋아요 데이터도 함께 제거
     @Override
     public void delete() {
-        super.delete(); // deletedAt 설정
-        this.likes.clear(); // 연관된 좋아요 데이터 제거
+        super.delete();
+        if (likes != null) {
+            likes.forEach(like -> like.getComment().getLikes().remove(like));
+        }
     }
 }

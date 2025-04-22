@@ -8,10 +8,7 @@ import team03.monew.entity.article.Article;
 import team03.monew.entity.base.BaseEntity;
 import team03.monew.entity.user.User;
 
-/**
- * 댓글 좋아요 엔티티
- * - BaseEntity를 상속받아 기본 필드(id, createdAt) 자동 관리
- */
+
 @Entity
 @Table(name = "comment_likes")
 @Getter
