@@ -14,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import team03.monew.entity.article.Article;
+import team03.monew.entity.user.User;
 
 /**
  * 사용자가 댓글에 누른 좋아요를 나타내는 엔티티 클래스.

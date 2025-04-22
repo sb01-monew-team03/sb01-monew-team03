@@ -19,6 +19,8 @@ import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
+import team03.monew.entity.article.Article;
+import team03.monew.entity.user.User;
 
 /**
  * 뉴스 기사에 대한 댓글을 나타내는 엔티티 클래스.
