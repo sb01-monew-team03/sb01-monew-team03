@@ -29,6 +29,7 @@ CREATE TABLE keywords
     id          UUID PRIMARY KEY,
     interest_id UUID        NOT NULL,
     name        VARCHAR(30) NOT NULL,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (interest_id, name)
 );

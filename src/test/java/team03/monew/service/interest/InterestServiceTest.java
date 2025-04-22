@@ -28,6 +28,7 @@ import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Keyword;
 import team03.monew.mapper.interest.InterestMapper;
+import team03.monew.repository.interest.CustomInterestRepositoryImpl;
 import team03.monew.repository.interest.InterestRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +39,9 @@ public class InterestServiceTest {
 
   @Mock
   private InterestMapper interestMapper;
+
+  @Mock
+  private CustomInterestRepositoryImpl customInterestRepository;
 
   @InjectMocks
   private InterestServiceImpl interestService;
