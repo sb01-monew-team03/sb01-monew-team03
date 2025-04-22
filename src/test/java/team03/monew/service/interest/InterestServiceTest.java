@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,6 +30,8 @@ import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Keyword;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
+import team03.monew.util.exception.interest.EmptyKeywordListException;
+import team03.monew.util.exception.interest.InterestAlreadyExistException;
 
 @ExtendWith(MockitoExtension.class)
 public class InterestServiceTest {
@@ -82,7 +85,7 @@ public class InterestServiceTest {
       InterestRegisterRequest request = new InterestRegisterRequest(name, keywords);
 
       // when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(EmptyKeywordListException.class,
           () -> interestService.create(request));  // 해당 종류의 예외가 발생해야 테스트 성공
       verify(interestRepository, never()).save(any(Interest.class));  // 메서드 호출 실패 시 테스트 성공
     }
@@ -103,7 +106,7 @@ public class InterestServiceTest {
       InterestRegisterRequest request = new InterestRegisterRequest(newName, newKeywords);
 
       // when & then
-      assertThrows(IllegalArgumentException.class, () -> interestService.create(request));
+      assertThrows(InterestAlreadyExistException.class, () -> interestService.create(request));
       verify(interestRepository, never()).save(any(Interest.class));
     }
   }
@@ -153,13 +156,13 @@ public class InterestServiceTest {
   class DeleteTest {
 
     @Test
-    @DisplayName("[success] InterestRepository의 deleteById()를 호출해야 함")
+    @DisplayName("[success] InterestRepository의 delete()를 호출해야 함")
     void successTest() {
       // given
       UUID id = UUID.randomUUID();
 
       // when
-      interestService.deleteById(id);
+      interestService.delete(id);
 
       // then
       verify(interestRepository).deleteById(id);
@@ -170,28 +173,37 @@ public class InterestServiceTest {
   @DisplayName("find() - 관심사 목록 조회 테스트")
   class FindTest {
 
-//    @Test
-//    @DisplayName("[success] CustomInterestRepository의 findInterest()를 호출해야 함")
-//    void successTest() {
-//      // given
-//      UUID cursor = UUID.randomUUID();
-//      UUID userId = UUID.randomUUID();
-//
-//      InterestFindRequest request = new InterestFindRequest(
-//          "test",
-//          "name",
-//          "asc",
-//          String.valueOf(cursor),
-//          String.valueOf(Instant.now()),
-//          50,
-//          String.valueOf(userId)
-//      );
-//
-//      // when
-//      List<CursorPageResponse<InterestDto>> results = interestService.find(request);
-//
-//      // then
-//      verify(CustomInterestRepository).findInterest(request);
-//    }
+    @Test
+    @DisplayName("[success] CustomInterestRepository의 findInterest()를 호출하고, CursorPageResponse를 반환해야 함")
+    void successTest() {
+      // given
+      InterestFindRequest request = new InterestFindRequest(
+          "test",
+          "name",
+          "asc",
+          "cursor",
+          String.valueOf(Instant.now()),
+          50,
+          UUID.randomUUID().toString()
+      );
+
+      List<Interest> fakeResults = List.of(new Interest("test"));
+      given(interestRepository.findInterest(eq(request))).willReturn(fakeResults);
+      given(interestRepository.totalCountInterest(eq(request))).willReturn(1L);
+      given(interestMapper.toDto(any(), anyBoolean())).willReturn(new InterestDto(
+          UUID.randomUUID().toString(),
+          "관심사 검색 테스트",
+          List.of("키워드1", "키워드2"),
+          0,
+          false));
+
+      // when
+      CursorPageResponse<InterestDto> results = interestService.find(request);
+
+      // then
+      verify(interestRepository).findInterest(eq(request));
+      assertThat(results.content()).hasSize(1);
+      assertThat(results.content().get(0).name()).isEqualTo("관심사 검색 테스트");
+    }
   }
 }

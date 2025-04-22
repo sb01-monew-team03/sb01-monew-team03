@@ -28,7 +28,7 @@ public class Interest extends BaseEntity {
   @Column(nullable = false)
   private long subscriberCount; // 구독자 수
 
-  // 부모 객체 삭제 시 자식 객체도 삭제, 고아 객체 삭제
+  // 부모 객체 저장/수정/삭제 시 자식 객체도 저장/수정/삭제, 고아 객체 삭제
   @OneToMany(mappedBy = "interest", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
   private List<Keyword> keywords;   // 키워드
 
