@@ -9,7 +9,8 @@ spring:
 logging:
   level:
     root: info
+
 admin:
-  email: admin@example.com
-  password: supersecret
+  email: ${ADMIN_EMAIL}
+  password: ${ADMIN_PASSWORD}
   nickname: admin
