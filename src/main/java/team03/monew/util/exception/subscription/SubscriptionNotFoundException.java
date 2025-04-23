@@ -9,9 +9,10 @@ public class SubscriptionNotFoundException extends SubscriptionException {
     super(ErrorCode.SUBSCRIPTION_NOT_FOUND);
   }
 
-  public static SubscriptionNotFoundException withSubscriptionId(UUID subscriptionId) {
+  public static SubscriptionNotFoundException withUserIdAndInterestId(UUID userId, UUID interestId) {
     SubscriptionNotFoundException exception = new SubscriptionNotFoundException();
-    exception.addDetail("subscriptionId", subscriptionId);
+    exception.addDetail("userId", userId);
+    exception.addDetail("interestId", interestId);
     return exception;
   }
 }

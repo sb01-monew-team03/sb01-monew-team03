@@ -14,8 +14,8 @@ import team03.monew.repository.interest.SubscriptionRepository;
 import team03.monew.service.interest.InterestService;
 import team03.monew.service.interest.SubscriptionService;
 import team03.monew.service.user.UserService;
-import team03.monew.util.exception.interest.InterestNotFoundException;
 import team03.monew.util.exception.subscription.SubscriptionAlreadyExistException;
+import team03.monew.util.exception.subscription.SubscriptionNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +33,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     // 필요한 user, interest 세팅
     User user = userService.findUserById(userId);
-    Interest interest = interestService.getInterestEntity(interestId)
-        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
+    Interest interest = interestService.getInterestEntityById(interestId);
 
     // 예외처리 - 구독 중복 방지
-    if (subscriptionRepository.existsByUserAndInterest(user, interest)) {
+    if (existByUserIdAndInterestId(userId, interestId)) {
       throw SubscriptionAlreadyExistException.withInterestIdAndUserId(userId, interestId);
     }
 
@@ -54,5 +53,31 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             subscription,
             interestMapper.toDto(interest, true)
         );
+  }
+
+  @Override
+  public void delete(UUID userId, UUID interestId) {
+
+    // 필요한 user, interest 세팅
+    Interest interest = interestService.getInterestEntityById(interestId);
+
+    // subscription 가져오기, 예외처리 - 해당 구독 정보 없는 경우
+    Subscription subscription = subscriptionRepository.findByUser_IdAndInterest_Id(userId, interestId)
+        .orElseThrow(
+            () -> SubscriptionNotFoundException.withUserIdAndInterestId(userId, interestId));
+
+    // 삭제
+    subscriptionRepository.delete(subscription);
+
+    // 구독자 수 감소
+    interestService.decreaseSubscriberCount(interest);
+  }
+
+  // TODO: 순환참조 문제 없이 boolean값 InterestService에 넘길 방법 찾기
+  @Override
+  public boolean existByUserIdAndInterestId(UUID userId, UUID interestId) {
+
+    // 구독 여부 반환
+    return subscriptionRepository.existsByUser_IdAndInterest_Id(userId, interestId);
   }
 }

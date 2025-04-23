@@ -1,6 +1,5 @@
 package team03.monew.service.interest;
 
-import java.util.Optional;
 import java.util.UUID;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.interest.InterestDto;
@@ -15,13 +14,13 @@ public interface InterestService {
   InterestDto create(InterestRegisterRequest request);
 
   // 관심사 수정
-  InterestDto update(UUID interestId, InterestUpdateRequest request);
+  InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId);
 
   // 관심사 삭제
   void delete(UUID interestId);
 
   // 관심사 검색
-  CursorPageResponse<InterestDto> find(InterestFindRequest request);
+  CursorPageResponse<InterestDto> find(InterestFindRequest request, UUID userId);
 
   // 관심사 구독자 수 증가
   void increaseSubscriberCount(Interest interest);
@@ -30,5 +29,5 @@ public interface InterestService {
   void decreaseSubscriberCount(Interest interest);
 
   // 관심사 엔티티 반환
-  Optional<Interest> getInterestEntity(UUID interestId);
+  Interest getInterestEntityById(UUID interestId);
 }

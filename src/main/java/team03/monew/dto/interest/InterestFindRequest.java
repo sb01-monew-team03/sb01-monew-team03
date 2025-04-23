@@ -11,9 +11,7 @@ public record InterestFindRequest(
     String cursor,      // 커서 값(name 또는 subscriberCount)
     String after,       // 보조 커서(create_at)
     @NotBlank
-    Integer limit,      // 커서 페이지 크기
-    @NotBlank
-    String monewRequestUserId   // 요청자 id - 구독 확인용
+    Integer limit      // 커서 페이지 크기
 ) {
 
 }

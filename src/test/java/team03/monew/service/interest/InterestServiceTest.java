@@ -143,7 +143,7 @@ public class InterestServiceTest {
           );
 
       // when
-      InterestDto result = interestService.update(interestId, request);
+      InterestDto result = interestService.update(interestId, request, UUID.randomUUID());
 
       // then
       verify(interestRepository).findById(any(UUID.class));
@@ -187,8 +187,7 @@ public class InterestServiceTest {
           "asc",
           "cursor",
           String.valueOf(Instant.now()),
-          50,
-          UUID.randomUUID().toString()
+          50
       );
 
       List<Interest> fakeResults = List.of(new Interest("test"));
@@ -202,7 +201,7 @@ public class InterestServiceTest {
           false));
 
       // when
-      CursorPageResponse<InterestDto> results = interestService.find(request);
+      CursorPageResponse<InterestDto> results = interestService.find(request, UUID.randomUUID());
 
       // then
       verify(interestRepository).findInterest(eq(request));

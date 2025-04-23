@@ -27,6 +27,7 @@ import team03.monew.repository.interest.SubscriptionRepository;
 import team03.monew.service.interest.impl.SubscriptionServiceImpl;
 import team03.monew.service.user.UserService;
 import team03.monew.util.exception.subscription.SubscriptionAlreadyExistException;
+import team03.monew.util.exception.subscription.SubscriptionNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionServiceTest {
@@ -53,7 +54,6 @@ public class SubscriptionServiceTest {
   @DisplayName("create() - 구독 테스트")
   class CreateTest {
 
-    // TODO: 현재 깨짐, User 엔티티 반환 메서드 생기면 다시 확인
     @Test
     @DisplayName("[success] SubscriptionRepository의 save()와 InterestService의 increaseSubscriberCount()를 호출하고, SubscriptionDto를 반환해야 함")
     void successTest() {
@@ -66,8 +66,8 @@ public class SubscriptionServiceTest {
       SubscriptionDto subscriptionDto = mock(SubscriptionDto.class);
 
       // Mocking
-      given(interestService.getInterestEntity(interestId)).willReturn(Optional.of(interest));
-      given(subscriptionRepository.existsByUserAndInterest(user, interest)).willReturn(false);
+      given(interestService.getInterestEntityById(interestId)).willReturn(interest);
+      given(subscriptionRepository.existsByUser_IdAndInterest_Id(userId, interestId)).willReturn(false);
       given(subscriptionRepository.save(any(Subscription.class))).willReturn(subscription);
       given(subscriptionMapper.toDto(any(Subscription.class), any())).willReturn(subscriptionDto);
       given(userService.findUserById(userId)).willReturn(user);
@@ -91,8 +91,8 @@ public class SubscriptionServiceTest {
       Interest interest = mock(Interest.class);
 
       // Mocking
-      given(interestService.getInterestEntity(interestId)).willReturn(Optional.of(interest));
-      given(subscriptionRepository.existsByUserAndInterest(user, interest)).willReturn(true);
+      given(interestService.getInterestEntityById(interestId)).willReturn(interest);
+      given(subscriptionRepository.existsByUser_IdAndInterest_Id(userId, interestId)).willReturn(true);
       given(userService.findUserById(userId)).willReturn(user);
 
       // when & then
@@ -101,4 +101,56 @@ public class SubscriptionServiceTest {
       verify(subscriptionRepository, never()).save(any(Subscription.class));
     }
   }
+
+  @Nested
+  @DisplayName("delete() - 구독 취소 테스트")
+  class DeleteTest {
+
+    @Test
+    @DisplayName("[success] SubscriptionRepository의 delete()와 InterestService의 decreaseSubscriberCount()를 호출해야 함")
+    void successTest() {
+      // given
+      UUID userId = UUID.randomUUID();
+      UUID interestId = UUID.randomUUID();
+      User user = mock(User.class);
+      Interest interest = mock(Interest.class);
+      Subscription subscription = new Subscription(user, interest);
+
+      // Mocking
+      given(interestService.getInterestEntityById(interestId)).willReturn(interest);
+      given(subscriptionRepository.findByUser_IdAndInterest_Id(any(UUID.class),
+          any(UUID.class))).willReturn(
+          Optional.of(subscription));
+
+      // when
+      subscriptionService.delete(userId, interestId);
+
+      // then
+      verify(subscriptionRepository).delete(any(Subscription.class));
+      verify(interestService).decreaseSubscriberCount(any(Interest.class));
+    }
+
+    @Test
+    @DisplayName("[fail] 존재하지 않는 구독 정보일 경우 SubscriptionNotFoundException 발생")
+    void failTest() {
+      // given
+      UUID userId = UUID.randomUUID();
+      UUID interestId = UUID.randomUUID();
+      User user = mock(User.class);
+      Interest interest = mock(Interest.class);
+
+      // Mocking
+      given(interestService.getInterestEntityById(interestId)).willReturn(interest);
+      given(subscriptionRepository.findByUser_IdAndInterest_Id(any(UUID.class),
+          any(UUID.class))).willReturn(
+          Optional.empty());
+
+      // when & then
+      assertThrows(SubscriptionNotFoundException.class,
+          () -> subscriptionService.delete(userId, interestId));
+      verify(subscriptionRepository, never()).delete(any(Subscription.class));
+    }
+  }
+  
+  // TODO: 구독 여부 확인 테스트 코드 작성
 }

@@ -2,7 +2,6 @@ package team03.monew.service.interest.impl;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
@@ -62,7 +61,7 @@ public class InterestServiceImpl implements InterestService {
   }
 
   @Override
-  public InterestDto update(UUID interestId, InterestUpdateRequest request) {
+  public InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId) {
 
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
@@ -70,7 +69,7 @@ public class InterestServiceImpl implements InterestService {
 
     interest.updateKeywords(keywords);
 
-    // TODO: 구독 구현 후 subscribedByMe 수정
+    // TODO: 구독 여부 수정
     return interestMapper.toDto(interest, true);
   }
 
@@ -85,7 +84,7 @@ public class InterestServiceImpl implements InterestService {
 
   @Override
   @Transactional(readOnly = true)
-  public CursorPageResponse<InterestDto> find(InterestFindRequest request) {
+  public CursorPageResponse<InterestDto> find(InterestFindRequest request, UUID userId) {
 
     List<Interest> interestList = interestRepository.findInterest(request);
     String nextCursor = null;
@@ -98,10 +97,10 @@ public class InterestServiceImpl implements InterestService {
       nextCursor = setNextCursor(lastInterest, request.orderBy());
       nextAfter = lastInterest.getCreatedAt();
     }
-    
+
     List<InterestDto> content = interestList.stream()
-        // TODO: 구독 구현 후 subscribedByMe 수정
-        .map(interest -> interestMapper.toDto(interest, false))
+        // TODO: 구독 여부 수정
+        .map(interest -> interestMapper.toDto(interest, true))
         .toList();
 
     return new CursorPageResponse<>(
@@ -126,8 +125,9 @@ public class InterestServiceImpl implements InterestService {
 
   @Override
   @Transactional(readOnly = true)
-  public Optional<Interest> getInterestEntity(UUID interestId) {
-    return interestRepository.findById(interestId);
+  public Interest getInterestEntityById(UUID interestId) {
+    return interestRepository.findById(interestId)
+        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
   }
 
 
@@ -138,7 +138,8 @@ public class InterestServiceImpl implements InterestService {
     LevenshteinDistance ld = new LevenshteinDistance();
 
     double result = 0;
-    double temp = ld.apply(interestName, existingInterestName);   // 두 문자열 간의 최소 편집 거리 계산 - a를 b로 만들기 위해 필요한 최소 삽입/삭제/수정 횟수
+    double temp = ld.apply(interestName,
+        existingInterestName);   // 두 문자열 간의 최소 편집 거리 계산 - a를 b로 만들기 위해 필요한 최소 삽입/삭제/수정 횟수
     result = (maxLength - temp) / maxLength;
 
     if (result >= 0.8) {
