@@ -1,7 +1,8 @@
-package team03.monew.service.interest;
+package team03.monew.service.interest.impl;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
@@ -15,6 +16,7 @@ import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
+import team03.monew.service.interest.InterestService;
 import team03.monew.util.exception.interest.EmptyKeywordListException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
 import team03.monew.util.exception.interest.InterestNotFoundException;
@@ -110,6 +112,22 @@ public class InterestServiceImpl implements InterestService {
         interestRepository.totalCountInterest(request),
         hasNext
     );
+  }
+
+  @Override
+  public void increaseSubscriberCount(Interest interest) {
+    interest.increaseSubscribers();
+  }
+
+  @Override
+  public void decreaseSubscriberCount(Interest interest) {
+    interest.decreaseSubscribers();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<Interest> getInterestEntity(UUID interestId) {
+    return interestRepository.findById(interestId);
   }
 
 
