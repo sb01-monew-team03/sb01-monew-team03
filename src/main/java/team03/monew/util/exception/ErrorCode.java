@@ -24,8 +24,8 @@ public enum ErrorCode {
   INVALID_REQUEST("REQUEST_001", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
 
   // Comment 관련 에러 코드
-  ALREADY_LIKED("COMMENT_001", "이미 좋아요된 댓글입니다.", HttpStatus.CONFLICT),
-  COMMENT_NOT_FOUND("COMMENT_002", "댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+  COMMENT_NOT_FOUND("COMMENT_001", "댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+  ALREADY_LIKED("COMMENT_002", "이미 좋아요된 댓글입니다.", HttpStatus.CONFLICT),
   COMMENT_NOT_FOUND_BY_ARTICLE("COMMENT_003", "해당 게시글에 댓글이 없습니다.", HttpStatus.NOT_FOUND),
   LIKE_NOT_FOUND("COMMENT_004", "댓글 좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
