@@ -56,16 +56,27 @@ public class UserServiceImpl implements UserService {
     return userDtoList;
   }
 
-  // 3. 특정 사용자 정보 조회
+  // 3. 특정 사용자 정보 조회 - UserDto
   @Override
   @Transactional(readOnly = true)
-  public UserDto findById(UUID id) {
+  public UserDto findUserDtoById(UUID id) {
     log.debug("사용자 조회 시작: userId={}", id);
     UserDto userDto = userRepository.findById(id)
         .map(userMapper::toDto)
         .orElseThrow(() -> UserNotFoundException.withId(id));
     log.info("사용자 조회 완료: email={}, nickname={}", userDto.email(), userDto.nickname());
     return userDto;
+  }
+
+  // 3.1 특정 사용자 정보 조회 - User
+  @Override
+  @Transactional(readOnly = true)
+  public User findUserById(UUID id) {
+    log.debug("사용자 조회 시작: userId={}", id);
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> UserNotFoundException.withId(id));
+    log.info("사용자 조회 완료: email={}, nickname={}",user.getEmail(), user.getNickname());
+    return user;
   }
 
   // 4. 사용자 정보 수정

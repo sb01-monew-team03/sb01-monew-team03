@@ -5,6 +5,7 @@ import java.util.UUID;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserRegisterRequest;
 import team03.monew.dto.user.UserUpdateRequest;
+import team03.monew.entity.user.User;
 
 public interface UserService {
 
@@ -14,8 +15,11 @@ public interface UserService {
   // 2. 모든 사용자 정보 조회
   List<UserDto> findAll();
 
-  // 3. 특정 사용자 정보 조회
-  UserDto findById(UUID id);
+  // 3. 특정 사용자 정보 조회 - UserDto
+  UserDto findUserDtoById(UUID id);
+
+  // 3.1 특정 사용자 정보 조회 - User
+  User findUserById(UUID id);
 
   // 4. 사용자 정보 수정
   UserDto update(UUID id, UserUpdateRequest request);
