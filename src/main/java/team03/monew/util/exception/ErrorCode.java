@@ -17,6 +17,12 @@ public enum ErrorCode {
   INVALID_KEYWORD_COUNT("INTEREST_003", "키워드는 최소 1개 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
   INVALID_ORDER_BY("INTEREST_004", "정렬은 '이름' 또는 '구독자 수' 기준으로만 가능합니다.", HttpStatus.BAD_REQUEST),
 
+  // comment 에러 코드
+  COMMENT_NOT_FOUND("COMMENT_001", "Comment not found", HttpStatus.NOT_FOUND),
+
+  // notification 에러 코드
+  NOTIFICATION_NOT_FOUND("NOTIFICATION_001", "Notification not found", HttpStatus.NOT_FOUND),
+
   // Server 에러 코드
   INTERNAL_SERVER_ERROR("SERVER_001","서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
