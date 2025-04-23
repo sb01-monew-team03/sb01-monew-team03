@@ -65,7 +65,7 @@ public class CommentService {
 
         return page.map(cmt -> {
             boolean likedByMe = commentLikeRepository.existsByCommentIdAndUserId(cmt.getId(), requesterId);
-            return commentMapper.toDtoWithLike(cmt, likedByMe);
+            return commentMapper.toDto(cmt, likedByMe);
         });
     }
 
@@ -77,7 +77,7 @@ public class CommentService {
         comment.update(request.content());
         log.info("댓글 수정 완료: commentId={}", comment.getId());
         boolean likedByMe = commentLikeRepository.existsByCommentIdAndUserId(commentId, userId);
-        return commentMapper.toDtoWithLike(comment, likedByMe);
+        return commentMapper.toDto(comment, likedByMe);
     }
 
     // 4. 댓글 논리 삭제
@@ -112,7 +112,7 @@ public class CommentService {
         commentLikeRepository.save(like);
         comment.increaseLikeCount();
         log.info("댓글 좋아요 등록 완료: likeId={}", like.getId());
-        return commentMapper.toLikeDto(like); //'CommentMapper'의 메서드 'toLikeDto'을(를) 해결할 수 없습니다
+        return commentMapper.toLikeDto(like);
     }
 
     // 7. 댓글 좋아요 취소
