@@ -38,11 +38,11 @@ import team03.monew.repository.article.ArticleRepository;
 import team03.monew.repository.comments.CommentLikeRepository;
 import team03.monew.repository.comments.CommentRepository;
 import team03.monew.repository.user.UserRepository;
-import team03.monew.util.exception.articles.ArticleNotFoundException;
+import team03.monew.util.exception.article.ArticleNotFoundException;
 import team03.monew.util.exception.comments.AlreadyLikedException;
 import team03.monew.util.exception.comments.CommentNotFoundException;
 import team03.monew.util.exception.comments.LikeNotFoundException;
-import team03.monew.util.exception.users.UserNotFoundException;
+import team03.monew.util.exception.user.UserNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
@@ -149,7 +149,7 @@ class CommentServiceTest {
                     PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"))
             )).willReturn(page);
             given(commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), requesterId)).willReturn(true);
-            given(commentMapper.toDtoWithLike(comment, true)).willReturn(dto);
+            given(commentMapper.toDto(comment, true)).willReturn(dto);
 
             // when
             Page<CommentDto> result = commentService.listByArticle(
@@ -181,7 +181,7 @@ class CommentServiceTest {
                     "nick", request.content(), 0L, false,
                     LocalDateTime.now()
             );
-            given(commentMapper.toDtoWithLike(comment, false)).willReturn(dto);
+            given(commentMapper.toDto(comment, false)).willReturn(dto);
 
             // when
             CommentDto result = commentService.update(commentId, userId, request);
@@ -190,7 +190,7 @@ class CommentServiceTest {
             assertNotNull(result);
             assertEquals(request.content(), result.content());
             then(commentRepository).should().findByIdAndUserId(commentId, userId);
-            then(commentMapper).should().toDtoWithLike(comment, false);
+            then(commentMapper).should().toDto(comment, false);
         }
 
         @Test
@@ -213,7 +213,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("논리 삭제 성공")
-        void softDelete_success() {
+        void Delete_success() {
             // given
             UUID commentId = UUID.randomUUID();
             UUID userId = UUID.randomUUID();
