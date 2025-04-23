@@ -21,7 +21,13 @@ public enum ErrorCode {
   INTERNAL_SERVER_ERROR("SERVER_001","서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
   // Request 에러 코드
-  INVALID_REQUEST("REQUEST_001", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
+  INVALID_REQUEST("REQUEST_001", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
+
+  // Comment 관련 에러 코드
+  COMMENT_NOT_FOUND("COMMENT_001", "댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+  ALREADY_LIKED("COMMENT_002", "이미 좋아요된 댓글입니다.", HttpStatus.CONFLICT),
+  COMMENT_NOT_FOUND_BY_ARTICLE("COMMENT_003", "해당 게시글에 댓글이 없습니다.", HttpStatus.NOT_FOUND),
+  LIKE_NOT_FOUND("COMMENT_004", "댓글 좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
   private final String code;
   private final String message;
