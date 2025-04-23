@@ -25,12 +25,15 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public UserDto login(UserLoginRequest request) {
     log.debug("로그인 시작: email={}", request.email());
+    // email로 유저 확인
     User user = userRepository.findByEmail(request.email())
         .orElseThrow(() -> UserNotFoundException.withEmail(request.email()));
 
+    // password 확인
     if (!user.getPassword().equals(request.password())) {
       throw InvalidException.wrongPassword();
     }
+
     log.info("로그인 완료: userId={}, email={}", user.getId(), user.getEmail());
     return userMapper.toDto(user);
   }
