@@ -13,6 +13,7 @@ import team03.monew.mapper.interest.SubscriptionMapper;
 import team03.monew.repository.interest.SubscriptionRepository;
 import team03.monew.service.interest.InterestService;
 import team03.monew.service.interest.SubscriptionService;
+import team03.monew.service.user.UserService;
 import team03.monew.util.exception.interest.InterestNotFoundException;
 import team03.monew.util.exception.subscription.SubscriptionAlreadyExistException;
 
@@ -25,12 +26,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   private final SubscriptionMapper subscriptionMapper;
   private final InterestMapper interestMapper;
   private final InterestService interestService;
+  private final UserService userService;
 
   @Override
   public SubscriptionDto create(UUID userId, UUID interestId) {
 
     // 필요한 user, interest 세팅
-    User user = null;   // TODO: User 엔티티 반환 메서드 생기면 수정
+    User user = userService.findUserById(userId);
     Interest interest = interestService.getInterestEntity(interestId)
         .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
 

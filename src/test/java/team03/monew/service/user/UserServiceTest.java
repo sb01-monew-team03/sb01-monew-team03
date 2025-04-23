@@ -121,7 +121,7 @@ class UserServiceTest {
       given(userMapper.toDto(user)).willReturn(userDto);
 
       // when
-      UserDto result = userService.findById(userId);
+      UserDto result = userService.findUserDtoById(userId);
 
       // then
       assertNotNull(result);
@@ -140,7 +140,7 @@ class UserServiceTest {
       given(userRepository.findById(userId)).willReturn(Optional.empty());
 
       // when, then
-      assertThrows(UserNotFoundException.class, () -> userService.findById(userId));
+      assertThrows(UserNotFoundException.class, () -> userService.findUserDtoById(userId));
     }
   }
 

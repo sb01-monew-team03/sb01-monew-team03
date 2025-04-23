@@ -25,6 +25,7 @@ import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.mapper.interest.SubscriptionMapper;
 import team03.monew.repository.interest.SubscriptionRepository;
 import team03.monew.service.interest.impl.SubscriptionServiceImpl;
+import team03.monew.service.user.UserService;
 import team03.monew.util.exception.subscription.SubscriptionAlreadyExistException;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +42,9 @@ public class SubscriptionServiceTest {
 
   @Mock
   private InterestService interestService;
+
+  @Mock
+  private UserService userService;
 
   @InjectMocks
   private SubscriptionServiceImpl subscriptionService;
@@ -66,6 +70,7 @@ public class SubscriptionServiceTest {
       given(subscriptionRepository.existsByUserAndInterest(user, interest)).willReturn(false);
       given(subscriptionRepository.save(any(Subscription.class))).willReturn(subscription);
       given(subscriptionMapper.toDto(any(Subscription.class), any())).willReturn(subscriptionDto);
+      given(userService.findUserById(userId)).willReturn(user);
 
       // when
       SubscriptionDto result = subscriptionService.create(userId, interestId);
@@ -88,6 +93,7 @@ public class SubscriptionServiceTest {
       // Mocking
       given(interestService.getInterestEntity(interestId)).willReturn(Optional.of(interest));
       given(subscriptionRepository.existsByUserAndInterest(user, interest)).willReturn(true);
+      given(userService.findUserById(userId)).willReturn(user);
 
       // when & then
       assertThrows(SubscriptionAlreadyExistException.class,
