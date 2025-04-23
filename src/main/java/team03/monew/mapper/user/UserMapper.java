@@ -6,15 +6,9 @@ import org.springframework.stereotype.Component;
 import team03.monew.dto.user.UserDto;
 import team03.monew.entity.user.User;
 
-@Component
-@RequiredArgsConstructor
-public class UserMapper {
+@Mapper(componentModel = "spring")
+public interface UserMapper {
 
-  public UserDto toDto(User user) {
-    return new UserDto(user.getId(),
-        user.getEmail(),
-        user.getNickname(),
-        user.getCreatedAt());
-  }
+  UserDto toDto(User user);
 }
 
