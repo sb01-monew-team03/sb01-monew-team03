@@ -29,7 +29,7 @@ CREATE TABLE keywords
     id          UUID PRIMARY KEY,
     interest_id UUID        NOT NULL,
     name        VARCHAR(30) NOT NULL,
-    created_at       TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (interest_id, name)
 );
@@ -57,54 +57,10 @@ ALTER TABLE subscriptions
     ADD CONSTRAINT fk_subscriptions_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
 
 
--- 댓글 테이블 생성
-CREATE TABLE comments
-(
-    id         UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id    UUID         NOT NULL,
-    article_id UUID         NOT NULL,
-    content    VARCHAR(500) NOT NULL,
-    like_count INTEGER      NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ,
-    deleted_at TIMESTAMPTZ
-);
-
--- 제약 조건 추가
-ALTER TABLE comments
-    ADD CONSTRAINT fk_comments_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
-
-ALTER TABLE comments
-    ADD CONSTRAINT fk_comments_articles FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE;
-
-
--- 댓글 좋아요 테이블 생성
-CREATE TABLE comment_likes
-(
-    id         UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    comment_id UUID        NOT NULL,
-    user_id    UUID        NOT NULL,
-    article_id UUID        NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ,
-    UNIQUE (comment_id, user_id)
-);
-
--- 제약 조건 추가
-ALTER TABLE comment_likes
-    ADD CONSTRAINT fk_comment_likes_comments FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE;
-
-ALTER TABLE comment_likes
-    ADD CONSTRAINT fk_comment_likes_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
-
-ALTER TABLE comment_likes
-    ADD CONSTRAINT fk_comment_likes_articles FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE;
-
-
 -- articles 테이블 생성
 CREATE TABLE articles
 (
-    id            UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id            UUID PRIMARY KEY,
     source        VARCHAR     NOT NULL,
     original_link VARCHAR     NOT NULL,
     title         VARCHAR     NOT NULL,
@@ -142,10 +98,54 @@ ALTER TABLE articles
         CHECK (updated_at >= created_at);
 
 
+-- 댓글 테이블 생성
+CREATE TABLE comments
+(
+    id         UUID PRIMARY KEY,
+    user_id    UUID         NOT NULL,
+    article_id UUID         NOT NULL,
+    content    VARCHAR(500) NOT NULL,
+    like_count INTEGER      NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ
+);
+
+-- 제약 조건 추가
+ALTER TABLE comments
+    ADD CONSTRAINT fk_comments_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
+
+ALTER TABLE comments
+    ADD CONSTRAINT fk_comments_articles FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE;
+
+
+-- 댓글 좋아요 테이블 생성
+CREATE TABLE comment_likes
+(
+    id         UUID PRIMARY KEY,
+    comment_id UUID        NOT NULL,
+    user_id    UUID        NOT NULL,
+    article_id UUID        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ,
+    UNIQUE (comment_id, user_id)
+);
+
+-- 제약 조건 추가
+ALTER TABLE comment_likes
+    ADD CONSTRAINT fk_comment_likes_comments FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE;
+
+ALTER TABLE comment_likes
+    ADD CONSTRAINT fk_comment_likes_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
+
+ALTER TABLE comment_likes
+    ADD CONSTRAINT fk_comment_likes_articles FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE;
+
+
 -- activity 테이블 생성
 CREATE TABLE activity
 (
-    id         UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id         UUID PRIMARY KEY,
     user_id    UUID        NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NULL
@@ -165,7 +165,7 @@ ALTER TABLE activity
 -- article_view 테이블 생성
 CREATE TABLE article_view
 (
-    id         UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id         UUID PRIMARY KEY,
     article_id UUID        NOT NULL,
     user_id    UUID,
     viewed_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -184,12 +184,12 @@ ALTER TABLE article_view
 -- notification 테이블 생성
 CREATE TABLE notification
 (
-    id                UUID GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id                UUID PRIMARY KEY,
     user_id           UUID         NOT NULL,
     content           VARCHAR(255) NOT NULL,
     read              BOOLEAN      NOT NULL DEFAULT FALSE,
     message_id        UUID,
-    notification_type VARCHAR(50)  NOT NULL CHECK ( notification_type IN ('INTEREST', 'COMMENT'),
+    notification_type VARCHAR(50)  NOT NULL CHECK ( notification_type IN ('INTEREST', 'COMMENT') ),
     created_at        TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMPTZ
 );
