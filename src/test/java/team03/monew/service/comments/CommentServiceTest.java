@@ -48,7 +48,7 @@ import team03.monew.util.exception.user.UserNotFoundException;
 class CommentServiceTest {
 
     @InjectMocks
-    private CommentService commentService;
+    private CommentServiceImpl commentService;
 
     @Mock
     private CommentRepository commentRepository;
