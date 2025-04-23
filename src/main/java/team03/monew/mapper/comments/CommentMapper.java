@@ -6,17 +6,11 @@ import team03.monew.dto.comments.CommentLikeDto;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Component
 public class CommentMapper {
 
-    private static final ZoneId ZONE = ZoneId.systemDefault(); // or ZoneId.of("Asia/Seoul");
-
     public CommentDto toDto(Comment comment, boolean likedByMe) {
-        LocalDateTime createdAt = LocalDateTime.ofInstant(comment.getCreatedAt(), ZONE);
-
         return new CommentDto(
                 comment.getId(),
                 comment.getArticle().getId(),
@@ -25,7 +19,7 @@ public class CommentMapper {
                 comment.getContent(),
                 comment.getLikeCount().longValue(),
                 likedByMe,
-                createdAt
+                comment.getCreatedAt()  // 필요 타입: LocalDateTime
         );
     }
 
@@ -34,21 +28,18 @@ public class CommentMapper {
     }
 
     public CommentLikeDto toLikeDto(CommentLike like) {
-        var comment = like.getComment();
-        LocalDateTime likeCreatedAt    = LocalDateTime.ofInstant(like.getCreatedAt(), ZONE);
-        LocalDateTime commentCreatedAt = LocalDateTime.ofInstant(comment.getCreatedAt(), ZONE);
-
+        Comment comment = like.getComment();
         return new CommentLikeDto(
                 like.getId(),
                 like.getUser().getId(),
-                likeCreatedAt,
+                like.getCreatedAt(),       // Instant 타입
                 comment.getId(),
                 like.getArticle().getId(),
                 comment.getUser().getId(),
                 comment.getUser().getNickname(),
                 comment.getContent(),
                 comment.getLikeCount().longValue(),
-                commentCreatedAt
+                comment.getCreatedAt()     // Instant 타입
         );
     }
 }

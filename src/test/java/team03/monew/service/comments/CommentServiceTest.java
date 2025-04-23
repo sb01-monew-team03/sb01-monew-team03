@@ -7,7 +7,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,7 +78,7 @@ class CommentServiceTest {
             CommentDto dto = new CommentDto(
                     savedComment.getId(), articleId, userId,
                     user.getNickname(), request.content(), 0L, false,
-                    LocalDateTime.now()
+                    Instant.now()
             );
 
             given(userRepository.findById(userId)).willReturn(Optional.of(user));
@@ -141,7 +141,7 @@ class CommentServiceTest {
             CommentDto dto = new CommentDto(
                     comment.getId(), articleId, UUID.randomUUID(),
                     "nick", "content", 5L, true,
-                    LocalDateTime.now()
+                    Instant.now()
             );
 
             given(commentRepository.findByArticleIdAndDeletedAtIsNull(
@@ -179,7 +179,7 @@ class CommentServiceTest {
             CommentDto dto = new CommentDto(
                     commentId, UUID.randomUUID(), userId,
                     "nick", request.content(), 0L, false,
-                    LocalDateTime.now()
+                    Instant.now()
             );
             given(commentMapper.toDto(comment, false)).willReturn(dto);
 
@@ -290,9 +290,9 @@ class CommentServiceTest {
             User user = new User("nick", "nick@example.com", "pass", Role.USER);
             CommentLike like = mock(CommentLike.class);
             CommentLikeDto likeDto = new CommentLikeDto(
-                    like.getId(), userId, LocalDateTime.now(),
+                    like.getId(), userId, Instant.now(),
                     commentId, UUID.randomUUID(), user.getId(), user.getNickname(),
-                    "content", 0L, LocalDateTime.now()
+                    "content", 0L, Instant.now()
             );
 
             given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));
