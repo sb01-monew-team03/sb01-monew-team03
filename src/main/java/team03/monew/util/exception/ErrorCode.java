@@ -21,8 +21,11 @@ public enum ErrorCode {
   SUBSCRIPTION_NOT_FOUND("SUBSCRIPTION_001", "해당 구독 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
   DUPLICATE_SUBSCRIPTION("SUBSCRIPTION_002", "이미 구독 중입니다.", HttpStatus.CONFLICT),
 
-  // comment 에러 코드
-  COMMENT_NOT_FOUND("COMMENT_001", "Comment not found", HttpStatus.NOT_FOUND),
+  // Comment 관련 에러 코드
+  COMMENT_NOT_FOUND("COMMENT_001", "댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+  ALREADY_LIKED("COMMENT_002", "이미 좋아요된 댓글입니다.", HttpStatus.CONFLICT),
+  COMMENT_NOT_FOUND_BY_ARTICLE("COMMENT_003", "해당 게시글에 댓글이 없습니다.", HttpStatus.NOT_FOUND),
+  LIKE_NOT_FOUND("COMMENT_004", "댓글 좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
   // notification 에러 코드
   NOTIFICATION_NOT_FOUND("NOTIFICATION_001", "Notification not found", HttpStatus.NOT_FOUND),
@@ -32,12 +35,7 @@ public enum ErrorCode {
 
   // Request 에러 코드
   INVALID_REQUEST("REQUEST_001", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
-
-  // Comment 관련 에러 코드
-  COMMENT_NOT_FOUND("COMMENT_001", "댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-  ALREADY_LIKED("COMMENT_002", "이미 좋아요된 댓글입니다.", HttpStatus.CONFLICT),
-  COMMENT_NOT_FOUND_BY_ARTICLE("COMMENT_003", "해당 게시글에 댓글이 없습니다.", HttpStatus.NOT_FOUND),
-  LIKE_NOT_FOUND("COMMENT_004", "댓글 좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+  FORBIDDEN_REQUEST("REQUEST_002", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN);
 
   private final String code;
   private final String message;
