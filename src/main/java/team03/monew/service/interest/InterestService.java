@@ -13,7 +13,7 @@ public interface InterestService {
   // 관심사 등록
   InterestDto create(InterestRegisterRequest request);
 
-  // 관심사 수정
+  // 관심사 키워드 수정
   InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId);
 
   // 관심사 삭제
@@ -22,11 +22,8 @@ public interface InterestService {
   // 관심사 검색
   CursorPageResponse<InterestDto> find(InterestFindRequest request, UUID userId);
 
-  // 관심사 구독자 수 증가
-  void increaseSubscriberCount(Interest interest);
-
-  // 관심사 구독자 수 감소
-  void decreaseSubscriberCount(Interest interest);
+  // 관심사 구독자 수 변경
+  void updateSubscriberCount(Interest interest, boolean increase);
 
   // 관심사 엔티티 반환
   Interest getInterestEntityById(UUID interestId);
