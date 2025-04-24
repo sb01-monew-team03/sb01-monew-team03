@@ -79,7 +79,7 @@ public class SubscriptionServiceTest {
 
       // then
       verify(subscriptionRepository).save(any(Subscription.class));
-      verify(interestService).increaseSubscriberCount(interest);
+      verify(interestService).updateSubscriberCount(interest, true);
       assertThat(result).isEqualTo(subscriptionDto);
     }
 
@@ -129,7 +129,7 @@ public class SubscriptionServiceTest {
 
       // then
       verify(subscriptionRepository).delete(any(Subscription.class));
-      verify(interestService).decreaseSubscriberCount(any(Interest.class));
+      verify(interestService).updateSubscriberCount(interest, false);
     }
 
     @Test

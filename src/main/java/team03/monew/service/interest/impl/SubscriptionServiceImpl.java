@@ -50,7 +50,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     subscriptionRepository.save(subscription);
 
     // interest 구독자 수 증가
-    interestService.increaseSubscriberCount(interest);
+    interestService.updateSubscriberCount(interest, true);
 
     // dto 변환
     SubscriptionDto subscriptionDto = subscriptionMapper
@@ -83,7 +83,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     subscriptionRepository.delete(subscription);
 
     // 구독자 수 감소
-    interestService.decreaseSubscriberCount(interest);
+    interestService.updateSubscriberCount(interest, false);
 
     log.info("[delete] 구독 취소 완료: subscriptionId={}, userId={}, interestId={}", subscription.getId(), userId, interestId);
   }

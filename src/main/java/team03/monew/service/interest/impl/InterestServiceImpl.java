@@ -1,5 +1,6 @@
 package team03.monew.service.interest.impl;
 
+import jakarta.persistence.OptimisticLockException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -70,7 +71,8 @@ public class InterestServiceImpl implements InterestService {
     // dto로 변환
     InterestDto interestDto = interestMapper.toDto(interest, false);
 
-    log.info("[create] 관심사 등록 완료: interestId={}, interestName={}", interestDto.id(), interestDto.name());
+    log.info("[create] 관심사 등록 완료: interestId={}, interestName={}", interestDto.id(),
+        interestDto.name());
 
     return interestDto;
   }
@@ -79,7 +81,8 @@ public class InterestServiceImpl implements InterestService {
   @Override
   public InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId) {
 
-    log.debug("[update] 관심사 키워드 수정 시작: interestId={}, request={}, userId={}", interestId, request, userId);
+    log.debug("[update] 관심사 키워드 수정 시작: interestId={}, request={}, userId={}", interestId, request,
+        userId);
 
     // 해당 관심사 repository에서 찾기, 예외처리 - 관심사 없는 경우
     Interest interest = interestRepository.findById(interestId)
@@ -95,7 +98,8 @@ public class InterestServiceImpl implements InterestService {
         subscriptionService.existByUserIdAndInterestId(userId, interestId)
     );
 
-    log.info("[update] 관심사 키워드 수정 완료: interestId={}, keywords={}", interestDto.id(), interestDto.keywords());
+    log.info("[update] 관심사 키워드 수정 완료: interestId={}, keywords={}", interestDto.id(),
+        interestDto.keywords());
 
     return interestDto;
   }
@@ -156,36 +160,48 @@ public class InterestServiceImpl implements InterestService {
         hasNext
     );
 
-    log.info("[find] 관심사 목록 조회 완료: userId={}, 반환 개수={}, hasNext={}, nextCursor={}, totalElements={}",
+    log.info(
+        "[find] 관심사 목록 조회 완료: userId={}, 반환 개수={}, hasNext={}, nextCursor={}, totalElements={}",
         userId, content.size(), hasNext, nextCursor, cursorPageResponse.totalElements());
 
     return cursorPageResponse;
   }
 
-  // 구독자 수 증가
   @Override
-  public void increaseSubscriberCount(Interest interest) {
+  public void updateSubscriberCount(Interest interest, boolean increase) {
 
-    log.debug("[increaseSubscriberCount] 구독자 수 증가 시작: interestId={}, subscriberCount={}", interest.getId(),
-        interest.getSubscriberCount());
+    log.debug("[updateSubscriberCount] 구독자 수 변경 시작: interestId={}, subscriberCount={}, 구독자수 변경={}",
+        interest.getId(),
+        interest.getSubscriberCount(),
+        increase ? "증가" : "감소");
 
-    interest.increaseSubscribers();
+    boolean update = false;
 
-    log.info("[increaseSubscriberCount] 구독자 수 증가 완료: interestId={}, subscriberCount={}", interest.getId(),
-        interest.getSubscriberCount());
-  }
+    while (!update) {
+      try {
+        if (increase) {
+          interest.increaseSubscribers();
+        } else {
+          interest.decreaseSubscribers();
+        }
+        update = true;
+      } catch (OptimisticLockException e) {
 
-  // 구독자 수 감소
-  @Override
-  public void decreaseSubscriberCount(Interest interest) {
+        log.warn("[OptimisticLockException] 구독자 수 변경 충돌: interestId={}, subscriberCount={}",
+            interest.getId(), interest.getSubscriberCount(), e);
 
-    log.debug("[decreaseSubscriberCount] 구독자 수 감소 시작: interestId={}, subscriberCount={}", interest.getId(),
-        interest.getSubscriberCount());
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException ex) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    }
 
-    interest.decreaseSubscribers();
-
-    log.info("[decreaseSubscriberCount] 구독자 수 감소 완료: interestId={}, subscriberCount={}", interest.getId(),
-        interest.getSubscriberCount());
+    log.info("[updateSubscriberCount] 구독자 수 변경 완료: interestId={}, subscriberCount={}, 구독자수 변경={}",
+        interest.getId(),
+        interest.getSubscriberCount(),
+        increase ? "증가" : "감소");
   }
 
   // 관심사 엔티티 반환
