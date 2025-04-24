@@ -2,6 +2,7 @@ package team03.monew.service.interest.impl;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.interest.SubscriptionDto;
@@ -25,8 +26,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   private final SubscriptionRepository subscriptionRepository;
   private final SubscriptionMapper subscriptionMapper;
   private final InterestMapper interestMapper;
-  private final InterestService interestService;
   private final UserService userService;
+  private final InterestService interestService;
 
   @Override
   public SubscriptionDto create(UUID userId, UUID interestId) {
@@ -73,7 +74,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     interestService.decreaseSubscriberCount(interest);
   }
 
-  // TODO: 순환참조 문제 없이 boolean값 InterestService에 넘길 방법 찾기
   @Override
   public boolean existByUserIdAndInterestId(UUID userId, UUID interestId) {
 

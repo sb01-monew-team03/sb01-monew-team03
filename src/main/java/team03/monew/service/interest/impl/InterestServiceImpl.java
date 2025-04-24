@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.common.CursorPageResponse;
@@ -16,6 +17,7 @@ import team03.monew.entity.interest.Interest;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
 import team03.monew.service.interest.InterestService;
+import team03.monew.service.interest.SubscriptionService;
 import team03.monew.util.exception.interest.EmptyKeywordListException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
 import team03.monew.util.exception.interest.InterestNotFoundException;
@@ -28,6 +30,9 @@ public class InterestServiceImpl implements InterestService {
 
   private final InterestRepository interestRepository;
   private final InterestMapper interestMapper;
+
+  @Lazy   // 순환참조 해결을 위한 지연 로딩
+  private final SubscriptionService subscriptionService;
 
   @Override
   public InterestDto create(InterestRegisterRequest request) {
@@ -69,8 +74,10 @@ public class InterestServiceImpl implements InterestService {
 
     interest.updateKeywords(keywords);
 
-    // TODO: 구독 여부 수정
-    return interestMapper.toDto(interest, true);
+    return interestMapper.toDto(
+        interest,
+        subscriptionService.existByUserIdAndInterestId(userId, interestId)
+    );
   }
 
   @Override
@@ -99,8 +106,8 @@ public class InterestServiceImpl implements InterestService {
     }
 
     List<InterestDto> content = interestList.stream()
-        // TODO: 구독 여부 수정
-        .map(interest -> interestMapper.toDto(interest, true))
+        .map(interest -> interestMapper.toDto(interest,
+            subscriptionService.existByUserIdAndInterestId(userId, interest.getId())))
         .toList();
 
     return new CursorPageResponse<>(
