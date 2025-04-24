@@ -30,6 +30,7 @@ import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Keyword;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
+import team03.monew.service.interest.impl.InterestServiceImpl;
 import team03.monew.util.exception.interest.EmptyKeywordListException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
 
@@ -142,7 +143,7 @@ public class InterestServiceTest {
           );
 
       // when
-      InterestDto result = interestService.update(interestId, request);
+      InterestDto result = interestService.update(interestId, request, UUID.randomUUID());
 
       // then
       verify(interestRepository).findById(any(UUID.class));
@@ -160,12 +161,15 @@ public class InterestServiceTest {
     void successTest() {
       // given
       UUID id = UUID.randomUUID();
+      Interest interest = new Interest("관심사 삭제 테스트");
+
+      given(interestRepository.findById(id)).willReturn(Optional.of(interest));
 
       // when
       interestService.delete(id);
 
       // then
-      verify(interestRepository).deleteById(id);
+      verify(interestRepository).delete(interest);
     }
   }
 
@@ -183,8 +187,7 @@ public class InterestServiceTest {
           "asc",
           "cursor",
           String.valueOf(Instant.now()),
-          50,
-          UUID.randomUUID().toString()
+          50
       );
 
       List<Interest> fakeResults = List.of(new Interest("test"));
@@ -198,7 +201,7 @@ public class InterestServiceTest {
           false));
 
       // when
-      CursorPageResponse<InterestDto> results = interestService.find(request);
+      CursorPageResponse<InterestDto> results = interestService.find(request, UUID.randomUUID());
 
       // then
       verify(interestRepository).findInterest(eq(request));

@@ -1,4 +1,4 @@
-package team03.monew.service.interest;
+package team03.monew.service.interest.impl;
 
 import java.time.Instant;
 import java.util.List;
@@ -15,6 +15,7 @@ import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
+import team03.monew.service.interest.InterestService;
 import team03.monew.util.exception.interest.EmptyKeywordListException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
 import team03.monew.util.exception.interest.InterestNotFoundException;
@@ -60,7 +61,7 @@ public class InterestServiceImpl implements InterestService {
   }
 
   @Override
-  public InterestDto update(UUID interestId, InterestUpdateRequest request) {
+  public InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId) {
 
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
@@ -68,7 +69,7 @@ public class InterestServiceImpl implements InterestService {
 
     interest.updateKeywords(keywords);
 
-    // TODO: 구독 구현 후 subscribedByMe 수정
+    // TODO: 구독 여부 수정
     return interestMapper.toDto(interest, true);
   }
 
@@ -83,7 +84,7 @@ public class InterestServiceImpl implements InterestService {
 
   @Override
   @Transactional(readOnly = true)
-  public CursorPageResponse<InterestDto> find(InterestFindRequest request) {
+  public CursorPageResponse<InterestDto> find(InterestFindRequest request, UUID userId) {
 
     List<Interest> interestList = interestRepository.findInterest(request);
     String nextCursor = null;
@@ -96,10 +97,10 @@ public class InterestServiceImpl implements InterestService {
       nextCursor = setNextCursor(lastInterest, request.orderBy());
       nextAfter = lastInterest.getCreatedAt();
     }
-    
+
     List<InterestDto> content = interestList.stream()
-        // TODO: 구독 구현 후 subscribedByMe 수정
-        .map(interest -> interestMapper.toDto(interest, false))
+        // TODO: 구독 여부 수정
+        .map(interest -> interestMapper.toDto(interest, true))
         .toList();
 
     return new CursorPageResponse<>(
@@ -112,6 +113,23 @@ public class InterestServiceImpl implements InterestService {
     );
   }
 
+  @Override
+  public void increaseSubscriberCount(Interest interest) {
+    interest.increaseSubscribers();
+  }
+
+  @Override
+  public void decreaseSubscriberCount(Interest interest) {
+    interest.decreaseSubscribers();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Interest getInterestEntityById(UUID interestId) {
+    return interestRepository.findById(interestId)
+        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
+  }
+
 
   // 단어 유사성 검사 - 80% 미만일 경우 예외처리
   private void calculateSimilarity(String interestName, String existingInterestName) {
@@ -120,7 +138,8 @@ public class InterestServiceImpl implements InterestService {
     LevenshteinDistance ld = new LevenshteinDistance();
 
     double result = 0;
-    double temp = ld.apply(interestName, existingInterestName);   // 두 문자열 간의 최소 편집 거리 계산 - a를 b로 만들기 위해 필요한 최소 삽입/삭제/수정 횟수
+    double temp = ld.apply(interestName,
+        existingInterestName);   // 두 문자열 간의 최소 편집 거리 계산 - a를 b로 만들기 위해 필요한 최소 삽입/삭제/수정 횟수
     result = (maxLength - temp) / maxLength;
 
     if (result >= 0.8) {

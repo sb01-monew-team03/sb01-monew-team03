@@ -110,8 +110,7 @@ public class InterestRepositoryTest {
           "asc",
           null,
           null,
-          2,
-          null
+          2
       );
 
       // when
@@ -134,8 +133,7 @@ public class InterestRepositoryTest {
           "asc",
           null,
           null,
-          2,
-          null
+          2
       );
 
       // when
@@ -158,8 +156,7 @@ public class InterestRepositoryTest {
           "asc",
           null,
           null,
-          2,
-          null
+          2
       );
 
       // when
