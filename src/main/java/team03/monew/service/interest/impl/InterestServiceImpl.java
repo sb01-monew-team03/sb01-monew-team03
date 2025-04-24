@@ -40,7 +40,7 @@ public class InterestServiceImpl implements InterestService {
   @Override
   public InterestDto create(InterestRegisterRequest request) {
 
-    log.debug("관심사 등록 시작: request={}", request);
+    log.debug("[create] 관심사 등록 시작: request={}", request);
 
     // request 쪼개기
     String name = request.name();
@@ -49,6 +49,7 @@ public class InterestServiceImpl implements InterestService {
     // 예외처리 - name이 80% 이상 유사한 관심사가 있는 경우 관심사 등록 불가
     List<Interest> interests = interestRepository.findAll();
     for (Interest interest : interests) {
+      log.trace("유사성 비교 중: 입력 name={}, 기존 name={}", name, interest.getName());
       calculateSimilarity(name, interest.getName());
     }
 
@@ -69,7 +70,7 @@ public class InterestServiceImpl implements InterestService {
     // dto로 변환
     InterestDto interestDto = interestMapper.toDto(interest, false);
 
-    log.info("관심사 등록 완료: interestId={}, interestName={}", interestDto.id(), interestDto.name());
+    log.info("[create] 관심사 등록 완료: interestId={}, interestName={}", interestDto.id(), interestDto.name());
 
     return interestDto;
   }
@@ -78,7 +79,7 @@ public class InterestServiceImpl implements InterestService {
   @Override
   public InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId) {
 
-    log.debug("관심사 키워드 수정 시작: interestId={}, request={}, userId={}", interestId, request, userId);
+    log.debug("[update] 관심사 키워드 수정 시작: interestId={}, request={}, userId={}", interestId, request, userId);
 
     // 해당 관심사 repository에서 찾기, 예외처리 - 관심사 없는 경우
     Interest interest = interestRepository.findById(interestId)
@@ -94,7 +95,7 @@ public class InterestServiceImpl implements InterestService {
         subscriptionService.existByUserIdAndInterestId(userId, interestId)
     );
 
-    log.info("관심사 키워드 수정 완료: interestId={}, keywords={}", interestId, interestDto.keywords());
+    log.info("[update] 관심사 키워드 수정 완료: interestId={}, keywords={}", interestDto.id(), interestDto.keywords());
 
     return interestDto;
   }
@@ -103,7 +104,7 @@ public class InterestServiceImpl implements InterestService {
   @Override
   public void delete(UUID interestId) {
 
-    log.debug("관심사 삭제 시작: interestId={}", interestId);
+    log.debug("[delete] 관심사 삭제 시작: interestId={}", interestId);
 
     // 예외처리 - 해당 관심사가 존재하는지 확인
     Interest interest = interestRepository.findById(interestId)
@@ -112,7 +113,7 @@ public class InterestServiceImpl implements InterestService {
     // 삭제
     interestRepository.delete(interest);
 
-    log.info("관심사 삭제 완료: interestId={}", interestId);
+    log.info("[delete] 관심사 삭제 완료: interestId={}", interest.getId());
   }
 
   // 관심사 목록 조회
@@ -120,7 +121,7 @@ public class InterestServiceImpl implements InterestService {
   @Transactional(readOnly = true)
   public CursorPageResponse<InterestDto> find(InterestFindRequest request, UUID userId) {
 
-    log.debug("관심사 목록 조회 시작: request={}, userId={}", request, userId);
+    log.debug("[find] 관심사 목록 조회 시작: request={}, userId={}", request, userId);
 
     // 조건에 부합하는 관심사 리스트 가져오기
     List<Interest> interestList = interestRepository.findInterest(request);
@@ -155,7 +156,7 @@ public class InterestServiceImpl implements InterestService {
         hasNext
     );
 
-    log.info("관심사 목록 조회 완료: userId={}, 반환 개수={}, hasNext={}, nextCursor={}, totalElements={}",
+    log.info("[find] 관심사 목록 조회 완료: userId={}, 반환 개수={}, hasNext={}, nextCursor={}, totalElements={}",
         userId, content.size(), hasNext, nextCursor, cursorPageResponse.totalElements());
 
     return cursorPageResponse;
@@ -165,12 +166,12 @@ public class InterestServiceImpl implements InterestService {
   @Override
   public void increaseSubscriberCount(Interest interest) {
 
-    log.debug("구독자 수 증가 시작: interestId={}, subscriberCount={}", interest.getId(),
+    log.debug("[increaseSubscriberCount] 구독자 수 증가 시작: interestId={}, subscriberCount={}", interest.getId(),
         interest.getSubscriberCount());
 
     interest.increaseSubscribers();
 
-    log.info("구독자 수 증가 완료: interestId={}, subscriberCount={}", interest.getId(),
+    log.info("[increaseSubscriberCount] 구독자 수 증가 완료: interestId={}, subscriberCount={}", interest.getId(),
         interest.getSubscriberCount());
   }
 
@@ -178,12 +179,12 @@ public class InterestServiceImpl implements InterestService {
   @Override
   public void decreaseSubscriberCount(Interest interest) {
 
-    log.debug("구독자 수 감소 시작: interestId={}, subscriberCount={}", interest.getId(),
+    log.debug("[decreaseSubscriberCount] 구독자 수 감소 시작: interestId={}, subscriberCount={}", interest.getId(),
         interest.getSubscriberCount());
 
     interest.decreaseSubscribers();
 
-    log.info("구독자 수 감소 완료: interestId={}, subscriberCount={}", interest.getId(),
+    log.info("[decreaseSubscriberCount] 구독자 수 감소 완료: interestId={}, subscriberCount={}", interest.getId(),
         interest.getSubscriberCount());
   }
 
@@ -192,12 +193,10 @@ public class InterestServiceImpl implements InterestService {
   @Transactional(readOnly = true)
   public Interest getInterestEntityById(UUID interestId) {
 
-    log.debug("관심사 엔티티 반환 시작: interestId={}", interestId);
-
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
 
-    log.info("관심사 엔티티 반환 완료: interestId={}, interestName={}", interest.getId(), interest.getName());
+    log.info("관심사 엔티티 반환: interestId={}, interestName={}", interest.getId(), interest.getName());
 
     return interest;
   }
@@ -219,6 +218,7 @@ public class InterestServiceImpl implements InterestService {
     }
   }
 
+  // 커서 세팅
   private String setNextCursor(Interest lastInterest, String orderBy) {
     switch (orderBy) {
       case "name":
