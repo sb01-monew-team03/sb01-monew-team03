@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,8 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserLoginRequest;
 import team03.monew.service.user.AuthService;
+import team03.monew.service.user.UserService;
 import team03.monew.util.exception.user.InvalidException;
 import team03.monew.util.exception.user.UserNotFoundException;
+import team03.monew.util.interceptor.UserInterceptor;
 
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
@@ -32,6 +35,9 @@ class AuthControllerTest {
 
   @MockitoBean
   private AuthService authService;
+
+  @MockitoBean
+  private UserService userService;
 
   @Test
   @DisplayName("로그인 성공")

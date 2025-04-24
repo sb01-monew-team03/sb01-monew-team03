@@ -124,7 +124,8 @@ class UserControllerTest {
       // 1. mockMvc 사용
       mockMvc.perform(patch("/api/users/{userId}", userId)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request)))
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nickname").value(request.nickname()));
     }
@@ -141,7 +142,8 @@ class UserControllerTest {
       // 1. mockMvc 사용
       mockMvc.perform(patch("/api/users/{userId}", userId)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request)))
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isBadRequest());
     }
 
@@ -160,7 +162,8 @@ class UserControllerTest {
       // 1. mockMvc 사용
       mockMvc.perform(patch("/api/users/{userId}", userId)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request)))
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNotFound());
     }
   }
@@ -182,7 +185,8 @@ class UserControllerTest {
       // when, then
       // 1. mockMvc 사용
       mockMvc.perform(delete("/api/users/{userId}", userId)
-              .contentType(MediaType.APPLICATION_JSON))
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNoContent());
     }
 
@@ -199,7 +203,8 @@ class UserControllerTest {
       // when, then
       // 1. mockMvc 사용
       mockMvc.perform(delete("/api/users/{userId}", userId)
-              .contentType(MediaType.APPLICATION_JSON))
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNotFound());
     }
   }
@@ -221,7 +226,8 @@ class UserControllerTest {
       // when, then
       // 1. mockMvc 사용
       mockMvc.perform(delete("/api/users/{userId}/hard", userId)
-              .contentType(MediaType.APPLICATION_JSON))
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNoContent());
     }
 
@@ -238,7 +244,8 @@ class UserControllerTest {
       // when, then
       // 1. mockMvc 사용
       mockMvc.perform(delete("/api/users/{userId}/hard", userId)
-              .contentType(MediaType.APPLICATION_JSON))
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNotFound());
     }
   }
