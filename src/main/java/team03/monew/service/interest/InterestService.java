@@ -13,7 +13,7 @@ public interface InterestService {
   // 관심사 등록
   InterestDto create(InterestRegisterRequest request);
 
-  // 관심사 수정
+  // 관심사 키워드 수정
   InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId);
 
   // 관심사 삭제
