@@ -21,6 +21,12 @@ public enum ErrorCode {
   SUBSCRIPTION_NOT_FOUND("SUBSCRIPTION_001", "해당 구독 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
   DUPLICATE_SUBSCRIPTION("SUBSCRIPTION_002", "이미 구독 중입니다.", HttpStatus.CONFLICT),
 
+  // comment 에러 코드
+  COMMENT_NOT_FOUND("COMMENT_001", "Comment not found", HttpStatus.NOT_FOUND),
+
+  // notification 에러 코드
+  NOTIFICATION_NOT_FOUND("NOTIFICATION_001", "Notification not found", HttpStatus.NOT_FOUND),
+
   // Server 에러 코드
   INTERNAL_SERVER_ERROR("SERVER_001","서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 

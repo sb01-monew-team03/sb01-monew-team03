@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import team03.monew.dto.notification.ResourceType;
-import team03.monew.entity.base.BaseEntity;
+import team03.monew.entity.base.BaseUpdatableEntity;
 import team03.monew.entity.user.User;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "notification")
-public class Notification extends BaseEntity {
+public class Notification extends BaseUpdatableEntity {
 
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
