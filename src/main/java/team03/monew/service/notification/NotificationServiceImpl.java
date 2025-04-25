@@ -1,6 +1,5 @@
 package team03.monew.service.notification;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
+import team03.monew.dto.notification.NotificationFindRequest;
 import team03.monew.dto.notification.ResourceType;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.comments.Comment;
@@ -123,7 +123,7 @@ public class NotificationServiceImpl implements NotificationService {
   // 알림 목록 조회
   @Transactional
   @Override
-  public CursorPageResponse<NotificationDto> findAll(String cursor, Instant after, Integer limit, UUID userId) {
+  public CursorPageResponse<NotificationDto> findAll(NotificationFindRequest request) {
     if (!userRepository.existsById(userId)) {
       log.error("존재하지 않는 사용자 ID");
       throw UserNotFoundException.withId(userId);
@@ -140,7 +140,7 @@ public class NotificationServiceImpl implements NotificationService {
           .toList();
 
       String nextCursor = null;
-      Instant nextAfter = null;
+      nextAfter = null;
       if (pages.hasNext() && !notificationDtos.isEmpty()) {
         Notification lastNotification = pages.getContent().get(pages.getContent().size() - 1);
         nextCursor = lastNotification.getCreatedAt().toString();
