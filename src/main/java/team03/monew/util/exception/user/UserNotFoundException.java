@@ -20,4 +20,9 @@ public class UserNotFoundException extends UserException {
     exception.addDetail("email", email);
     return exception;
   }
+
+  public static UserNotFoundException isDeleted() {
+    UserNotFoundException exception = new UserNotFoundException();
+    return exception;
+  }
 }

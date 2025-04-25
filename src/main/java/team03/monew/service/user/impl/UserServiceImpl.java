@@ -49,10 +49,11 @@ public class UserServiceImpl implements UserService {
   @Transactional(readOnly = true)
   public List<UserDto> findAll() {
     log.debug("모든 사용자 조회 시작");
-     List<UserDto> userDtoList = userRepository.findAll().stream()
-         .map(userMapper::toDto)
-         .toList();
-     log.info("모든 사용자 조회 완료: 사용자 수={}", userDtoList.size());
+    List<UserDto> userDtoList = userRepository.findAll().stream()
+        .filter(user -> !user.isDeleted())
+        .map(userMapper::toDto)
+        .toList();
+    log.info("모든 사용자 조회 완료: 사용자 수={}", userDtoList.size());
     return userDtoList;
   }
 
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
   @Transactional(readOnly = true)
   public UserDto findUserDtoById(UUID id) {
     log.debug("사용자 조회 시작: userId={}", id);
-    UserDto userDto = userRepository.findById(id)
+    UserDto userDto = userRepository.findActiveById(id)
         .map(userMapper::toDto)
         .orElseThrow(() -> UserNotFoundException.withId(id));
     log.info("사용자 조회 완료: email={}, nickname={}", userDto.email(), userDto.nickname());
@@ -73,9 +74,9 @@ public class UserServiceImpl implements UserService {
   @Transactional(readOnly = true)
   public User findUserById(UUID id) {
     log.debug("사용자 조회 시작: userId={}", id);
-    User user = userRepository.findById(id)
+    User user = userRepository.findActiveById(id)
         .orElseThrow(() -> UserNotFoundException.withId(id));
-    log.info("사용자 조회 완료: email={}, nickname={}",user.getEmail(), user.getNickname());
+    log.info("사용자 조회 완료: email={}, nickname={}", user.getEmail(), user.getNickname());
     return user;
   }
 
@@ -83,7 +84,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserDto update(UUID id, UserUpdateRequest request) {
     log.debug("사용자 수정 시작: request={}", request);
-    User user = userRepository.findById(id)
+    User user = userRepository.findActiveById(id)
         .orElseThrow(() -> UserNotFoundException.withId(id));
     user.update(request.nickname());
     log.info("사용자 수정 완료: nickname={}", user.getNickname());
@@ -94,7 +95,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public void softDelete(UUID id) {
     log.debug("사용자 논리 삭제 시작: userId={}", id);
-    User user = userRepository.findById(id)
+    User user = userRepository.findActiveById(id)
         .orElseThrow(() -> UserNotFoundException.withId(id));
     user.delete();
     log.info("사용자 논리 삭제 완료: userId={}", id);
