@@ -2,17 +2,17 @@ package team03.monew.config.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.Instant;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import team03.monew.controller.notification.NotificationRequestForm;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
-import team03.monew.dto.notification.NotificationFindRequest;
 
 @Tag(name = "알림 관리 API")
 public interface NotificationApi {
@@ -47,7 +47,7 @@ public interface NotificationApi {
           )
       )
   })
-  ResponseEntity<CursorPageResponse<NotificationDto>> findAll(NotificationFindRequest request);
+  ResponseEntity<CursorPageResponse<NotificationDto>> findAll(NotificationRequestForm request);
 
   //PATCH /api/notifications
   @Operation(
@@ -73,7 +73,12 @@ public interface NotificationApi {
       ),
   })
   ResponseEntity<Void> updateAll(
-      @Parameter(description = "요청자 ID", required = true) UUID userId);
+      @Parameter(
+          name = "Monew-Request-User-ID",
+          description = "요청자 ID",
+          required = true,
+          in = ParameterIn.HEADER)
+      UUID userId);
 
   //PATCH /api/notifications/{notificationId}
   @Operation(
@@ -98,7 +103,7 @@ public interface NotificationApi {
           description = "서버 내부 오류"
       ),
   })
-  ResponseEntity<Void> update(@Parameter(description = "알림 ID", required = true) UUID notificationId,
-      @Parameter(description = "요청자 ID", required = true) UUID userId);
+  ResponseEntity<Void> update(@Parameter(name = "notificationId", description = "알림 ID", required = true) UUID notificationId,
+      @Parameter(name = "Monew-Request-User-ID", description = "요청자 ID", required = true, in = ParameterIn.HEADER) UUID userId);
 
 }
