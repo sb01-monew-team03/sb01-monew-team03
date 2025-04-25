@@ -1,6 +1,6 @@
 package team03.monew.service.notification;
 
-import java.time.Instant;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,11 +8,6 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
@@ -25,8 +20,8 @@ import team03.monew.entity.notification.Notification;
 import team03.monew.entity.user.User;
 import team03.monew.mapper.notification.NotificationMapper;
 import team03.monew.repository.comments.CommentRepository;
+import team03.monew.repository.interest.SubscriptionRepository;
 import team03.monew.repository.notification.NotificationRepository;
-import team03.monew.repository.subscription.SubscriptionRepository;
 import team03.monew.repository.user.UserRepository;
 import team03.monew.util.exception.comments.CommentNotFoundException;
 import team03.monew.util.exception.notification.NotificationNotFoundException;
