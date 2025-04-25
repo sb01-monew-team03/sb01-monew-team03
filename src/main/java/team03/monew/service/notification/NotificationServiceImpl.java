@@ -1,6 +1,5 @@
 package team03.monew.service.notification;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
+import team03.monew.dto.notification.NotificationFindRequest;
 import team03.monew.dto.notification.ResourceType;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.comments.Comment;
@@ -105,7 +105,7 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   // TODO: findAll()
-  public CursorPageResponse<NotificationDto> findAll() {
+  public CursorPageResponse<NotificationDto> findAll(NotificationFindRequest request) {
 
   return null;
   }
