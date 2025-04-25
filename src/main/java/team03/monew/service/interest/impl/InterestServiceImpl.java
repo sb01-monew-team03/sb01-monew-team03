@@ -37,6 +37,7 @@ public class InterestServiceImpl implements InterestService {
   @Lazy   // 순환참조 해결을 위한 지연 로딩
   private final SubscriptionService subscriptionService;
 
+  // TODO: 관리자만 등록 가능하도록 수정
   // 관심사 등록
   @Override
   public InterestDto create(InterestRegisterRequest request) {
@@ -77,6 +78,7 @@ public class InterestServiceImpl implements InterestService {
     return interestDto;
   }
 
+  // TODO: 관리자만 수정 가능하도록 수정
   // 관심사 키워드 수정
   @Override
   public InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId) {
@@ -104,6 +106,7 @@ public class InterestServiceImpl implements InterestService {
     return interestDto;
   }
 
+  // TODO: 관리자만 삭제 가능하도록 수정
   // 관심사 삭제
   @Override
   public void delete(UUID interestId) {

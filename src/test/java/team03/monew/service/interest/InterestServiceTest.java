@@ -9,6 +9,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,9 @@ public class InterestServiceTest {
 
   @Mock
   private InterestMapper interestMapper;
+
+  @Mock
+  private SubscriptionService subscriptionService;
 
   @InjectMocks
   private InterestServiceImpl interestService;
@@ -125,6 +129,7 @@ public class InterestServiceTest {
       interest.updateKeywords(List.of("java"));
       InterestUpdateRequest request = new InterestUpdateRequest(List.of("java", "spring", "boot"));
 
+      // Mocking
       given(interestRepository.findById(interestId)).willReturn(Optional.of(interest));
       given(interestMapper.toDto(any(Interest.class), anyBoolean()))
           .willAnswer(
@@ -141,6 +146,7 @@ public class InterestServiceTest {
                 );
               }
           );
+      given(subscriptionService.existByUserIdAndInterestId(any(UUID.class), any(UUID.class))).willReturn(true);
 
       // when
       InterestDto result = interestService.update(interestId, request, UUID.randomUUID());
@@ -179,7 +185,7 @@ public class InterestServiceTest {
 
     @Test
     @DisplayName("[success] CustomInterestRepository의 findInterest()를 호출하고, CursorPageResponse를 반환해야 함")
-    void successTest() {
+    void successTest() throws NoSuchFieldException, IllegalAccessException {
       // given
       InterestFindRequest request = new InterestFindRequest(
           "test",
@@ -189,8 +195,14 @@ public class InterestServiceTest {
           String.valueOf(Instant.now()),
           50
       );
-
       List<Interest> fakeResults = List.of(new Interest("test"));
+
+      // 강제로 id 필드 주입 - private이어도 가능
+      Field idField = Interest.class.getSuperclass().getDeclaredField("id");
+      idField.setAccessible(true);
+      idField.set(fakeResults.get(0), UUID.randomUUID());
+
+      // Mocking
       given(interestRepository.findInterest(eq(request))).willReturn(fakeResults);
       given(interestRepository.totalCountInterest(eq(request))).willReturn(1L);
       given(interestMapper.toDto(any(), anyBoolean())).willReturn(new InterestDto(
@@ -199,6 +211,8 @@ public class InterestServiceTest {
           List.of("키워드1", "키워드2"),
           0,
           false));
+      given(subscriptionService.existByUserIdAndInterestId(any(UUID.class), any(UUID.class))).willReturn(true);
+
 
       // when
       CursorPageResponse<InterestDto> results = interestService.find(request, UUID.randomUUID());
