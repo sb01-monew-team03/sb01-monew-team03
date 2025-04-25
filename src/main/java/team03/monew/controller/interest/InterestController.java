@@ -33,10 +33,7 @@ public class InterestController {
 
   // 관심사 등록
   @PostMapping
-  public ResponseEntity<InterestDto> create(
-      @RequestBody @Valid InterestRegisterRequest request,
-      @RequestHeader(value = "Monew-Request-User-ID") UUID userId
-  ) {
+  public ResponseEntity<InterestDto> create(@RequestBody @Valid InterestRegisterRequest request) {
 
     log.info("관심사 등록 요청: {}", request);
 
@@ -66,10 +63,7 @@ public class InterestController {
 
   // 관심사 물리 삭제
   @DeleteMapping("/{interestId}")
-  public ResponseEntity<Void> delete(
-      @PathVariable UUID interestId,
-      @RequestHeader(value = "Monew-Request-User-ID") UUID userId
-  ) {
+  public ResponseEntity<Void> delete(@PathVariable UUID interestId) {
 
     log.info("관심사 물리 삭제 요청: interestId={}", interestId);
 
