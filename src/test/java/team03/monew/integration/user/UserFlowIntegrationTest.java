@@ -31,7 +31,8 @@ public class UserFlowIntegrationTest {
     String password = "qwer1234!";
     UserRegisterRequest userRegisterRequest = new UserRegisterRequest(email, "test", password);
 
-    ResponseEntity<UserDto> createdUser = restTemplate.postForEntity("/api/users", userRegisterRequest, UserDto.class);
+    ResponseEntity<UserDto> createdUser = restTemplate.postForEntity("/api/users",
+        userRegisterRequest, UserDto.class);
 
     assertNotNull(createdUser.getBody());
     assertEquals(createdUser.getStatusCode(), HttpStatus.CREATED);
@@ -39,7 +40,8 @@ public class UserFlowIntegrationTest {
     // 2. 로그인
     UserLoginRequest userLoginRequest = new UserLoginRequest(email, password);
 
-    ResponseEntity<UserDto> loginUser = restTemplate.postForEntity("/api/users/login", userLoginRequest, UserDto.class);
+    ResponseEntity<UserDto> loginUser = restTemplate.postForEntity("/api/users/login",
+        userLoginRequest, UserDto.class);
 
     assertNotNull(loginUser.getBody());
     assertEquals(loginUser.getStatusCode(), HttpStatus.OK);
