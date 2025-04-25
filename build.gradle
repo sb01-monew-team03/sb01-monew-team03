@@ -46,19 +46,18 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
 	// Lombok, Mapstruct 연동(mapsturct 빌드 시 lombok과 충돌 이슈 해결)
-	// https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding
 	implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
 	// 문자열 유틸
-	// https://mvnrepository.com/artifact/org.apache.commons/commons-text
 	implementation 'org.apache.commons:commons-text:1.12.0'
 
-	// QueryDSL
+	// QueryDSL - 수정된 부분
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
-	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+	// 다음 두 개 의존성을 명시적으로 추가
+	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -69,16 +68,22 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-def querydslDir = "${layout.buildDirectory.get()}/generated/querydsl"
+// QueryDSL 설정
+def querydslDir = "$buildDir/generated/querydsl"
 
 sourceSets {
 	main.java.srcDirs += [querydslDir]
 }
 
-tasks.withType(JavaCompile).configureEach {
-	options.generatedSourceOutputDirectory = layout.buildDirectory.dir("generated/querydsl")
+tasks.withType(JavaCompile) {
+	options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
 }
 
-clean.doLast {
-	file(querydslDir).deleteDir()
+// 이 부분이 중요합니다 - 어노테이션 프로세서가 JPA 엔티티를 인식하도록 설정
+tasks.withType(JavaCompile) {
+	options.annotationProcessorPath = configurations.annotationProcessor
+}
+
+clean {
+	delete file(querydslDir)
 }

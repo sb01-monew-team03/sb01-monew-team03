@@ -32,7 +32,7 @@ public class Notification extends BaseUpdatableEntity {
   private String content;
 
   @Column(nullable = false)
-  private Boolean confirmed;
+  private boolean confirmed;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -49,8 +49,12 @@ public class Notification extends BaseUpdatableEntity {
     this.confirmed = false;
   }
 
-  public void confirmed() {
+  public void setConfirmed() {
     this.confirmed = true;
+  }
+
+  public boolean isConfirmed() {
+    return confirmed;
   }
 
 }

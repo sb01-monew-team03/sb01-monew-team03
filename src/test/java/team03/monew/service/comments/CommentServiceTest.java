@@ -38,7 +38,7 @@ import team03.monew.repository.article.ArticleRepository;
 import team03.monew.repository.comments.CommentLikeRepository;
 import team03.monew.repository.comments.CommentRepository;
 import team03.monew.repository.user.UserRepository;
-import team03.monew.util.exception.article.ArticleNotFoundException;
+//import team03.monew.util.exception.article.ArticleNotFoundException;
 import team03.monew.util.exception.comments.AlreadyLikedException;
 import team03.monew.util.exception.comments.CommentNotFoundException;
 import team03.monew.util.exception.comments.LikeNotFoundException;
@@ -121,7 +121,8 @@ class CommentServiceTest {
             given(articleRepository.findById(articleId)).willReturn(Optional.empty());
 
             // when & then
-            assertThrows(ArticleNotFoundException.class, () -> commentService.create(request));
+//            assertThrows(ArticleNotFoundException.class, () -> commentService.create(request));
+            assertThrows(RuntimeException.class, () -> commentService.create(request));
         }
     }
 

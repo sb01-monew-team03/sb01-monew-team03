@@ -1,5 +1,6 @@
 package team03.monew.service.notification;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import team03.monew.dto.common.CursorPageResponse;
@@ -17,6 +18,6 @@ public interface NotificationService {
 
   void readAllNotification(UUID userId);
 
-  CursorPageResponse<NotificationDto> findAll();
+  CursorPageResponse<NotificationDto> findAll(String cursor, Instant after, Integer limit, UUID userId);
 
 }

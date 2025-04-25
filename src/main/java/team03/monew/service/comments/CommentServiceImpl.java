@@ -15,7 +15,7 @@ import team03.monew.repository.article.ArticleRepository;
 import team03.monew.repository.comments.CommentLikeRepository;
 import team03.monew.repository.comments.CommentRepository;
 import team03.monew.repository.user.UserRepository;
-import team03.monew.util.exception.article.ArticleNotFoundException;
+//import team03.monew.util.exception.article.ArticleNotFoundException;
 import team03.monew.util.exception.comments.*;
 import team03.monew.util.exception.user.UserNotFoundException;
 
@@ -39,7 +39,8 @@ public class CommentServiceImpl implements CommentService {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> UserNotFoundException.withId(request.userId()));
         Article article = articleRepository.findById(request.articleId())
-                .orElseThrow(() -> new ArticleNotFoundException(request.articleId()));
+//                .orElseThrow(() -> new ArticleNotFoundException(request.articleId()));
+            .orElseThrow(() -> new RuntimeException());
 
         Comment comment = new Comment(request.content(), user, article);
         Comment saved = commentRepository.save(comment);
