@@ -1,6 +1,9 @@
 package team03.monew.service.user;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -38,6 +41,37 @@ class UserServiceTest {
   @Mock
   private UserMapper userMapper;
 
+  @Test
+  @DisplayName("모든 사용자 조회")
+  void findAll_success() {
+    // given
+    User user1 = new User("user1", "user1@gmail.com", "qwer1234", Role.USER);
+    User user2 = new User("user2", "user2@gmail.com", "qwer1234", Role.USER);
+
+    List<User> users = List.of(user1, user2);
+
+    UserDto user1Dto = new UserDto(user1.getId(), user1.getEmail(), user1.getNickname(),
+        user1.getCreatedAt(), Role.USER.toString());
+    UserDto user2Dto = new UserDto(user2.getId(), user2.getEmail(), user2.getNickname(),
+        user2.getCreatedAt(), Role.USER.toString());
+
+    given(userRepository.findAll()).willReturn(users);
+    given(userMapper.toDto(user1)).willReturn(user1Dto);
+    given(userMapper.toDto(user2)).willReturn(user2Dto);
+
+    // when
+    List<UserDto> result = userService.findAll();
+
+    // then
+    assertNotNull(result);
+    assertEquals(result.get(0).email(), user1Dto.email());
+    assertEquals(result.get(1).email(), user2Dto.email());
+
+    then(userRepository).should().findAll();
+    then(userMapper).should().toDto(user1);
+    then(userMapper).should().toDto(user2);
+  }
+
   @Nested
   @DisplayName("사용자 등록")
   class CreateUserTest {
@@ -48,7 +82,8 @@ class UserServiceTest {
       // given
       UserRegisterRequest request = new UserRegisterRequest("test@gmail.com", "test", "qwer1234");
       User user = new User(request.nickname(), request.email(), request.password(), Role.USER);
-      UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(), user.getCreatedAt());
+      UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(),
+          user.getCreatedAt(), Role.USER.toString());
 
       given(userRepository.existsByEmail(user.getEmail())).willReturn(false);
       given(userRepository.save(any(User.class))).willReturn(user);
@@ -77,47 +112,19 @@ class UserServiceTest {
     }
   }
 
-  @Test
-  @DisplayName("모든 사용자 조회")
-  void findAll_success() {
-    // given
-    User user1 = new User("user1", "user1@gmail.com", "qwer1234", Role.USER);
-    User user2 = new User("user2", "user2@gmail.com", "qwer1234", Role.USER);
-
-    List<User> users = List.of(user1, user2);
-
-    UserDto user1Dto = new UserDto(user1.getId(), user1.getEmail(), user1.getNickname(), user1.getCreatedAt());
-    UserDto user2Dto = new UserDto(user2.getId(), user2.getEmail(), user2.getNickname(), user2.getCreatedAt());
-
-    given(userRepository.findAll()).willReturn(users);
-    given(userMapper.toDto(user1)).willReturn(user1Dto);
-    given(userMapper.toDto(user2)).willReturn(user2Dto);
-
-    // when
-    List<UserDto> result = userService.findAll();
-
-    // then
-    assertNotNull(result);
-    assertEquals(result.get(0).email(), user1Dto.email());
-    assertEquals(result.get(1).email(), user2Dto.email());
-
-    then(userRepository).should().findAll();
-    then(userMapper).should().toDto(user1);
-    then(userMapper).should().toDto(user2);
-  }
-
   @Nested
-  @DisplayName("특정 사용자 조회")
-  class FindById {
+  @DisplayName("특정 사용자 조회 - Dto 반환")
+  class FindUserDtoById {
 
     @Test
     @DisplayName("특정 사용자 조회 성공")
-    void findById_success() {
+    void FindUserDtoById_success() {
       // given
       UUID userId = UUID.randomUUID();
       User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
-      UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(), user.getCreatedAt());
-      given(userRepository.findById(userId)).willReturn(Optional.of(user));
+      UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(),
+          user.getCreatedAt(), Role.USER.toString());
+      given(userRepository.findActiveById(userId)).willReturn(Optional.of(user));
       given(userMapper.toDto(user)).willReturn(userDto);
 
       // when
@@ -128,19 +135,54 @@ class UserServiceTest {
       assertEquals(result.id(), userDto.id());
       assertEquals(result.email(), userDto.email());
 
-      then(userRepository).should().findById(userId);
+      then(userRepository).should().findActiveById(userId);
       then(userMapper).should().toDto(user);
     }
 
     @Test
     @DisplayName("사용자 찾기 실패 - user not found")
-    void findById_userNotFound() {
+    void FindUserDtoById_userNotFound() {
       // given
       UUID userId = UUID.randomUUID();
-      given(userRepository.findById(userId)).willReturn(Optional.empty());
+      given(userRepository.findActiveById(userId)).willReturn(Optional.empty());
 
       // when, then
       assertThrows(UserNotFoundException.class, () -> userService.findUserDtoById(userId));
+    }
+  }
+
+  @Nested
+  @DisplayName("특정 사용자 조회 - Entity")
+  class FindUserById {
+
+    @Test
+    @DisplayName("특정 사용자 조회 성공")
+    void FindUserById_success() {
+      // given
+      UUID userId = UUID.randomUUID();
+      User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
+      given(userRepository.findActiveById(userId)).willReturn(Optional.of(user));
+
+      // when
+      User result = userService.findUserById(userId);
+
+      // then
+      assertNotNull(result);
+      assertEquals(result.getId(), user.getId());
+      assertEquals(result.getEmail(), user.getEmail());
+
+      then(userRepository).should().findActiveById(userId);
+    }
+
+    @Test
+    @DisplayName("사용자 찾기 실패 - user not found")
+    void FindUserById_userNotFound() {
+      // given
+      UUID userId = UUID.randomUUID();
+      given(userRepository.findActiveById(userId)).willReturn(Optional.empty());
+
+      // when, then
+      assertThrows(UserNotFoundException.class, () -> userService.findUserById(userId));
     }
   }
 
@@ -155,8 +197,9 @@ class UserServiceTest {
       UUID id = UUID.randomUUID();
       UserUpdateRequest request = new UserUpdateRequest("updatedUser");
       User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
-      UserDto userDto = new UserDto(user.getId(), user.getEmail(), request.nickname(), user.getCreatedAt());
-      given(userRepository.findById(id)).willReturn(Optional.of(user));
+      UserDto userDto = new UserDto(user.getId(), user.getEmail(), request.nickname(),
+          user.getCreatedAt(), Role.USER.toString());
+      given(userRepository.findActiveById(id)).willReturn(Optional.of(user));
       given(userMapper.toDto(user)).willReturn(userDto);
 
       // when
@@ -165,7 +208,7 @@ class UserServiceTest {
       // then
       assertNotNull(result);
       assertEquals(result.nickname(), user.getNickname());
-      then(userRepository).should().findById(id);
+      then(userRepository).should().findActiveById(id);
       then(userMapper).should().toDto(user);
     }
 
@@ -175,7 +218,7 @@ class UserServiceTest {
       // given
       UUID userId = UUID.randomUUID();
       UserUpdateRequest request = new UserUpdateRequest("updatedUser");
-      given(userRepository.findById(userId)).willReturn(Optional.empty());
+      given(userRepository.findActiveById(userId)).willReturn(Optional.empty());
 
       // when, then
       assertThrows(UserNotFoundException.class, () -> userService.update(userId, request));
@@ -191,8 +234,8 @@ class UserServiceTest {
     void softDelete_success() {
       // given
       UUID id = UUID.randomUUID();
-      User user =new User("user", "user@gmail.com", "qwer1234", Role.USER);
-      given(userRepository.findById(id)).willReturn(Optional.of(user));
+      User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
+      given(userRepository.findActiveById(id)).willReturn(Optional.of(user));
 
       // when
       userService.softDelete(id);
@@ -203,11 +246,11 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("사용자 정보 찾기 실패 - user not found")
+    @DisplayName("사용자 논리 삭제 실패- user not found")
     void softDelete_userNotFound() {
       // given
       UUID id = UUID.randomUUID();
-      given(userRepository.findById(id)).willReturn(Optional.empty());
+      given(userRepository.findActiveById(id)).willReturn(Optional.empty());
 
       // when, then
       assertThrows(UserNotFoundException.class, () -> userService.softDelete(id));
@@ -234,7 +277,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("사용자 정보 찾기 실패 - user not found")
+    @DisplayName("사용자 물리 삭제 실패 - user not found")
     void hardDelete_userNotfound() {
       // given
       UUID id = UUID.randomUUID();

@@ -29,6 +29,11 @@ public class AuthServiceImpl implements AuthService {
     User user = userRepository.findByEmail(request.email())
         .orElseThrow(() -> UserNotFoundException.withEmail(request.email()));
 
+    // 소프트 삭제된 유저일 경우
+    if (user.isDeleted()) {
+      throw UserNotFoundException.isDeleted();
+    }
+
     // password 확인
     if (!user.getPassword().equals(request.password())) {
       throw InvalidException.wrongPassword();

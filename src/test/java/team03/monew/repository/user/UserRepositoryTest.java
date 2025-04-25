@@ -1,10 +1,13 @@
 package team03.monew.repository.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -91,6 +94,50 @@ class UserRepositoryTest {
 
       // when
       Optional<User> result = userRepository.findByEmail(email);
+
+      // then
+      assertThat(result).isEmpty();
+    }
+  }
+
+  @Nested
+  @DisplayName("활동중인 사용자 찾기")
+  class findActiveById {
+
+    @Test
+    @DisplayName("활동중인 사용자 찾기 성공")
+    void findActiveById_success() {
+      // given
+      User user = new User("test", "test@gmail.com", "qwer1234!", Role.USER);
+      userRepository.save(user);
+      entityManager.flush();
+      entityManager.clear();
+      UUID userId = user.getId();
+
+      // when
+      Optional<User> result = userRepository.findActiveById(userId);
+
+      // then
+      assertThat(result).isPresent();
+      assertEquals(result.get().getNickname(), user.getNickname());
+    }
+
+    @Test
+    @DisplayName("삭제됐을 경우")
+    void findActiveById_alreadyUserSoftDeleted() {
+      // given
+      User user = new User("test", "test@gmail.com", "qwer1234!", Role.USER);
+      userRepository.save(user);
+      entityManager.flush();
+      entityManager.clear();
+      UUID userId = user.getId();
+      user.delete();
+      userRepository.save(user);
+      entityManager.flush();
+      entityManager.clear();
+
+      // when
+      Optional<User> result = userRepository.findActiveById(userId);
 
       // then
       assertThat(result).isEmpty();

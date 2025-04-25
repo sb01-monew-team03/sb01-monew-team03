@@ -7,7 +7,8 @@ public record UserDto(
     UUID id,
     String email,
     String nickname,
-    Instant createdAt
+    Instant createdAt,
+    String role
 ) {
 
 }

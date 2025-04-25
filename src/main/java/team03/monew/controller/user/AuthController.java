@@ -1,5 +1,6 @@
 package team03.monew.controller.user;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +23,16 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/login")
-  public ResponseEntity<UserDto> login(@RequestBody @Valid UserLoginRequest request) {
+  public ResponseEntity<UserDto> login(
+      @RequestBody @Valid UserLoginRequest request,
+      HttpSession session) {
     log.info("로그인 요청: email={}", request.email());
     UserDto userDto = authService.login(request);
     log.debug("로그인 응답: {}", userDto);
+
+    log.debug("세션 저장: userId={}, role={}", userDto.id(), userDto.role());
+    session.setAttribute("userId", userDto.id());
+    session.setAttribute("role", userDto.role());
     return ResponseEntity.status(HttpStatus.OK).body(userDto);
   }
 }
