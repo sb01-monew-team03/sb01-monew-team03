@@ -1,6 +1,6 @@
 package team03.monew.service.notification;
 
-
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,9 +8,15 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
+import team03.monew.dto.notification.NotificationFindRequest;
 import team03.monew.dto.notification.ResourceType;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.comments.Comment;
@@ -63,6 +69,7 @@ public class NotificationServiceImpl implements NotificationService {
             notifications.add(notificationMapper.toDto(notification));
           }
         });
+
     return notifications;
   }
 
@@ -125,8 +132,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     try {
-      Pageable pageable = PageRequest.of(0, limit, Sort.by(Direction.DESC, "createdAt"));
-      Page<Notification> pages = notificationRepository.findPageWithCursor(userId, cursor,
+      Pageable pageable = PageRequest.of(0, request.limit(), Sort.by(Direction.DESC, "createdAt"));
+      Page<Notification> pages = notificationRepository.findPageWithCursor(request.userId(), request.cursor(),
           pageable);
 
       List<NotificationDto> notificationDtos = pages.getContent()

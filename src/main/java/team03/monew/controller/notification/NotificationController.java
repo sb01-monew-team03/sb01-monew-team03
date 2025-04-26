@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import team03.monew.config.api.NotificationApi;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
+import team03.monew.dto.notification.NotificationFindRequest;
 import team03.monew.service.notification.NotificationService;
 
 @Slf4j
@@ -28,7 +29,7 @@ public class NotificationController implements NotificationApi {
   @Override
   @GetMapping
   public ResponseEntity<CursorPageResponse<NotificationDto>> findAll (
-      @ModelAttribute NotificationRequestForm request) {
+      @ModelAttribute NotificationFindRequest request) {
     log.info("알림 조회 요청: {}", request);
 
     CursorPageResponse<NotificationDto> notificationDtos = notificationService.findAll(request);
