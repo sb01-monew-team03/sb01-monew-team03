@@ -69,7 +69,6 @@ public class NotificationServiceImpl implements NotificationService {
             notifications.add(notificationMapper.toDto(notification));
           }
         });
-
     return notifications;
   }
 
@@ -143,6 +142,7 @@ public class NotificationServiceImpl implements NotificationService {
 
       String nextCursor = null;
       Instant nextAfter = null;
+
       if (pages.hasNext() && !notificationDtos.isEmpty()) {
         Notification lastNotification = pages.getContent().get(pages.getContent().size() - 1);
         nextCursor = lastNotification.getCreatedAt().toString();

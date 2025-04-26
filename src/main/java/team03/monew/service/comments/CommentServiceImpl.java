@@ -39,9 +39,7 @@ import team03.monew.repository.comments.CommentLikeRepository;
 import team03.monew.repository.comments.CommentRepository;
 import team03.monew.repository.user.UserRepository;
 //import team03.monew.util.exception.article.ArticleNotFoundException;
-import team03.monew.util.exception.comments.AlreadyLikedException;
-import team03.monew.util.exception.comments.CommentNotFoundException;
-import team03.monew.util.exception.comments.LikeNotFoundException;
+import team03.monew.util.exception.comments.*;
 import team03.monew.util.exception.user.UserNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,40 +59,31 @@ class CommentServiceTest {
   @Mock
   private CommentMapper commentMapper;
 
-  @Nested
-  @DisplayName("댓글 등록")
-  class CreateCommentTest {
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class CommentServiceImpl implements CommentService {
 
-    @Test
-    @DisplayName("댓글 등록 성공")
-    void create_success() {
-      // given
-      UUID userId = UUID.randomUUID();
-      UUID articleId = UUID.randomUUID();
-      CommentCreateRequest request = new CommentCreateRequest("Nice article!", articleId, userId);
-      User user = new User("nick", "nick@example.com", "pass", Role.USER);
-      Article article = mock(Article.class);
-      Comment savedComment = new Comment(request.content(), user, article);
-      CommentDto dto = new CommentDto(
-          savedComment.getId(), articleId, userId,
-          user.getNickname(), request.content(), 0L, false,
-          Instant.now()
-      );
+    private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final UserRepository userRepository;
+    private final ArticleRepository articleRepository;
+    private final CommentMapper commentMapper;
 
-      given(userRepository.findById(userId)).willReturn(Optional.of(user));
-      given(articleRepository.findById(articleId)).willReturn(Optional.of(article));
-      given(commentRepository.save(any(Comment.class))).willReturn(savedComment);
-      given(commentMapper.toDto(savedComment)).willReturn(dto);
+    @Override
+    public CommentDto create(CommentCreateRequest request) {
+        log.debug("댓글 등록 시작: articleId={}, userId={}", request.articleId(), request.userId());
+        User user = userRepository.findById(request.userId())
+                .orElseThrow(() -> UserNotFoundException.withId(request.userId()));
+        Article article = articleRepository.findById(request.articleId())
+//                .orElseThrow(() -> new ArticleNotFoundException(request.articleId()));
+            .orElseThrow(() -> new RuntimeException());
 
-      // when
-      CommentDto result = commentService.create(request);
-
-      // then
-      assertNotNull(result);
-      assertEquals(dto.content(), result.content());
-      assertEquals(dto.userNickname(), result.userNickname());
-      then(commentRepository).should().save(any(Comment.class));
-      then(commentMapper).should().toDto(savedComment);
+        Comment comment = new Comment(request.content(), user, article);
+        Comment saved = commentRepository.save(comment);
+        log.info("댓글 등록 완료: commentId={}", saved.getId());
+        return commentMapper.toDto(saved);
     }
 
     @Test
