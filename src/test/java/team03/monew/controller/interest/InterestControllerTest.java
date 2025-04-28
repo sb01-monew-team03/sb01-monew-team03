@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -24,7 +25,6 @@ import team03.monew.dto.interest.InterestFindRequest;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.service.interest.InterestService;
-import team03.monew.service.user.UserService;
 
 @WebMvcTest(InterestController.class)
 public class InterestControllerTest {
@@ -38,64 +38,126 @@ public class InterestControllerTest {
   @MockitoBean
   private InterestService interestService;
 
-  @MockitoBean
-  private UserService userService;  // UserInterceptor에서 필요함
-
-  @Test
+  @Nested
   @DisplayName("create() - 관심사 등록 테스트")
-  void createTest() throws Exception {
+  class CreateTest {
 
-    // given
-    InterestRegisterRequest request = new InterestRegisterRequest("test", List.of("keyword"));
-    InterestDto interestDto = new InterestDto(UUID.randomUUID().toString(), request.name(),
-        request.keywords(), 0, false);
+    @Test
+    @DisplayName("[success] 관심사 등록 성공")
+    void successTest() throws Exception {
 
-    // mocking
-    given(interestService.create(request)).willReturn(interestDto);
+      // given
+      InterestRegisterRequest request = new InterestRegisterRequest("test", List.of("keyword"));
+      InterestDto interestDto = new InterestDto(UUID.randomUUID().toString(), request.name(),
+          request.keywords(), 0, false);
 
-    // when & then
-    mockMvc.perform(post("/api/interests")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id").exists());
+      // mocking
+      given(interestService.create(request)).willReturn(interestDto);
+
+      // when & then
+      mockMvc.perform(post("/api/interests")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(request))
+              .sessionAttr("role", "admin"))
+          .andExpect(status().isCreated())
+          .andExpect(jsonPath("$.id").exists());
+    }
+
+    @Test
+    @DisplayName("[fail] role이 admin이 아닐 때 실패")
+    void failTest() throws Exception {
+
+      // given
+      InterestRegisterRequest request = new InterestRegisterRequest("test", List.of("keyword"));
+
+      // when & then
+      mockMvc.perform(post("/api/interests")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(request))
+              .sessionAttr("role", "user"))
+          .andExpect(status().isForbidden());
+    }
   }
 
-  @Test
+  @Nested
   @DisplayName("update() - 관심사 정보 수정 테스트")
-  void updateTest() throws Exception {
+  class UpdateTest {
 
-    // given
-    UUID interestId = UUID.randomUUID();
-    UUID userId = UUID.randomUUID();
-    InterestUpdateRequest request = new InterestUpdateRequest(List.of("update", "keywords"));
-    InterestDto interestDto = new InterestDto(interestId.toString(), "test",
-        request.keywords(), 0, false);
+    @Test
+    @DisplayName("[success] 관심사 수정 성공")
+    void successTest() throws Exception {
 
-    // mocking
-    given(interestService.update(interestId, request, userId)).willReturn(interestDto);
+      // given
+      UUID interestId = UUID.randomUUID();
+      UUID userId = UUID.randomUUID();
+      InterestUpdateRequest request = new InterestUpdateRequest(List.of("update", "keywords"));
+      InterestDto interestDto = new InterestDto(interestId.toString(), "test",
+          request.keywords(), 0, false);
 
-    // when & then
-    mockMvc.perform(patch("/api/interests/{interestId}", interestId)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request))
-            .header("MoNew-Request-User-ID", userId))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(interestId.toString()))
-        .andExpect(jsonPath("$.keywords[0]").value("update"));
+      // mocking
+      given(interestService.update(interestId, request, userId)).willReturn(interestDto);
+
+      // when & then
+      mockMvc.perform(patch("/api/interests/{interestId}", interestId)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", userId)
+              .sessionAttr("role", "admin"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.id").value(interestId.toString()))
+          .andExpect(jsonPath("$.keywords[0]").value("update"));
+    }
+
+    @Test
+    @DisplayName("[fail] role이 admin이 아닐 때 실패")
+    void failTest() throws Exception {
+
+      // given
+      UUID interestId = UUID.randomUUID();
+      UUID userId = UUID.randomUUID();
+      InterestUpdateRequest request = new InterestUpdateRequest(List.of("update", "keywords"));
+
+      // when & then
+      mockMvc.perform(patch("/api/interests/{interestId}", interestId)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", userId)
+              .sessionAttr("role", "user"))
+          .andExpect(status().isForbidden());
+    }
   }
 
-  @Test
+  @Nested
   @DisplayName("delete() - 관심사 물리 삭제 테스트")
-  void deleteTest() throws Exception {
+  class DeleteTest {
 
-    // given
-    UUID interestId = UUID.randomUUID();
+    @Test
+    @DisplayName("[success] 관심사 물리 삭제 성공")
+    void successTest() throws Exception {
 
-    // when & then
-    mockMvc.perform(delete("/api/interests/{interestId}", interestId)
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
+      // given
+      UUID interestId = UUID.randomUUID();
+
+      // when & then
+      mockMvc.perform(delete("/api/interests/{interestId}", interestId)
+              .contentType(MediaType.APPLICATION_JSON)
+              .sessionAttr("role", "admin"))
+          .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("[fail] role이 admin이 아닐 때 실패")
+    void failTest() throws Exception {
+
+      // given
+      UUID interestId = UUID.randomUUID();
+
+      // when & then
+      mockMvc.perform(delete("/api/interests/{interestId}", interestId)
+              .contentType(MediaType.APPLICATION_JSON)
+              .sessionAttr("role", "user"))
+          .andExpect(status().isForbidden());
+    }
   }
 
   @Test
