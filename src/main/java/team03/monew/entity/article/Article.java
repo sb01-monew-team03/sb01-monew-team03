@@ -46,18 +46,24 @@ public class Article extends BaseEntity {
     // 연관 관심사 (ManyToMany)
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "article_interest",
-            joinColumns = @JoinColumn(name = "article_id"),
-            inverseJoinColumns = @JoinColumn(name = "interest_id")
+        name = "article_interest",
+        joinColumns = @JoinColumn(name = "article_id"),
+        inverseJoinColumns = @JoinColumn(name = "interest_id")
     )
     private Set<Interest> interests = new HashSet<>();
 
-    public Article(String source, String originalLink, String title, String summary, LocalDateTime publishedAt) {
+    public Article(String source, String originalLink, String title, String summary,
+        LocalDateTime publishedAt) {
         this.source = source;
         this.originalLink = originalLink;
         this.title = title;
         this.summary = summary;
         this.publishedAt = publishedAt;
+    }
+
+    public void setInterests(Set<Interest> interests) {
+        this.interests.clear();
+        this.interests.addAll(interests);
     }
 
     public void increaseViewCount() {
