@@ -168,7 +168,9 @@ CREATE TABLE article_view
     id         UUID PRIMARY KEY,
     article_id UUID        NOT NULL,
     user_id    UUID,
-    viewed_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    viewed_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NULL
 );
 
 -- article_view 제약 조건 추가
