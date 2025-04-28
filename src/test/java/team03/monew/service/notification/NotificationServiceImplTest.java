@@ -30,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
+import team03.monew.dto.notification.NotificationFindRequest;
 import team03.monew.dto.notification.ResourceType;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.comments.Comment;
@@ -41,7 +42,7 @@ import team03.monew.entity.user.User.Role;
 import team03.monew.mapper.notification.NotificationMapper;
 import team03.monew.repository.comments.CommentRepository;
 import team03.monew.repository.notification.NotificationRepository;
-import team03.monew.repository.subscription.SubscriptionRepository;
+import team03.monew.repository.interest.SubscriptionRepository;
 import team03.monew.repository.user.UserRepository;
 import team03.monew.util.exception.comments.CommentNotFoundException;
 import team03.monew.util.exception.notification.NotificationNotFoundException;
@@ -257,6 +258,8 @@ class NotificationServiceImplTest {
     UUID notificationId = UUID.randomUUID();
     ReflectionTestUtils.setField(notification, "id", notificationId);
 
+    NotificationFindRequest request = new NotificationFindRequest(cursor, after, limit, user.getId());
+
     Instant createdAt = Instant.now();
     ReflectionTestUtils.setField(notification, "createdAt", createdAt);
 
@@ -272,7 +275,7 @@ class NotificationServiceImplTest {
     when(notificationRepository.findPageWithCursor(eq(user.getId()), eq(cursor), any(Pageable.class))).thenReturn(page);
     when(notificationMapper.toDto(notification)).thenReturn(notificationDto);
 
-    CursorPageResponse<NotificationDto> result = notificationService.findAll(cursor, after, limit, user.getId());
+    CursorPageResponse<NotificationDto> result = notificationService.findAll(request);
 
     assertNotNull(result);
     assertEquals(1, result.content().size());
@@ -300,10 +303,12 @@ class NotificationServiceImplTest {
     Instant createdAt = Instant.now();
     ReflectionTestUtils.setField(notification, "createdAt", createdAt);
 
+    NotificationFindRequest request = new NotificationFindRequest(cursor, after, limit, user.getId());
+
     when(userRepository.existsById(user.getId())).thenReturn(false);
 
     assertThrows(UserNotFoundException.class, () ->
-        notificationService.findAll(cursor, after, limit, user.getId()));
+        notificationService.findAll(request));
 
     verify(userRepository).existsById(user.getId());
     verify(notificationRepository, never()).findPageWithCursor(any(), any(), any());
@@ -316,12 +321,14 @@ class NotificationServiceImplTest {
     Instant after = null;
     int limit = 10;
 
+    NotificationFindRequest request = new NotificationFindRequest(cursor, after, limit, user.getId());
+
     when(userRepository.existsById(user.getId())).thenReturn(true);
     when(notificationRepository.findPageWithCursor(eq(user.getId()), eq(cursor), any(Pageable.class)))
         .thenThrow(new IllegalArgumentException("Invalid cursor format"));
 
     assertThrows(IllegalArgumentException.class, () ->
-        notificationService.findAll(cursor, after, limit, user.getId()));
+        notificationService.findAll(request));
 
     verify(userRepository).existsById(user.getId());
     verify(notificationRepository).findPageWithCursor(eq(user.getId()), eq(cursor), any(Pageable.class));
