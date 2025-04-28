@@ -42,6 +42,13 @@ public interface SubscriptionApi {
           content = @Content(
               schema = @Schema(implementation = ErrorResponse.class)
           )
+      ),
+      @ApiResponse(
+          responseCode = "503",
+          description = "시도 횟수 초과",
+          content = @Content(
+              schema = @Schema(implementation = ErrorResponse.class)
+          )
       )
   })
   ResponseEntity<SubscriptionDto> create(UUID interestId, UUID userId);
@@ -66,6 +73,13 @@ public interface SubscriptionApi {
       @ApiResponse(
           responseCode = "500",
           description = "서버 오류",
+          content = @Content(
+              schema = @Schema(implementation = ErrorResponse.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = "503",
+          description = "시도 횟수 초과",
           content = @Content(
               schema = @Schema(implementation = ErrorResponse.class)
           )
