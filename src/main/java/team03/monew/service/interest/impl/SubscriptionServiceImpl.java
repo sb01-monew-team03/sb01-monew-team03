@@ -41,9 +41,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     Interest interest = interestService.getInterestEntityById(interestId);
 
     // 예외처리 - 구독 중복 방지
-    if (existByUserIdAndInterestId(userId, interestId)) {
-      throw SubscriptionAlreadyExistException.withInterestIdAndUserId(userId, interestId);
-    }
+    validateSubscriptionAlreadyExists(userId, interestId);
 
     // subscription 생성 및 저장
     Subscription subscription = new Subscription(user, interest);
@@ -59,7 +57,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             interestMapper.toDto(interest, true)
         );
 
-    log.info("[create] 구독 완료: subscriptionId={}, subscribed_at={}", subscription.getId(), subscription.getCreatedAt());
+    log.info("[create] 구독 완료: subscriptionId={}, subscribed_at={}", subscription.getId(),
+        subscription.getCreatedAt());
 
     return subscriptionDto;
   }
@@ -74,10 +73,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     Interest interest = interestService.getInterestEntityById(interestId);
 
     // subscription 가져오기, 예외처리 - 해당 구독 정보 없는 경우
-    Subscription subscription = subscriptionRepository.findByUser_IdAndInterest_Id(userId,
-            interestId)
-        .orElseThrow(
-            () -> SubscriptionNotFoundException.withUserIdAndInterestId(userId, interestId));
+    Subscription subscription = findByUserIdAndInterestId(userId, interestId);
 
     // 삭제
     subscriptionRepository.delete(subscription);
@@ -85,7 +81,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     // 구독자 수 감소
     interestService.updateSubscriberCount(interest, false);
 
-    log.info("[delete] 구독 취소 완료: subscriptionId={}, userId={}, interestId={}", subscription.getId(), userId, interestId);
+    log.info("[delete] 구독 취소 완료: subscriptionId={}, userId={}, interestId={}", subscription.getId(),
+        userId, interestId);
   }
 
   // 구독 여부 확인
@@ -94,8 +91,25 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     boolean isExisted = subscriptionRepository.existsByUser_IdAndInterest_Id(userId, interestId);
 
-    log.info("[existByUserIdAndInterestId] 구독 여부 확인: userId={}, interestId={}, isSubscribed={}", userId, interestId, isExisted);
+    log.info("[existByUserIdAndInterestId] 구독 여부 확인: userId={}, interestId={}, isSubscribed={}",
+        userId, interestId, isExisted);
 
     return isExisted;
+  }
+
+  // 구독 중복 방지
+  private void validateSubscriptionAlreadyExists(UUID userId, UUID interestId) {
+
+    if (existByUserIdAndInterestId(userId, interestId)) {
+      throw SubscriptionAlreadyExistException.withInterestIdAndUserId(userId, interestId);
+    }
+  }
+
+  // 구독 정보 검색
+  private Subscription findByUserIdAndInterestId(UUID userId, UUID interestId) {
+
+    return subscriptionRepository.findByUser_IdAndInterest_Id(userId, interestId)
+        .orElseThrow(
+            () -> SubscriptionNotFoundException.withUserIdAndInterestId(userId, interestId));
   }
 }
