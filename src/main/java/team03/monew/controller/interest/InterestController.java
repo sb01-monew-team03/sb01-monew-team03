@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import team03.monew.config.api.interest.InterestApi;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestFindRequest;
@@ -29,7 +30,7 @@ import team03.monew.util.interest.AdminValidator;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/interests")
-public class InterestController {
+public class InterestController implements InterestApi {
 
   private final InterestService interestService;
 

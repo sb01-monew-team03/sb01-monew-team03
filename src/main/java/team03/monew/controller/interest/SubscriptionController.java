@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import team03.monew.config.api.interest.SubscriptionApi;
 import team03.monew.dto.interest.SubscriptionDto;
 import team03.monew.service.interest.SubscriptionService;
 
@@ -18,7 +19,7 @@ import team03.monew.service.interest.SubscriptionService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/interests")
-public class SubscriptionController {
+public class SubscriptionController implements SubscriptionApi {
 
   private final SubscriptionService subscriptionService;
 
