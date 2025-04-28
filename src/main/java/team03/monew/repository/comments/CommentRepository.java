@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import team03.monew.entity.article.Article;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.user.User;
 
@@ -23,4 +24,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     // 활동 관리를 위한 최근 작성한 댓글(최대 10건) 추출
     @EntityGraph(attributePaths = {"article"})
     List<Comment> findTop10ByUserOrderByCreatedAtDesc(User user);
+
+    Long countByArticle(Article article);
 }

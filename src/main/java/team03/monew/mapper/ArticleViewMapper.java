@@ -1,9 +1,11 @@
 package team03.monew.mapper;
 
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.entity.article.ArticleView;
+import team03.monew.repository.comments.CommentRepository;
 
 @Mapper(componentModel = "spring")
 public interface ArticleViewMapper {
@@ -20,5 +22,5 @@ public interface ArticleViewMapper {
   @Mapping(expression = "java(commentRepository.countByArticle(articleView.getArticle()))",
       target = "articleCommentCount")
   @Mapping(source = "articleView.article.viewCount", target = "articleViewCount")
-  ArticleViewDto toDto(ArticleView articleView);
+  ArticleViewDto toDto(ArticleView articleView, @Context CommentRepository commentRepository);
 }

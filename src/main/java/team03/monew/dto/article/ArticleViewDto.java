@@ -13,8 +13,8 @@ public record ArticleViewDto(
     String articleTitle,
     Instant articlePublishedDate,
     String articleSummary,
-    int articleCommentCount,
-    int articleViewCount
+    Long articleCommentCount,
+    Long articleViewCount
 
 ) {
 
