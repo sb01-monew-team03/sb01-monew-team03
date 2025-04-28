@@ -2,14 +2,12 @@ package team03.monew.mapper.comments;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.stereotype.Component;
 import team03.monew.dto.comments.CommentDto;
 import team03.monew.dto.comments.CommentLikeDto;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 
 @Mapper(componentModel = "spring")
-@Component
 public interface CommentMapper {
 
     @Mapping(target = "likedByMe", constant = "false")
@@ -24,7 +22,6 @@ public interface CommentMapper {
     @Mapping(target = "likedByMe", source = "likedByMe")
     @Mapping(target = "createdAt", source = "comment.createdAt")
     CommentDto toDto(Comment comment, boolean likedByMe);
-
 
     @Mapping(target = "id", source = "like.id")
     @Mapping(target = "likedBy", source = "like.user.id")
