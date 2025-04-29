@@ -54,30 +54,19 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
   }
 
   // where
-  // 조건절 취합
+  // 관심사명, 키워드명 검색
   private BooleanExpression getWhere(String keyword) {
+
     BooleanExpression where = null;
 
     if (!StringUtils.isNullOrEmpty(keyword)) {
-      where = containsInterestName(keyword)
-          .or(containsKeywordsName(keyword));
+      where = qInterest.name.contains(keyword)
+          .or(qKeyword.name.contains(keyword));
     }
 
     return where;
   }
-
-  // 관심사 이름
-  private BooleanExpression containsInterestName(String keyword) {
-
-    return qInterest.name.contains(keyword);
-  }
-
-  // 키워드
-  private BooleanExpression containsKeywordsName(String keyword) {
-
-    return qKeyword.name.contains(keyword);
-  }
-
+  
   // orderBy
   // 관심사 이름 or 구독자 수
   private OrderSpecifier<?> getOrderBy(String orderBy, String direction) {
