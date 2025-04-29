@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team03.monew.dto.activity.ActivityDto;
+import team03.monew.dto.user.UserActivityDto;
 import team03.monew.dto.article.ArticleViewDto;
-import team03.monew.dto.comments.CommentDto;
-import team03.monew.dto.comments.CommentLikeDtoForActivity;
+import team03.monew.dto.comments.CommentActivityDto;
+import team03.monew.dto.comments.CommentLikeActivityDto;
 import team03.monew.dto.interest.SubscriptionDto;
 import team03.monew.entity.article.ArticleView;
 import team03.monew.entity.comments.Comment;
@@ -45,7 +45,7 @@ public class ActivityServiceImpl implements ActivityService {
   private final ArticleViewMapper articleViewMapper;
 
   @Override
-  public ActivityDto findUserActivity(UUID userId) {
+  public UserActivityDto findUserActivity(UUID userId) {
     if (!userRepository.existsById(userId)) {
       log.error("존재하지 않는 사용자 ID");
       throw UserNotFoundException.withId(userId);
@@ -60,18 +60,19 @@ public class ActivityServiceImpl implements ActivityService {
         .map(subscriptionMapper::toDto).toList();
 
     List<Comment> comments = commentRepository.findTop10ByUserOrderByCreatedAtDesc(user);
-    List<CommentDto> commentDtos = comments.stream()
-        .map(commentMapper::toDto).toList();
+    List<CommentActivityDto> commentDtos = comments.stream()
+        .map(commentMapper::toActivityDto).toList();
 
     List<CommentLike> commentLikes = commentLikeRepository.findTop10ByUserOrderByCreatedAtDesc(user);
-    List<CommentLikeDtoForActivity> commentLikeDtos = commentLikes.stream()
+    List<CommentLikeActivityDto> commentLikeDtos = commentLikes.stream()
         .map(commentLikeMapper::toDto).toList();
 
     List<ArticleView> articleViews = articleViewRepository.findTop10ByUserOrderByViewedAtDesc(user);
     List<ArticleViewDto> articleViewDtos = articleViews.stream()
-        .map(articleViewMapper::toDto).toList();
+        .map(articleView -> articleViewMapper.toDto(articleView, commentRepository)
+        ).toList();
 
-    ActivityDto activityDto = new ActivityDto(
+    UserActivityDto userActivityDto = new UserActivityDto(
         userId,
         user.getEmail(),
         user.getNickname(),
@@ -82,6 +83,6 @@ public class ActivityServiceImpl implements ActivityService {
         articleViewDtos);
 
     log.info("사용자 활동 내역 조회 완료: 사용자 ID = {}", userId);
-    return activityDto;
+    return userActivityDto;
   }
 }

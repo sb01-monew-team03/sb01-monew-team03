@@ -3,7 +3,7 @@ package team03.monew.dto.comments;
 import java.time.Instant;
 import java.util.UUID;
 
-public record CommentLikeDtoForActivity(
+public record CommentLikeActivityDto (
     UUID id,
     Instant createdAt,
     UUID commentId,

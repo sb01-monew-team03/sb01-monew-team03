@@ -21,6 +21,7 @@ public interface SubscriptionMapper {
 
   @Mapping(target = "id", expression = "java(subscription.getId().toString())")
   @Mapping(target = "interestId", expression = "java(subscription.getInterest().getId().toString())")
+  @Mapping(target = "interestName", source = "subscription.interest.name")
   @Mapping(target = "interestKeywords", source = "subscription.interest.keywords")
   @Mapping(target = "interestSubscriberCount", source = "subscription.interest.subscriberCount")
   @Mapping(target = "createdAt", source = "subscription.createdAt")
