@@ -61,7 +61,7 @@ public class Article extends BaseEntity {
         this.publishedAt = publishedAt;
     }
 
-    public void setInterests(Set<Interest> interests) {
+    public void updateInterests(Set<Interest> interests) {
         this.interests.clear();
         this.interests.addAll(interests);
     }
@@ -74,7 +74,4 @@ public class Article extends BaseEntity {
         this.deleted = true;
     }
 
-    public void setInterests(Set<Interest> interests) {
-        this.interests = interests;
-    }
 }
