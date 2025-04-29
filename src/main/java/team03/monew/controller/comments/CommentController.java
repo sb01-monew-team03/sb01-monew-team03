@@ -3,14 +3,10 @@ package team03.monew.controller.comments;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import team03.monew.dto.comments.CommentCreateRequest;
-import team03.monew.dto.comments.CommentDto;
-import team03.monew.dto.comments.CommentLikeDto;
-import team03.monew.dto.comments.CommentListRequest;
-import team03.monew.dto.comments.CommentUpdateRequest;
+import team03.monew.dto.comments.*;
+import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.service.comments.CommentService;
 
 import java.util.UUID;
@@ -24,19 +20,30 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<Page<CommentDto>> listByArticle(
-            @ModelAttribute @Valid CommentListRequest request,
+    public ResponseEntity<CursorPageResponse<CommentDto>> listByArticle(
+            @ModelAttribute CommentListRequest req,
             @RequestHeader("MoNew-Request-User-ID") UUID requesterId
     ) {
-        log.info("댓글 목록 조회 요청: {}", request);
-        Page<CommentDto> page = commentService.listByArticle(
-                request.getArticleId(),
-                request.getOrderBy(),
-                request.getDirection(),
-                request.getLimit(),
-                requesterId
+        log.info("댓글 목록 조회 요청: articleId={}, orderBy={}, direction={}, limit={}, cursor={}, after={}, requesterId={}",
+                req.getArticleId(), req.getOrderBy(), req.getDirection(), req.getLimit(),
+                req.getCursor(), req.getAfter(), requesterId
         );
-        log.debug("댓글 목록 조회 응답: size={}, totalElements={}", page.getSize(), page.getTotalElements());
+
+        CursorPageResponse<CommentDto> page =
+                commentService.listByArticleCursor(
+                        req.getArticleId(),
+                        req.getOrderBy(),
+                        req.getDirection(),
+                        req.getLimit(),
+                        req.getCursor(),
+                        req.getAfter(),
+                        requesterId
+                );
+
+        log.info("댓글 목록 조회 응답: size={}, totalElements={}, hasNext={}",
+                page.size(), page.totalElements(), page.hasNext()
+        );
+
         return ResponseEntity.ok(page);
     }
 
@@ -44,6 +51,7 @@ public class CommentController {
     public ResponseEntity<CommentDto> create(@RequestBody @Valid CommentCreateRequest request) {
         log.info("댓글 등록 요청: {}", request);
         CommentDto dto = commentService.create(request);
+        log.info("댓글 등록 완료: commentId={}", dto.id());
         return ResponseEntity.status(201).body(dto);
     }
 

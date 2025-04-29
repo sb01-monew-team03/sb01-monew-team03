@@ -1,10 +1,16 @@
 package team03.monew.dto.comments;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.Instant;
 import java.util.UUID;
 
+@Setter
+@Getter
 public class CommentListRequest {
 
     @NotNull(message = "articleId는 필수값입니다.")
@@ -16,35 +22,16 @@ public class CommentListRequest {
 
     private int limit = 10;
 
-    public UUID getArticleId() {
-        return articleId;
-    }
+    /**
+     * 커서 값 (정렬 기준의 마지막 값)
+     */
+    private String cursor;
 
-    public void setArticleId(UUID articleId) {
-        this.articleId = articleId;
-    }
+    /**
+     * 보조 커서(createdAt) 값
+     */
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Instant after;
 
-    public String getOrderBy() {
-        return orderBy;
-    }
 
-    public void setOrderBy(String orderBy) {
-        this.orderBy = orderBy;
-    }
-
-    public Sort.Direction getDirection() {
-        return direction;
-    }
-
-    public void setDirection(Sort.Direction direction) {
-        this.direction = direction;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
 }
