@@ -1,26 +1,31 @@
 package team03.monew.service.interest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.OptimisticLockException;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.interest.InterestDto;
@@ -33,6 +38,7 @@ import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
 import team03.monew.service.interest.impl.InterestServiceImpl;
 import team03.monew.util.exception.interest.EmptyKeywordListException;
+import team03.monew.util.exception.interest.ExcessiveRetryException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
 
 @ExtendWith(MockitoExtension.class)
@@ -221,6 +227,70 @@ public class InterestServiceTest {
       verify(interestRepository).findInterest(eq(request));
       assertThat(results.content()).hasSize(1);
       assertThat(results.content().get(0).name()).isEqualTo("관심사 검색 테스트");
+    }
+  }
+
+  @Nested
+  @DisplayName("updateSubscriberCount() - 구독자 수 변경 테스트")
+  class UpdateSubscriberCountTest {
+
+    Interest interest;
+
+    @BeforeEach
+    void setUp() {
+      interest = new Interest("관심사");
+      interest.updateKeywords(List.of("키워드1", "키워드2"));
+    }
+
+    @Test
+    @DisplayName("[success] 구독자 수 증가 성공")
+    void successIncreaseTest() {
+
+      // when
+      interestService.updateSubscriberCount(interest, true);
+
+      // then
+      assertThat(interest.getSubscriberCount()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("[success] 구독자 수 감소 성공")
+    void successDecreaseTest() {
+
+      // given
+      interest.increaseSubscribers();
+
+      // when
+      interestService.updateSubscriberCount(interest, false);
+
+      // then
+      assertThat(interest.getSubscriberCount()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("[fail] 구독자 수가 0명 이하일 때 감소하면 안됨")
+    void failDecreaseTest() {
+
+      // when
+      interestService.updateSubscriberCount(interest, false);
+
+      // then
+      assertThat(interest.getSubscriberCount()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("[fail] 낙관적 락 충돌 반복 시 ExcessiveRetryException 발생")
+    void failWithExcessiveRetryTest() {
+
+      // given
+      Interest interest = Mockito.spy(new Interest("관심사"));
+      interest.updateKeywords(List.of("키워드"));
+      
+      doThrow(new OptimisticLockException()).when(interest).increaseSubscribers();
+
+      // when & then
+      assertThatThrownBy(() -> interestService.updateSubscriberCount(interest, true))
+          .isInstanceOf(ExcessiveRetryException.class);
     }
   }
 }
