@@ -15,15 +15,17 @@ import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestFindRequest;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.dto.interest.InterestUpdateRequest;
+import team03.monew.dto.interest.PaginationDto;
 import team03.monew.entity.interest.Interest;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
 import team03.monew.service.interest.InterestService;
 import team03.monew.service.interest.SubscriptionService;
-import team03.monew.util.exception.interest.EmptyKeywordListException;
+import team03.monew.util.exception.interest.ExcessiveRetryException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
 import team03.monew.util.exception.interest.InterestNotFoundException;
 import team03.monew.util.exception.interest.OrderByValueException;
+import team03.monew.util.interest.InterestConstants;
 
 @Slf4j
 @Service
@@ -37,7 +39,6 @@ public class InterestServiceImpl implements InterestService {
   @Lazy   // 순환참조 해결을 위한 지연 로딩
   private final SubscriptionService subscriptionService;
 
-  // TODO: 관리자만 등록 가능하도록 수정
   // 관심사 등록
   @Override
   public InterestDto create(InterestRegisterRequest request) {
@@ -49,22 +50,13 @@ public class InterestServiceImpl implements InterestService {
     List<String> keywords = request.keywords();
 
     // 예외처리 - name이 80% 이상 유사한 관심사가 있는 경우 관심사 등록 불가
-    List<Interest> interests = interestRepository.findAll();
-    for (Interest interest : interests) {
-      log.trace("유사성 비교 중: 입력 name={}, 기존 name={}", name, interest.getName());
-      calculateSimilarity(name, interest.getName());
-    }
+    checkSimilarity(name);
 
     // Interest 생성
     Interest interest = new Interest(name);
 
     // interest에 keyword 추가
     interest.updateKeywords(keywords);
-
-    // 예외처리 - 키워드 하나 이상 있어야 함
-    if (interest.getKeywords().isEmpty()) {
-      throw new EmptyKeywordListException();
-    }
 
     // 레포지토리 저장
     interestRepository.save(interest);
@@ -78,7 +70,6 @@ public class InterestServiceImpl implements InterestService {
     return interestDto;
   }
 
-  // TODO: 관리자만 수정 가능하도록 수정
   // 관심사 키워드 수정
   @Override
   public InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId) {
@@ -86,9 +77,8 @@ public class InterestServiceImpl implements InterestService {
     log.debug("[update] 관심사 키워드 수정 시작: interestId={}, request={}, userId={}", interestId, request,
         userId);
 
-    // 해당 관심사 repository에서 찾기, 예외처리 - 관심사 없는 경우
-    Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
+    // 해당 관심사 검색
+    Interest interest = getInterestEntityById(interestId);
 
     // 키워드 수정
     List<String> keywords = request.keywords();
@@ -106,7 +96,6 @@ public class InterestServiceImpl implements InterestService {
     return interestDto;
   }
 
-  // TODO: 관리자만 삭제 가능하도록 수정
   // 관심사 삭제
   @Override
   public void delete(UUID interestId) {
@@ -114,8 +103,7 @@ public class InterestServiceImpl implements InterestService {
     log.debug("[delete] 관심사 삭제 시작: interestId={}", interestId);
 
     // 예외처리 - 해당 관심사가 존재하는지 확인
-    Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
+    Interest interest = getInterestEntityById(interestId);
 
     // 삭제
     interestRepository.delete(interest);
@@ -133,19 +121,8 @@ public class InterestServiceImpl implements InterestService {
     // 조건에 부합하는 관심사 리스트 가져오기
     List<Interest> interestList = interestRepository.findInterest(request);
 
-    // dto로 넘길 정보 변수 선언
-    String nextCursor = null;
-    Instant nextAfter = null;
-    boolean hasNext = false;
-
-    // 다음 페이지가 있는 경우
-    if (interestList.size() > request.limit()) {
-      interestList.remove(request.limit());  // 다음 페이지 확인용 마지막 요소 삭제
-      Interest lastInterest = interestList.get(request.limit() - 1); // 해당 페이지 마지막 요소
-      nextCursor = setNextCursor(lastInterest, request.orderBy());
-      nextAfter = lastInterest.getCreatedAt();
-      hasNext = true;
-    }
+    // 다음 페이지에 필요한 정보(nextCursor, nextAfter, hasNext) 세팅
+    PaginationDto paginationDto = setPaginationDto(interestList, request);
 
     // dto 변환
     List<InterestDto> content = interestList.stream()
@@ -156,20 +133,22 @@ public class InterestServiceImpl implements InterestService {
     // 커서 페이지네이션 응답용 dto 세팅
     CursorPageResponse<InterestDto> cursorPageResponse = new CursorPageResponse<>(
         content,
-        nextCursor,
-        nextAfter,
-        interestList.size(),
+        paginationDto.nextCursor(),
+        paginationDto.nextAfter(),
+        paginationDto.size(),
         interestRepository.totalCountInterest(request),
-        hasNext
+        paginationDto.hasNext()
     );
 
     log.info(
         "[find] 관심사 목록 조회 완료: userId={}, 반환 개수={}, hasNext={}, nextCursor={}, totalElements={}",
-        userId, content.size(), hasNext, nextCursor, cursorPageResponse.totalElements());
+        userId, content.size(), paginationDto.hasNext(), paginationDto.nextCursor(),
+        cursorPageResponse.totalElements());
 
     return cursorPageResponse;
   }
 
+  // 구독자 수 변경
   @Override
   public void updateSubscriberCount(Interest interest, boolean increase) {
 
@@ -179,6 +158,7 @@ public class InterestServiceImpl implements InterestService {
         increase ? "증가" : "감소");
 
     boolean update = false;
+    int count = 0;
 
     while (!update) {
       try {
@@ -193,11 +173,12 @@ public class InterestServiceImpl implements InterestService {
         log.warn("[OptimisticLockException] 구독자 수 변경 충돌: interestId={}, subscriberCount={}",
             interest.getId(), interest.getSubscriberCount(), e);
 
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException ex) {
-          Thread.currentThread().interrupt();
+        if (count > InterestConstants.MAX_RETRY_COUNT) {
+          throw new ExcessiveRetryException();
         }
+
+        count++;
+        handleOptimisticLockException();
       }
     }
 
@@ -221,7 +202,18 @@ public class InterestServiceImpl implements InterestService {
   }
 
 
-  // 단어 유사성 검사 - 80% 미만일 경우 예외처리
+  // 단어 유사성 검사
+  private void checkSimilarity(String name) {
+
+    List<Interest> interests = interestRepository.findAll();
+
+    for (Interest interest : interests) {
+      log.trace("유사성 비교 중: 입력 name={}, 기존 name={}", name, interest.getName());
+      calculateSimilarity(name, interest.getName());
+    }
+  }
+
+  // 단어 유사성 계산 - 80% 미만일 경우 예외처리
   private void calculateSimilarity(String interestName, String existingInterestName) {
     int maxLength = Math.max(interestName.length(), existingInterestName.length());
 
@@ -237,6 +229,25 @@ public class InterestServiceImpl implements InterestService {
     }
   }
 
+  // 다음 페이지에 필요한 정보 세팅
+  private PaginationDto setPaginationDto(List<Interest> interestList, InterestFindRequest request) {
+
+    // 다음 페이지가 없는 경우
+    if (interestList.size() <= request.limit()) {
+      return new PaginationDto(null, null, false, interestList.size());
+    }
+
+    // 다음 페이지가 있는 경우
+    List<Interest> paginatedList = interestList.subList(0,
+        request.limit());  // 마지막 요소를 제외한 list 새로 만듦
+    Interest lastInterest = paginatedList.get(paginatedList.size() - 1); // 해당 페이지 마지막 요소
+    String nextCursor = setNextCursor(lastInterest, request.orderBy());
+    Instant nextAfter = lastInterest.getCreatedAt();
+    boolean hasNext = true;
+
+    return new PaginationDto(nextCursor, nextAfter, hasNext, paginatedList.size());
+  }
+
   // 커서 세팅
   private String setNextCursor(Interest lastInterest, String orderBy) {
     switch (orderBy) {
@@ -246,5 +257,15 @@ public class InterestServiceImpl implements InterestService {
         return String.valueOf(lastInterest.getSubscriberCount());
     }
     throw OrderByValueException.withOrderBy(orderBy);
+  }
+
+  // 낙관적 락 충돌 시 처리 로직
+  private void handleOptimisticLockException() {
+
+    try {
+      Thread.sleep(InterestConstants.LOCK_WAIT_TIME_MS);  // 0.1초 대기
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
   }
 }

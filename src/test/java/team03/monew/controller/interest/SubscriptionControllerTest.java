@@ -18,7 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import team03.monew.dto.interest.SubscriptionDto;
 import team03.monew.service.interest.SubscriptionService;
-import team03.monew.service.user.UserService;
 
 @WebMvcTest(SubscriptionController.class)
 public class SubscriptionControllerTest {
@@ -31,9 +30,6 @@ public class SubscriptionControllerTest {
 
   @MockitoBean
   private SubscriptionService subscriptionService;
-
-  @MockitoBean
-  private UserService userService;  // UserInterceptor에서 필요함
 
   @Test
   @DisplayName("create() - 관심사 구독 테스트")

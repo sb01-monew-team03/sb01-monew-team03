@@ -1,5 +1,6 @@
 package team03.monew.service.notification;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,14 +125,14 @@ public class NotificationServiceImpl implements NotificationService {
   @Transactional
   @Override
   public CursorPageResponse<NotificationDto> findAll(NotificationFindRequest request) {
-    if (!userRepository.existsById(userId)) {
+    if (!userRepository.existsById(request.userId())) {
       log.error("존재하지 않는 사용자 ID");
-      throw UserNotFoundException.withId(userId);
+      throw UserNotFoundException.withId(request.userId());
     }
 
     try {
-      Pageable pageable = PageRequest.of(0, limit, Sort.by(Direction.DESC, "createdAt"));
-      Page<Notification> pages = notificationRepository.findPageWithCursor(userId, cursor,
+      Pageable pageable = PageRequest.of(0, request.limit(), Sort.by(Direction.DESC, "createdAt"));
+      Page<Notification> pages = notificationRepository.findPageWithCursor(request.userId(), request.cursor(),
           pageable);
 
       List<NotificationDto> notificationDtos = pages.getContent()
@@ -140,7 +141,8 @@ public class NotificationServiceImpl implements NotificationService {
           .toList();
 
       String nextCursor = null;
-      nextAfter = null;
+      Instant nextAfter = null;
+
       if (pages.hasNext() && !notificationDtos.isEmpty()) {
         Notification lastNotification = pages.getContent().get(pages.getContent().size() - 1);
         nextCursor = lastNotification.getCreatedAt().toString();

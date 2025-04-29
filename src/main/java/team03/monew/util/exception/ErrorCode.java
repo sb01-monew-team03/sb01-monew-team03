@@ -16,6 +16,8 @@ public enum ErrorCode {
   SIMILAR_INTEREST_EXISTS("INTEREST_002", "작성하신 관심사가 이미 존재하는 관심사와 유사합니다.", HttpStatus.CONFLICT),
   INVALID_KEYWORD_COUNT("INTEREST_003", "키워드는 최소 1개 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
   INVALID_ORDER_BY("INTEREST_004", "정렬은 '이름' 또는 '구독자 수' 기준으로만 가능합니다.", HttpStatus.BAD_REQUEST),
+  UNAUTHORIZED("INTEREST_005", "관리자만 접근할 수 있습니다.", HttpStatus.FORBIDDEN),
+  ERROR_MAX_RETRY_EXCEEDED("INTEREST_006", "최대 시도 횟수를 초과했습니다.", HttpStatus.SERVICE_UNAVAILABLE),
   
   // subscription 에러 코드
   SUBSCRIPTION_NOT_FOUND("SUBSCRIPTION_001", "해당 구독 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND),

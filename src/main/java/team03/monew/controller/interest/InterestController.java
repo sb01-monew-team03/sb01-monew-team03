@@ -1,5 +1,6 @@
 package team03.monew.controller.interest;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -16,26 +17,32 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import team03.monew.config.api.interest.InterestApi;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestFindRequest;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.service.interest.InterestService;
+import team03.monew.util.interest.AdminValidator;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/interests")
-public class InterestController {
+public class InterestController implements InterestApi {
 
   private final InterestService interestService;
 
   // 관심사 등록
   @PostMapping
-  public ResponseEntity<InterestDto> create(@RequestBody @Valid InterestRegisterRequest request) {
+  public ResponseEntity<InterestDto> create(
+      @RequestBody @Valid InterestRegisterRequest request,
+      HttpSession session) {
 
     log.info("관심사 등록 요청: {}", request);
+
+    AdminValidator.adminValidator(session);
 
     InterestDto interestDto = interestService.create(request);
 
@@ -49,10 +56,13 @@ public class InterestController {
   public ResponseEntity<InterestDto> update(
       @PathVariable UUID interestId,
       @RequestBody @Valid InterestUpdateRequest request,
-      @RequestHeader(value = "Monew-Request-User-ID") UUID userId
+      @RequestHeader(value = "Monew-Request-User-ID") UUID userId,
+      HttpSession session
   ) {
 
     log.info("관심사 정보 수정 요청: interestId={}", interestId);
+
+    AdminValidator.adminValidator(session);
 
     InterestDto interestDto = interestService.update(interestId, request, userId);
 
@@ -63,9 +73,13 @@ public class InterestController {
 
   // 관심사 물리 삭제
   @DeleteMapping("/{interestId}")
-  public ResponseEntity<Void> delete(@PathVariable UUID interestId) {
+  public ResponseEntity<Void> delete(
+      @PathVariable UUID interestId,
+      HttpSession session) {
 
     log.info("관심사 물리 삭제 요청: interestId={}", interestId);
+
+    AdminValidator.adminValidator(session);
 
     interestService.delete(interestId);
 
