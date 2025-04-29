@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserRegisterRequest;
 import team03.monew.dto.user.UserUpdateRequest;
+import team03.monew.entity.user.User.Role;
 import team03.monew.service.user.UserService;
 import team03.monew.util.exception.user.UserAlreadyExistsException;
 import team03.monew.util.exception.user.UserNotFoundException;
@@ -51,7 +52,8 @@ class UserControllerTest {
       UserRegisterRequest request = new UserRegisterRequest("test@gmail.com", "test", "qwer1234!");
 
       // 2. UserDto
-      UserDto userDto = new UserDto(UUID.randomUUID(), request.email(), request.nickname(), Instant.now());
+      UserDto userDto = new UserDto(UUID.randomUUID(), request.email(), request.nickname(),
+          Instant.now(), Role.USER.toString());
 
       // 3. 회원 가입
       given(userService.create(request)).willReturn(userDto);
@@ -115,7 +117,7 @@ class UserControllerTest {
       UserUpdateRequest request = new UserUpdateRequest("newNickname");
 
       // 2. UserDto
-      UserDto userDto = new UserDto(userId, "test@gmail.com", request.nickname(), Instant.now());
+      UserDto userDto = new UserDto(userId, "test@gmail.com", request.nickname(), Instant.now(), Role.USER.toString());
 
       // 3. 사용자 수정
       given(userService.update(userId, request)).willReturn(userDto);
@@ -124,7 +126,8 @@ class UserControllerTest {
       // 1. mockMvc 사용
       mockMvc.perform(patch("/api/users/{userId}", userId)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request)))
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.nickname").value(request.nickname()));
     }
@@ -141,7 +144,8 @@ class UserControllerTest {
       // 1. mockMvc 사용
       mockMvc.perform(patch("/api/users/{userId}", userId)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request)))
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isBadRequest());
     }
 
@@ -160,8 +164,27 @@ class UserControllerTest {
       // 1. mockMvc 사용
       mockMvc.perform(patch("/api/users/{userId}", userId)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request)))
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("사용자 권한 없음")
+    void update_forbidden() throws Exception{
+      // given
+      // 1. 사용자 수정 리퀘스트
+      UUID userId = UUID.randomUUID();
+      UUID requestUserId = UUID.randomUUID();
+      UserUpdateRequest request = new UserUpdateRequest("newNickname");
+
+      // when, then
+      // 1. mockMvc 사용
+      mockMvc.perform(patch("/api/users/{userId}", userId)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(request))
+              .header("MoNew-Request-User-ID", requestUserId))
+          .andExpect(status().isForbidden());
     }
   }
 
@@ -182,7 +205,8 @@ class UserControllerTest {
       // when, then
       // 1. mockMvc 사용
       mockMvc.perform(delete("/api/users/{userId}", userId)
-              .contentType(MediaType.APPLICATION_JSON))
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNoContent());
     }
 
@@ -199,8 +223,25 @@ class UserControllerTest {
       // when, then
       // 1. mockMvc 사용
       mockMvc.perform(delete("/api/users/{userId}", userId)
-              .contentType(MediaType.APPLICATION_JSON))
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("사용자 권한 없음")
+    void softDelete_forbidden() throws Exception{
+      // given
+      // 1. 사용자 논리 삭제
+      UUID userId = UUID.randomUUID();
+      UUID requestUserId = UUID.randomUUID();
+
+      // when, then
+      // 1. mockMvc 사용
+      mockMvc.perform(delete("/api/users/{userId}", userId)
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", requestUserId))
+          .andExpect(status().isForbidden());
     }
   }
 
@@ -221,7 +262,8 @@ class UserControllerTest {
       // when, then
       // 1. mockMvc 사용
       mockMvc.perform(delete("/api/users/{userId}/hard", userId)
-              .contentType(MediaType.APPLICATION_JSON))
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNoContent());
     }
 
@@ -238,8 +280,25 @@ class UserControllerTest {
       // when, then
       // 1. mockMvc 사용
       mockMvc.perform(delete("/api/users/{userId}/hard", userId)
-              .contentType(MediaType.APPLICATION_JSON))
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", userId))
           .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("사용자 권한 없음")
+    void hardDelete_forbidden() throws Exception{
+      // given
+      // 1. 사용자 물리 삭제
+      UUID userId = UUID.randomUUID();
+      UUID requestUserId = UUID.randomUUID();
+
+      // when, then
+      // 1. mockMvc 사용
+      mockMvc.perform(delete("/api/users/{userId}/hard", userId)
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("MoNew-Request-User-ID", requestUserId))
+          .andExpect(status().isForbidden());
     }
   }
 }

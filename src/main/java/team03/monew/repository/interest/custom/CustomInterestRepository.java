@@ -1,4 +1,4 @@
-package team03.monew.repository.interest;
+package team03.monew.repository.interest.custom;
 
 import java.util.List;
 import team03.monew.dto.interest.InterestFindRequest;

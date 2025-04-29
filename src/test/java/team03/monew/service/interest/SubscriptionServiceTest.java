@@ -1,7 +1,9 @@
 package team03.monew.service.interest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -77,7 +79,7 @@ public class SubscriptionServiceTest {
 
       // then
       verify(subscriptionRepository).save(any(Subscription.class));
-      verify(interestService).increaseSubscriberCount(interest);
+      verify(interestService).updateSubscriberCount(interest, true);
       assertThat(result).isEqualTo(subscriptionDto);
     }
 
@@ -127,7 +129,7 @@ public class SubscriptionServiceTest {
 
       // then
       verify(subscriptionRepository).delete(any(Subscription.class));
-      verify(interestService).decreaseSubscriberCount(any(Interest.class));
+      verify(interestService).updateSubscriberCount(interest, false);
     }
 
     @Test
@@ -152,5 +154,40 @@ public class SubscriptionServiceTest {
     }
   }
   
-  // TODO: 구독 여부 확인 테스트 코드 작성
+  @Nested
+  @DisplayName("existByUserIdAndInterestId() - 구독 여부 확인 테스트")
+  class ExistByUserIdAndInterestIdTest {
+
+    @Test
+    @DisplayName("[success] 구독 중일 경우 true 반환")
+    void successReturnTrueTest() {
+      // given
+      UUID userId = UUID.randomUUID();
+      UUID interestId = UUID.randomUUID();
+      given(subscriptionRepository.existsByUser_IdAndInterest_Id(userId, interestId)).willReturn(true);
+
+      // when
+      boolean result = subscriptionService.existByUserIdAndInterestId(userId, interestId);
+
+      // then
+      assertTrue(result);
+      verify(subscriptionRepository).existsByUser_IdAndInterest_Id(userId, interestId);
+    }
+
+    @Test
+    @DisplayName("[success] 구독하지 않을 경우 false 반환")
+    void successReturnFalseTest() {
+      // given
+      UUID userId = UUID.randomUUID();
+      UUID interestId = UUID.randomUUID();
+      given(subscriptionRepository.existsByUser_IdAndInterest_Id(userId, interestId)).willReturn(false);
+
+      // when
+      boolean result = subscriptionService.existByUserIdAndInterestId(userId, interestId);
+
+      // then
+      assertFalse(result);
+      verify(subscriptionRepository).existsByUser_IdAndInterest_Id(userId, interestId);
+    }
+  }
 }

@@ -1,6 +1,7 @@
 package team03.monew.entity.article;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,10 +13,9 @@ import team03.monew.entity.interest.Interest;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
-@Table(name = "articles")
+@Table(name = "article")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE articles SET deleted = true WHERE id = ?")
@@ -72,5 +72,9 @@ public class Article extends BaseEntity {
 
     public void delete() {
         this.deleted = true;
+    }
+
+    public void setInterests(Set<Interest> interests) {
+        this.interests = interests;
     }
 }

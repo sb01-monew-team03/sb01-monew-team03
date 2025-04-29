@@ -2,7 +2,6 @@ package team03.monew.util.exception.notification;
 
 import java.util.UUID;
 import team03.monew.util.exception.ErrorCode;
-import team03.monew.util.exception.comment.CommentNotFoundException;
 
 public class NotificationNotFoundException extends NotificationException {
 

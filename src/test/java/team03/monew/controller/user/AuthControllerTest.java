@@ -17,7 +17,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserLoginRequest;
+import team03.monew.entity.user.User.Role;
 import team03.monew.service.user.AuthService;
+import team03.monew.service.user.UserService;
 import team03.monew.util.exception.user.InvalidException;
 import team03.monew.util.exception.user.UserNotFoundException;
 
@@ -33,6 +35,9 @@ class AuthControllerTest {
   @MockitoBean
   private AuthService authService;
 
+  @MockitoBean
+  private UserService userService;
+
   @Test
   @DisplayName("로그인 성공")
   void login_success() throws Exception {
@@ -43,7 +48,7 @@ class AuthControllerTest {
     UserLoginRequest request = new UserLoginRequest(email, password);
 
     // 2. 로그인을 위한 유저 dto 생성
-    UserDto userDto = new UserDto(UUID.randomUUID(), email, "test", Instant.now());
+    UserDto userDto = new UserDto(UUID.randomUUID(), email, "test", Instant.now(), Role.USER.toString());
 
     // 3. 로그인
     given(authService.login(request)).willReturn(userDto);
@@ -61,7 +66,7 @@ class AuthControllerTest {
 
   @Test
   @DisplayName("사용자가 존재하지 않음")
-  void login_notFoundUser() throws Exception{
+  void login_notFoundUser() throws Exception {
     // given
     // 1. 로그인 리퀘스트 생성
     String email = "test@gmail.com";
@@ -81,7 +86,7 @@ class AuthControllerTest {
 
   @Test
   @DisplayName("잘못된 비밀번호")
-  void login_wrongPassword() throws Exception{
+  void login_wrongPassword() throws Exception {
     // given
     // 1. 로그인 리퀘스트 생성
     String email = "test@gmail.com";

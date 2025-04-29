@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserRegisterRequest;
 import team03.monew.dto.user.UserUpdateRequest;
 import team03.monew.service.user.UserService;
+import team03.monew.util.exception.user.ForbiddenException;
 
 @Slf4j
 @RestController
@@ -36,7 +38,12 @@ public class UserController {
 
   @PatchMapping("/{userId}")
   public ResponseEntity<UserDto> update(@PathVariable UUID userId,
-      @RequestBody @Valid UserUpdateRequest request) {
+      @RequestBody @Valid UserUpdateRequest request,
+      @RequestHeader("MoNew-Request-User-ID") UUID requestUserId) {
+    if (!requestUserId.equals(userId)) {
+      throw ForbiddenException.WrongUserId();
+    }
+
     log.info("사용자 수정 요청: userId={}, request={}", userId, request);
     UserDto userDto = userService.update(userId, request);
     log.debug("사용자 수정 응답: {}", userDto);
@@ -44,14 +51,24 @@ public class UserController {
   }
 
   @DeleteMapping("/{userId}")
-  public ResponseEntity<Void> softDelete(@PathVariable UUID userId) {
+  public ResponseEntity<Void> softDelete(@PathVariable UUID userId,
+      @RequestHeader("MoNew-Request-User-ID") UUID requestUserId) {
+    if (!requestUserId.equals(userId)) {
+      throw ForbiddenException.WrongUserId();
+    }
+
     log.info("사용자 논리 삭제 요청: userId={}", userId);
     userService.softDelete(userId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @DeleteMapping("/{userId}/hard")
-  public ResponseEntity<Void> hardDelete(@PathVariable UUID userId) {
+  public ResponseEntity<Void> hardDelete(@PathVariable UUID userId,
+      @RequestHeader("MoNew-Request-User-ID") UUID requestUserId) {
+    if (!requestUserId.equals(userId)) {
+      throw ForbiddenException.WrongUserId();
+    }
+
     log.info("사용자 물리 삭제 요청: userId={}", userId);
     userService.hardDelete(userId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

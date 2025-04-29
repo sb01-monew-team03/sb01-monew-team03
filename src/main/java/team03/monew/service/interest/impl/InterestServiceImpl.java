@@ -1,10 +1,13 @@
 package team03.monew.service.interest.impl;
 
+import jakarta.persistence.OptimisticLockException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.common.CursorPageResponse;
@@ -12,15 +15,19 @@ import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestFindRequest;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.dto.interest.InterestUpdateRequest;
+import team03.monew.dto.interest.PaginationDto;
 import team03.monew.entity.interest.Interest;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
 import team03.monew.service.interest.InterestService;
-import team03.monew.util.exception.interest.EmptyKeywordListException;
+import team03.monew.service.interest.SubscriptionService;
+import team03.monew.util.exception.interest.ExcessiveRetryException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
 import team03.monew.util.exception.interest.InterestNotFoundException;
 import team03.monew.util.exception.interest.OrderByValueException;
+import team03.monew.util.interest.InterestConstants;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional    // 모든 public 메서드에 적용됨
@@ -29,18 +36,21 @@ public class InterestServiceImpl implements InterestService {
   private final InterestRepository interestRepository;
   private final InterestMapper interestMapper;
 
+  @Lazy   // 순환참조 해결을 위한 지연 로딩
+  private final SubscriptionService subscriptionService;
+
+  // 관심사 등록
   @Override
   public InterestDto create(InterestRegisterRequest request) {
+
+    log.debug("[create] 관심사 등록 시작: request={}", request);
 
     // request 쪼개기
     String name = request.name();
     List<String> keywords = request.keywords();
 
     // 예외처리 - name이 80% 이상 유사한 관심사가 있는 경우 관심사 등록 불가
-    List<Interest> interests = interestRepository.findAll();
-    for (Interest interest : interests) {
-      calculateSimilarity(name, interest.getName());
-    }
+    checkSimilarity(name);
 
     // Interest 생성
     Interest interest = new Interest(name);
@@ -48,90 +58,162 @@ public class InterestServiceImpl implements InterestService {
     // interest에 keyword 추가
     interest.updateKeywords(keywords);
 
-    // 예외처리 - 키워드 하나 이상 있어야 함
-    if (interest.getKeywords().isEmpty()) {
-      throw new EmptyKeywordListException();
-    }
-
     // 레포지토리 저장
     interestRepository.save(interest);
 
-    // 결과물 반환
-    return interestMapper.toDto(interest, false);
+    // dto로 변환
+    InterestDto interestDto = interestMapper.toDto(interest, false);
+
+    log.info("[create] 관심사 등록 완료: interestId={}, interestName={}", interestDto.id(),
+        interestDto.name());
+
+    return interestDto;
   }
 
+  // 관심사 키워드 수정
   @Override
   public InterestDto update(UUID interestId, InterestUpdateRequest request, UUID userId) {
 
-    Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
-    List<String> keywords = request.keywords();
+    log.debug("[update] 관심사 키워드 수정 시작: interestId={}, request={}, userId={}", interestId, request,
+        userId);
 
+    // 해당 관심사 검색
+    Interest interest = getInterestEntityById(interestId);
+
+    // 키워드 수정
+    List<String> keywords = request.keywords();
     interest.updateKeywords(keywords);
 
-    // TODO: 구독 여부 수정
-    return interestMapper.toDto(interest, true);
+    // dto로 변환
+    InterestDto interestDto = interestMapper.toDto(
+        interest,
+        subscriptionService.existByUserIdAndInterestId(userId, interestId)
+    );
+
+    log.info("[update] 관심사 키워드 수정 완료: interestId={}, keywords={}", interestDto.id(),
+        interestDto.keywords());
+
+    return interestDto;
   }
 
+  // 관심사 삭제
   @Override
   public void delete(UUID interestId) {
 
-    Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
+    log.debug("[delete] 관심사 삭제 시작: interestId={}", interestId);
 
+    // 예외처리 - 해당 관심사가 존재하는지 확인
+    Interest interest = getInterestEntityById(interestId);
+
+    // 삭제
     interestRepository.delete(interest);
+
+    log.info("[delete] 관심사 삭제 완료: interestId={}", interest.getId());
   }
 
+  // 관심사 목록 조회
   @Override
   @Transactional(readOnly = true)
   public CursorPageResponse<InterestDto> find(InterestFindRequest request, UUID userId) {
 
+    log.debug("[find] 관심사 목록 조회 시작: request={}, userId={}", request, userId);
+
+    // 조건에 부합하는 관심사 리스트 가져오기
     List<Interest> interestList = interestRepository.findInterest(request);
-    String nextCursor = null;
-    Instant nextAfter = null;
-    boolean hasNext = false;
 
-    if (interestList.size() > request.limit()) {  // 다음 페이지가 있는 경우
-      interestList.remove(request.limit());  // 다음 페이지 확인용 마지막 요소 삭제
-      Interest lastInterest = interestList.get(request.limit() - 1); // 해당 페이지 마지막 요소
-      nextCursor = setNextCursor(lastInterest, request.orderBy());
-      nextAfter = lastInterest.getCreatedAt();
-    }
+    // 다음 페이지에 필요한 정보(nextCursor, nextAfter, hasNext) 세팅
+    PaginationDto paginationDto = setPaginationDto(interestList, request);
 
+    // dto 변환
     List<InterestDto> content = interestList.stream()
-        // TODO: 구독 여부 수정
-        .map(interest -> interestMapper.toDto(interest, true))
+        .map(interest -> interestMapper.toDto(interest,
+            subscriptionService.existByUserIdAndInterestId(userId, interest.getId())))
         .toList();
 
-    return new CursorPageResponse<>(
+    // 커서 페이지네이션 응답용 dto 세팅
+    CursorPageResponse<InterestDto> cursorPageResponse = new CursorPageResponse<>(
         content,
-        nextCursor,
-        nextAfter,
-        interestList.size(),
+        paginationDto.nextCursor(),
+        paginationDto.nextAfter(),
+        paginationDto.size(),
         interestRepository.totalCountInterest(request),
-        hasNext
+        paginationDto.hasNext()
     );
+
+    log.info(
+        "[find] 관심사 목록 조회 완료: userId={}, 반환 개수={}, hasNext={}, nextCursor={}, totalElements={}",
+        userId, content.size(), paginationDto.hasNext(), paginationDto.nextCursor(),
+        cursorPageResponse.totalElements());
+
+    return cursorPageResponse;
   }
 
+  // 구독자 수 변경
   @Override
-  public void increaseSubscriberCount(Interest interest) {
-    interest.increaseSubscribers();
+  public void updateSubscriberCount(Interest interest, boolean increase) {
+
+    log.debug("[updateSubscriberCount] 구독자 수 변경 시작: interestId={}, subscriberCount={}, 구독자수 변경={}",
+        interest.getId(),
+        interest.getSubscriberCount(),
+        increase ? "증가" : "감소");
+
+    boolean update = false;
+    int count = 0;
+
+    while (!update) {
+      try {
+        if (increase) {
+          interest.increaseSubscribers();
+        } else {
+          interest.decreaseSubscribers();
+        }
+        update = true;
+      } catch (OptimisticLockException e) {
+
+        log.warn("[OptimisticLockException] 구독자 수 변경 충돌: interestId={}, subscriberCount={}",
+            interest.getId(), interest.getSubscriberCount(), e);
+
+        if (count > InterestConstants.MAX_RETRY_COUNT) {
+          throw new ExcessiveRetryException();
+        }
+
+        count++;
+        handleOptimisticLockException();
+      }
+    }
+
+    log.info("[updateSubscriberCount] 구독자 수 변경 완료: interestId={}, subscriberCount={}, 구독자수 변경={}",
+        interest.getId(),
+        interest.getSubscriberCount(),
+        increase ? "증가" : "감소");
   }
 
-  @Override
-  public void decreaseSubscriberCount(Interest interest) {
-    interest.decreaseSubscribers();
-  }
-
+  // 관심사 엔티티 반환
   @Override
   @Transactional(readOnly = true)
   public Interest getInterestEntityById(UUID interestId) {
-    return interestRepository.findById(interestId)
+
+    Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
+
+    log.info("관심사 엔티티 반환: interestId={}, interestName={}", interest.getId(), interest.getName());
+
+    return interest;
   }
 
 
-  // 단어 유사성 검사 - 80% 미만일 경우 예외처리
+  // 단어 유사성 검사
+  private void checkSimilarity(String name) {
+
+    List<Interest> interests = interestRepository.findAll();
+
+    for (Interest interest : interests) {
+      log.trace("유사성 비교 중: 입력 name={}, 기존 name={}", name, interest.getName());
+      calculateSimilarity(name, interest.getName());
+    }
+  }
+
+  // 단어 유사성 계산 - 80% 미만일 경우 예외처리
   private void calculateSimilarity(String interestName, String existingInterestName) {
     int maxLength = Math.max(interestName.length(), existingInterestName.length());
 
@@ -147,6 +229,26 @@ public class InterestServiceImpl implements InterestService {
     }
   }
 
+  // 다음 페이지에 필요한 정보 세팅
+  private PaginationDto setPaginationDto(List<Interest> interestList, InterestFindRequest request) {
+
+    // 다음 페이지가 없는 경우
+    if (interestList.size() <= request.limit()) {
+      return new PaginationDto(null, null, false, interestList.size());
+    }
+
+    // 다음 페이지가 있는 경우
+    List<Interest> paginatedList = interestList.subList(0,
+        request.limit());  // 마지막 요소를 제외한 list 새로 만듦
+    Interest lastInterest = paginatedList.get(paginatedList.size() - 1); // 해당 페이지 마지막 요소
+    String nextCursor = setNextCursor(lastInterest, request.orderBy());
+    Instant nextAfter = lastInterest.getCreatedAt();
+    boolean hasNext = true;
+
+    return new PaginationDto(nextCursor, nextAfter, hasNext, paginatedList.size());
+  }
+
+  // 커서 세팅
   private String setNextCursor(Interest lastInterest, String orderBy) {
     switch (orderBy) {
       case "name":
@@ -155,5 +257,15 @@ public class InterestServiceImpl implements InterestService {
         return String.valueOf(lastInterest.getSubscriberCount());
     }
     throw OrderByValueException.withOrderBy(orderBy);
+  }
+
+  // 낙관적 락 충돌 시 처리 로직
+  private void handleOptimisticLockException() {
+
+    try {
+      Thread.sleep(InterestConstants.LOCK_WAIT_TIME_MS);  // 0.1초 대기
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
   }
 }

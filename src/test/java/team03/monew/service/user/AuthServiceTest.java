@@ -1,6 +1,8 @@
 package team03.monew.service.user;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -39,7 +41,8 @@ class AuthServiceTest {
     // given
     UserLoginRequest request = new UserLoginRequest("user@gmail.com", "qwer1234");
     User user = new User("user", "user@gmail.com", "qwer1234", Role.USER);
-    UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(), user.getCreatedAt());
+    UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getNickname(),
+        user.getCreatedAt(), Role.USER.toString());
     given(userRepository.findByEmail(request.email())).willReturn(Optional.of(user));
     given(userMapper.toDto(user)).willReturn(userDto);
 
