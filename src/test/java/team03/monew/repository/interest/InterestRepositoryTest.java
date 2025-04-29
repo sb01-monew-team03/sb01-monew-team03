@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import team03.monew.config.JpaConfig;
 import team03.monew.config.QueryDslConfig;
@@ -25,7 +26,9 @@ import team03.monew.entity.user.User;
 @ActiveProfiles("test")
 @Import({QueryDslConfig.class, JpaConfig.class})
 @EntityScan(basePackageClasses = {Interest.class, User.class, Keyword.class}) // 필요한 엔티티만 등록
-public class InterestRepositoryTest {
+@EnableJpaRepositories(basePackageClasses = InterestRepository.class)  // 필요한 레포지토리만 등록
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+class InterestRepositoryTest {
 
   @Autowired
   InterestRepository interestRepository;
