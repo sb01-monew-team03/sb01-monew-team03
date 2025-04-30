@@ -59,6 +59,12 @@ dependencies {
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
+    // S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+    // dotenv
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -78,7 +84,7 @@ sourceSets {
 tasks.withType(JavaCompile).configureEach {
 
     options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
-    // 이 부분이 중요합니다 - 어노테이션 프로세서가 JPA 엔티티를 인식하도록 설정
+    // 어노테이션 프로세서가 JPA 엔티티를 인식하도록 설정
     options.annotationProcessorPath = configurations.annotationProcessor
 }
 
