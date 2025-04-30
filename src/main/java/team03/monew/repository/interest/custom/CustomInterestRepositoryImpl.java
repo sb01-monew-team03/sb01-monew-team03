@@ -101,12 +101,13 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
               : qInterest.name.gt(cursor)
                   .or(qInterest.name.eq(cursor).and(afterCondition(after)));
         case "subscriberCount":
+          long cursorSubscriberCount = Long.parseLong(cursor);
           return isDesc
-              ? qInterest.subscriberCount.lt(Long.parseLong(cursor))
-              .or(qInterest.subscriberCount.eq(Long.parseLong(cursor))
+              ? qInterest.subscriberCount.lt(cursorSubscriberCount)
+              .or(qInterest.subscriberCount.eq(cursorSubscriberCount)
                   .and(afterCondition(after)))
-              : qInterest.subscriberCount.gt(Long.parseLong(cursor))
-                  .or(qInterest.subscriberCount.eq(Long.parseLong(cursor))
+              : qInterest.subscriberCount.gt(cursorSubscriberCount)
+                  .or(qInterest.subscriberCount.eq(cursorSubscriberCount)
                       .and(afterCondition(after)));
       }
     }
