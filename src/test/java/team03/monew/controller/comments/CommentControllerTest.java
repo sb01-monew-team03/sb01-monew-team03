@@ -22,13 +22,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
 import team03.monew.dto.comments.CommentCreateRequest;
 import team03.monew.dto.comments.CommentDto;
 import team03.monew.dto.comments.CommentLikeDto;
 import team03.monew.dto.comments.CommentUpdateRequest;
+import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.service.comments.CommentService;
 import team03.monew.util.exception.comments.CommentNotFoundException;
 import team03.monew.util.exception.comments.AlreadyLikedException;
@@ -47,33 +47,73 @@ class CommentControllerTest {
     private CommentService commentService;
 
     @Nested
-    @DisplayName("댓글 목록 조회")
+    @DisplayName("댓글 목록 조회 (Page 기반)")
     class ListCommentsTest {
-        @Test
-        @DisplayName("댓글 목록 조회 성공")
+        @Test @DisplayName("정상 조회")
         void listByArticle_success() throws Exception {
             UUID articleId = UUID.randomUUID();
-            UUID requesterId = UUID.randomUUID();
+            UUID reqId = UUID.randomUUID();
+
             CommentDto dto = new CommentDto(
                     UUID.randomUUID(), articleId, UUID.randomUUID(),
-                    "nick", "content", 5L, true,
-                    Instant.now()
+                    "nick","hello",3L,true, Instant.now()
             );
-            Page<CommentDto> page = new PageImpl<>(List.of(dto));
-
-            given(commentService.listByArticle(articleId, "createdAt", Sort.Direction.DESC, 10, requesterId))
-                    .willReturn(page);
+            // 서비스는 Page<CommentDto> 반환
+            given(commentService.listByArticle(
+                    articleId, "createdAt", Sort.Direction.DESC, 10, reqId
+            )).willReturn(new PageImpl<>(List.of(dto)));
 
             mockMvc.perform(get("/api/comments")
                             .param("articleId", articleId.toString())
                             .param("orderBy", "createdAt")
                             .param("direction", "DESC")
                             .param("limit", "10")
-                            .header("MoNew-Request-User-ID", requesterId))
+                            .header("MoNew-Request-User-ID", reqId))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content[0].id").value(dto.id().toString()));
         }
     }
+
+    @Nested
+    @DisplayName("댓글 페이지네이션 조회 (Cursor 기반)")
+    class CursorPaginationTest {
+        @Test @DisplayName("커서 페이지네이션 정상 조회")
+        void cursorPagination_success() throws Exception {
+            UUID articleId = UUID.randomUUID();
+            UUID reqId = UUID.randomUUID();
+            Instant createdAt = Instant.parse("2025-04-20T10:15:30Z");
+
+            CommentDto dto = new CommentDto(
+                    UUID.randomUUID(), articleId, UUID.randomUUID(),
+                    "nick","cursor!",2L,false, createdAt
+            );
+            CursorPageResponse<CommentDto> page = new CursorPageResponse<>(
+                    List.of(dto),
+                    null,
+                    null,
+                    1,
+                    1L,
+                    false
+            );
+
+            given(commentService.listByArticleCursor(
+                    articleId, "createdAt", Sort.Direction.DESC,
+                    5, null, null, reqId
+            )).willReturn(page);
+
+            mockMvc.perform(get("/api/comments")
+                            .param("articleId", articleId.toString())
+                            .param("orderBy", "createdAt")
+                            .param("direction", "DESC")
+                            .param("limit", "5")
+                            .header("MoNew-Request-User-ID", reqId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content[0].id").value(dto.id().toString()))
+                    .andExpect(jsonPath("$.size").value(1))
+                    .andExpect(jsonPath("$.hasNext").value(false));
+        }
+    }
+
 
     @Nested
     @DisplayName("댓글 등록")

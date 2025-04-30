@@ -6,10 +6,13 @@ import team03.monew.dto.comments.CommentCreateRequest;
 import team03.monew.dto.comments.CommentDto;
 import team03.monew.dto.comments.CommentLikeDto;
 import team03.monew.dto.comments.CommentUpdateRequest;
+import team03.monew.dto.common.CursorPageResponse;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public interface CommentService {
+
     CommentDto create(CommentCreateRequest request);
 
     Page<CommentDto> listByArticle(UUID articleId,
@@ -32,4 +35,14 @@ public interface CommentService {
 
 
     void unlikeComment(UUID commentId, UUID userId);
+
+    CursorPageResponse<CommentDto> listByArticleCursor(
+            UUID articleId,
+            String orderBy,
+            Sort.Direction direction,
+            int limit,
+            String cursor,
+            Instant after,
+            UUID requesterId
+    );
 }
