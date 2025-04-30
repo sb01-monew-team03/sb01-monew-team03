@@ -21,17 +21,21 @@ import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
 import team03.monew.service.interest.InterestService;
 import team03.monew.service.interest.SubscriptionService;
+import team03.monew.util.exception.interest.EmptyKeywordListException;
 import team03.monew.util.exception.interest.ExcessiveRetryException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
 import team03.monew.util.exception.interest.InterestNotFoundException;
 import team03.monew.util.exception.interest.OrderByValueException;
-import team03.monew.util.interest.InterestConstants;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional    // 모든 public 메서드에 적용됨
 public class InterestServiceImpl implements InterestService {
+
+
+  public static final int LOCK_WAIT_TIME_MS = 100;  // 낙관적 락 충돌 시 대기 시간
+  public static final int MAX_RETRY_COUNT = 5;  // 낙관적 락 최대 시도 횟수
 
   private final InterestRepository interestRepository;
   private final InterestMapper interestMapper;
@@ -57,6 +61,11 @@ public class InterestServiceImpl implements InterestService {
 
     // interest에 keyword 추가
     interest.updateKeywords(keywords);
+
+    // 예외처리 - 키워드 하나 이상 있어야 함
+    if (interest.getKeywords().isEmpty()) {
+      throw new EmptyKeywordListException();
+    }
 
     // 레포지토리 저장
     interestRepository.save(interest);
@@ -173,7 +182,7 @@ public class InterestServiceImpl implements InterestService {
         log.warn("[OptimisticLockException] 구독자 수 변경 충돌: interestId={}, subscriberCount={}",
             interest.getId(), interest.getSubscriberCount(), e);
 
-        if (count > InterestConstants.MAX_RETRY_COUNT) {
+        if (count > MAX_RETRY_COUNT) {
           throw new ExcessiveRetryException();
         }
 
@@ -263,7 +272,7 @@ public class InterestServiceImpl implements InterestService {
   private void handleOptimisticLockException() {
 
     try {
-      Thread.sleep(InterestConstants.LOCK_WAIT_TIME_MS);  // 0.1초 대기
+      Thread.sleep(LOCK_WAIT_TIME_MS);  // 0.1초 대기
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
     }
