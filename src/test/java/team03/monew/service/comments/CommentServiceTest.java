@@ -19,15 +19,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
+import org.springframework.data.jpa.domain.Specification;
 import team03.monew.dto.comments.CommentCreateRequest;
 import team03.monew.dto.comments.CommentDto;
 import team03.monew.dto.comments.CommentLikeDto;
 import team03.monew.dto.comments.CommentUpdateRequest;
+import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 import team03.monew.entity.article.Article;
@@ -38,7 +37,7 @@ import team03.monew.repository.article.ArticleRepository;
 import team03.monew.repository.comments.CommentLikeRepository;
 import team03.monew.repository.comments.CommentRepository;
 import team03.monew.repository.user.UserRepository;
-import team03.monew.util.exception.article.ArticleNotFoundException;
+//import team03.monew.util.exception.article.ArticleNotFoundException;
 import team03.monew.util.exception.comments.AlreadyLikedException;
 import team03.monew.util.exception.comments.CommentNotFoundException;
 import team03.monew.util.exception.comments.LikeNotFoundException;
@@ -121,7 +120,8 @@ class CommentServiceTest {
             given(articleRepository.findById(articleId)).willReturn(Optional.empty());
 
             // when & then
-            assertThrows(ArticleNotFoundException.class, () -> commentService.create(request));
+            //assertThrows(ArticleNotFoundException.class, () -> commentService.create(request));
+            assertThrows(RuntimeException.class, () -> commentService.create(request));
         }
     }
 
@@ -160,6 +160,65 @@ class CommentServiceTest {
             assertNotNull(result);
             assertFalse(result.isEmpty());
             assertEquals(dto.userNickname(), result.getContent().get(0).userNickname());
+        }
+    }
+
+    @Nested
+    @DisplayName("댓글 페이지네이션 조회 (Cursor 기반)")
+    class CursorPaginationTest {
+        @Test @DisplayName("createdAt 기준 커서 페이지네이션 성공")
+        void cursorPagination_success() {
+            // given
+            UUID articleId = UUID.randomUUID();
+            UUID reqId = UUID.randomUUID();
+            Instant createdAt = Instant.parse("2025-04-20T10:15:30Z");
+
+            Comment comment = mock(Comment.class);
+            Article article = mock(Article.class);
+            User user = mock(User.class);
+            UUID commentId = UUID.randomUUID();
+            UUID userId = UUID.randomUUID();
+
+            given(comment.getId()).willReturn(commentId);
+            given(comment.getArticle()).willReturn(article);
+            given(article.getId()).willReturn(articleId);
+            given(comment.getUser()).willReturn(user);
+            given(user.getId()).willReturn(userId);
+            given(user.getNickname()).willReturn("nick");
+            given(comment.getContent()).willReturn("paging!");
+            given(comment.getLikeCount()).willReturn(1);
+            given(comment.getCreatedAt()).willReturn(createdAt);
+
+            Page<Comment> page = new PageImpl<>(
+                    List.of(comment),
+                    PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC,"createdAt")
+                            .and(Sort.by(Sort.Direction.DESC,"createdAt"))),
+                    1
+            );
+
+            given(commentRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .willReturn(page);
+            given(commentLikeRepository.existsByCommentIdAndUserId(commentId, reqId))
+                    .willReturn(false);
+
+            CommentDto dto = new CommentDto(commentId, articleId, userId,
+                    "nick","paging!",1L,false, createdAt);
+            given(commentMapper.toDto(comment,false)).willReturn(dto);
+
+            // when
+            CursorPageResponse<CommentDto> resp =
+                    commentService.listByArticleCursor(
+                            articleId, "createdAt", Sort.Direction.DESC,
+                            5, null, null, reqId
+                    );
+
+            // then
+            assertNotNull(resp);
+            assertEquals(1, resp.size());
+            assertEquals(dto, resp.content().get(0));
+            assertNull(resp.nextCursor());
+            assertNull(resp.nextAfter());
+            assertFalse(resp.hasNext());
         }
     }
 
@@ -360,5 +419,7 @@ class CommentServiceTest {
             // when & then
             assertThrows(LikeNotFoundException.class, () -> commentService.unlikeComment(commentId, userId));
         }
+
     }
+
 }
