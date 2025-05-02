@@ -1,9 +1,10 @@
 package team03.monew.service.article;
 
-import static org.awaitility.Awaitility.given;
-import static org.hamcrest.Matchers.any;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
@@ -21,7 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team03.monew.dto.article.ArticleCreateRequest;
 import team03.monew.dto.article.ArticleDto;
 import team03.monew.entity.article.Article;
+import team03.monew.mapper.article.ArticleMapper;
 import team03.monew.repository.article.ArticleRepository;
+import team03.monew.util.exception.article.ArticleNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class ArticleServiceTest {

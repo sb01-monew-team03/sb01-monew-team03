@@ -286,8 +286,9 @@ class InterestRepositoryTest {
       assertThat(result.get(0).getName()).isEqualTo("관심사2");
     }
 
+    // TODO: 커서 기반 페이지네이션 커서 본인을 포함하는 문제 확인 -> 됐다 안됐다 함...로그 관련 코드 작성 후 다시 보기
     @Test
-    @DisplayName("[findInterest()] 커서 기반 페이지네이션")
+    @DisplayName("[findInterest()] 이름 커서 기반 페이지네이션")
     void findInterestCursorPaginationNameTest() {
 
       // given
@@ -307,9 +308,9 @@ class InterestRepositoryTest {
       assertThat(result).hasSize(1);
       assertThat(result.get(0).getName()).isEqualTo("관심사4");
     }
-
+    
     @Test
-    @DisplayName("[findInterest()] 커서 기반 페이지네이션")
+    @DisplayName("[findInterest()] 구독자 수 커서 기반 페이지네이션")
     void findInterestCursorPaginationSubscriberCountTest() {
 
       // given
@@ -321,7 +322,6 @@ class InterestRepositoryTest {
       saved4.increaseSubscribers();
       saved4.increaseSubscribers();
 
-      // TODO: 커서 본인을 포함하는 문제 확인 -> 해결 필요
       InterestFindRequest request = new InterestFindRequest(
           null,
           "subscriberCount",

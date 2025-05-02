@@ -44,7 +44,7 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleDto findById(UUID articleId) {
         log.debug("기사 단건 조회 시작: articleId={}", articleId);
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new ArticleNotFoundException(articleId));
+            .orElseThrow(() -> ArticleNotFoundException.withId(articleId));
         log.info("기사 단건 조회 완료: title={}", article.getTitle());
         return articleMapper.toDto(article);
     }
@@ -61,7 +61,7 @@ public class ArticleServiceImpl implements ArticleService {
     public void softDelete(UUID articleId) {
         log.debug("기사 논리 삭제 시작: articleId={}", articleId);
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new ArticleNotFoundException(articleId));
+            .orElseThrow(() -> ArticleNotFoundException.withId(articleId));
         article.delete();
         log.info("기사 논리 삭제 완료: articleId={}", articleId);
     }
@@ -70,7 +70,7 @@ public class ArticleServiceImpl implements ArticleService {
     public void hardDelete(UUID articleId) {
         log.debug("기사 물리 삭제 시작: articleId={}", articleId);
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new ArticleNotFoundException(articleId));
+            .orElseThrow(() -> ArticleNotFoundException.withId(articleId));
         articleRepository.delete(article);
         log.info("기사 물리 삭제 완료: articleId={}", articleId);
     }
