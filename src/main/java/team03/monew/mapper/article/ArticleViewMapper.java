@@ -1,4 +1,4 @@
-package team03.monew.mapper;
+package team03.monew.mapper.article;
 
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
