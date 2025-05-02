@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: monew
   profiles:
@@ -9,7 +11,20 @@ spring:
 logging:
   level:
     root: info
+
 admin:
   email: admin@example.com
   password: supersecret
   nickname: admin
+
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+      stack:
+        auto: false
+    region:
+      static: ${AWS_REGION}
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY}
+      secretKey: ${AWS_SECRET_KEY}
