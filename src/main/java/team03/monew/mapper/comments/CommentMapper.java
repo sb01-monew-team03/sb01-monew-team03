@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import team03.monew.dto.comments.CommentDto;
 import team03.monew.dto.comments.CommentLikeDto;
+import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 
@@ -34,4 +35,12 @@ public interface CommentMapper {
     @Mapping(target = "commentLikeCount", source = "like.comment.likeCount")
     @Mapping(target = "commentCreatedAt", source = "like.comment.createdAt")
     CommentLikeDto toLikeDto(CommentLike like);
+
+    @Mapping(target = "id", source = "comment.id")
+    @Mapping(target = "articleId", source = "comment.article.id")
+    @Mapping(target = "userId", source = "comment.user.id")
+    @Mapping(target = "userNickname", source = "comment.user.nickname")
+    @Mapping(target = "content", source = "comment.content")
+    @Mapping(target = "createdAt", source = "comment.createdAt")
+    CommentActivityDto toActivityDto(Comment comment);
 }
