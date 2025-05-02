@@ -1,5 +1,6 @@
 package team03.monew.service.activity;
 
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,8 +17,10 @@ import team03.monew.entity.article.Article;
 import team03.monew.entity.article.ArticleView;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
+import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Subscription;
 import team03.monew.entity.user.User;
+import team03.monew.entity.user.User.Role;
 import team03.monew.mapper.article.ArticleViewMapper;
 import team03.monew.mapper.comments.CommentLikeMapper;
 import team03.monew.mapper.comments.CommentMapper;
@@ -30,7 +33,6 @@ import team03.monew.repository.user.UserRepository;
 import team03.monew.util.exception.user.UserNotFoundException;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -68,62 +70,59 @@ class ActivityServiceTest {
 
   private UUID userId;
   private User user;
+  private Interest interest;
   private Subscription subscription;
   private Comment comment;
   private CommentLike commentLike;
   private ArticleView articleView;
   private Article article;
-  private Category category;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
-    user = User.builder()
-        .id(userId)
-        .email("test@example.com")
-        .nickname("testUser")
-        .createdAt(LocalDateTime.now())
-        .build();
 
-    category = Category.builder()
-        .id(UUID.randomUUID())
-        .name("Technology")
-        .build();
+    // User 생성자 사용
+    user = new User(
+        "test",
+        "test@example.com",
+        "test1234",
+        Role.USER
+    );
 
-    subscription = Subscription.builder()
-        .id(UUID.randomUUID())
-        .user(user)
-        .category(category)
-        .createdAt(LocalDateTime.now())
-        .build();
+    interest = new Interest("AI");
 
-    article = Article.builder()
-        .id(UUID.randomUUID())
-        .title("Test Article")
-        .content("Test Content")
-        .build();
+    // Subscription 생성자 사용
+    subscription = new Subscription(user, interest);
 
-    comment = Comment.builder()
-        .id(UUID.randomUUID())
-        .user(user)
-        .content("Test Comment")
-        .article(article)
-        .createdAt(LocalDateTime.now())
-        .build();
+    // Article 생성자 사용
+    article = new Article(
+        "Google",
+        "test url",
+        "test AI",
+        "test summary",
+        LocalDateTime.now()
+    );
 
-    commentLike = CommentLike.builder()
-        .id(UUID.randomUUID())
-        .user(user)
-        .comment(comment)
-        .createdAt(LocalDateTime.now())
-        .build();
+    // Comment 생성자 사용
+    comment = new Comment(
+        "Test Comment",
+        user,
+        article
+    );
 
-    articleView = ArticleView.builder()
-        .id(UUID.randomUUID())
-        .user(user)
-        .article(article)
-        .viewedAt(LocalDateTime.now())
-        .build();
+    // CommentLike 생성자 사용
+    commentLike = new CommentLike(
+        comment,
+        user,
+        article
+    );
+
+    // ArticleView 생성자 사용
+    articleView = new ArticleView(
+        user,
+        article,
+        Instant.now()
+    );
   }
 
   @Test
@@ -142,36 +141,13 @@ class ActivityServiceTest {
   @DisplayName("사용자 활동 내역을 정상적으로 조회한다")
   void findUserActivity() {
     // Given
-    SubscriptionDto subscriptionDto = new SubscriptionDto(
-        subscription.getId(),
-        category.getId(),
-        category.getName(),
-        subscription.getCreatedAt()
-    );
+    SubscriptionDto subscriptionDto = subscriptionMapper.toDto(subscription);
 
-    CommentActivityDto commentActivityDto = new CommentActivityDto(
-        comment.getId(),
-        article.getId(),
-        article.getTitle(),
-        comment.getContent(),
-        comment.getCreatedAt()
-    );
+    CommentActivityDto commentActivityDto = commentMapper.toActivityDto(comment);
 
-    CommentLikeActivityDto commentLikeActivityDto = new CommentLikeActivityDto(
-        commentLike.getId(),
-        comment.getId(),
-        article.getId(),
-        article.getTitle(),
-        comment.getContent(),
-        commentLike.getCreatedAt()
-    );
+    CommentLikeActivityDto commentLikeActivityDto = commentLikeMapper.toActivityDto(commentLike);
 
-    ArticleViewDto articleViewDto = new ArticleViewDto(
-        article.getId(),
-        article.getTitle(),
-        articleView.getViewedAt(),
-        0 // 댓글 수는 예시로 0으로 설정
-    );
+    ArticleViewDto articleViewDto = articleViewMapper.toDto(articleView, commentRepository);
 
     given(userRepository.existsById(userId)).willReturn(true);
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
@@ -182,7 +158,7 @@ class ActivityServiceTest {
 
     given(subscriptionMapper.toDto(subscription)).willReturn(subscriptionDto);
     given(commentMapper.toActivityDto(comment)).willReturn(commentActivityDto);
-    given(commentLikeMapper.toDto(commentLike)).willReturn(commentLikeActivityDto);
+    given(commentLikeMapper.toActivityDto(commentLike)).willReturn(commentLikeActivityDto);
     given(articleViewMapper.toDto(eq(articleView), any(CommentRepository.class))).willReturn(articleViewDto);
 
     // When

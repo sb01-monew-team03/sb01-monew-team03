@@ -11,9 +11,6 @@ import team03.monew.entity.comments.CommentLike;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-    @Mapping(target = "likedByMe", constant = "false")
-    CommentDto toDto(Comment comment);
-
     @Mapping(target = "id", source = "comment.id")
     @Mapping(target = "articleId", source = "comment.article.id")
     @Mapping(target = "userId", source = "comment.user.id")

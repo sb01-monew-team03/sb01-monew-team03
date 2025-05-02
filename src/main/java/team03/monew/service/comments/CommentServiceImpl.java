@@ -57,7 +57,9 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment(request.content(), user, article);
         Comment saved = commentRepository.save(comment);
         log.info("댓글 등록 완료: commentId={}", saved.getId());
-        return commentMapper.toDto(saved);
+
+        boolean likedByMe = commentLikeRepository.existsByCommentIdAndUserId(saved.getId(), user.getId());
+        return commentMapper.toDto(saved, likedByMe);
     }
 
     @Override
