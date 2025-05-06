@@ -19,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.domain.*;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -44,6 +46,7 @@ import team03.monew.util.exception.comments.LikeNotFoundException;
 import team03.monew.util.exception.user.UserNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class CommentServiceTest {
 
     @InjectMocks
@@ -133,11 +136,17 @@ class CommentServiceTest {
         @DisplayName("댓글 목록 조회 성공")
         void listByArticle_success() {
             // given
-            UUID articleId = UUID.randomUUID();
+            UUID articleId   = UUID.randomUUID();
             UUID requesterId = UUID.randomUUID();
-            Comment comment = mock(Comment.class);
+            Comment comment  = mock(Comment.class);
             List<Comment> comments = List.of(comment);
-            Page<Comment> page = new PageImpl<>(comments);
+            // → PageRequest, totalElements(=comments.size()) 함께 넘겨줘야 unpaged 가 아니어서 hasNext() false 처리
+            Page<Comment> page = new PageImpl<>(
+                    comments,
+                    PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt")),
+                    comments.size()
+            );
+
             CommentDto dto = new CommentDto(
                     comment.getId(), articleId, UUID.randomUUID(),
                     "nick", "content", 5L, true,
@@ -148,7 +157,8 @@ class CommentServiceTest {
                     articleId,
                     PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"))
             )).willReturn(page);
-            given(commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), requesterId)).willReturn(true);
+            given(commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), requesterId))
+                    .willReturn(true);
             given(commentMapper.toDto(comment, true)).willReturn(dto);
 
             // when

@@ -2,17 +2,11 @@ package team03.monew.service.comments;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team03.monew.dto.comments.CommentCreateRequest;
-import team03.monew.dto.comments.CommentDto;
-import team03.monew.dto.comments.CommentLikeDto;
-import team03.monew.dto.comments.CommentUpdateRequest;
+import team03.monew.dto.comments.*;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
@@ -23,9 +17,7 @@ import team03.monew.repository.article.ArticleRepository;
 import team03.monew.repository.comments.CommentLikeRepository;
 import team03.monew.repository.comments.CommentRepository;
 import team03.monew.repository.user.UserRepository;
-import team03.monew.util.exception.comments.AlreadyLikedException;
-import team03.monew.util.exception.comments.CommentNotFoundException;
-import team03.monew.util.exception.comments.LikeNotFoundException;
+import team03.monew.util.exception.comments.*;
 import team03.monew.util.exception.user.UserNotFoundException;
 
 import java.time.Instant;
@@ -45,13 +37,11 @@ public class CommentServiceImpl implements CommentService {
     private final ArticleRepository articleRepository;
     private final CommentMapper commentMapper;
 
-
     @Override
     public CommentDto create(CommentCreateRequest request) {
         log.debug("댓글 등록 시작: articleId={}, userId={}", request.articleId(), request.userId());
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> UserNotFoundException.withId(request.userId()));
-        // ArticleNotFoundException 임시 미존재 처리
         Article article = articleRepository.findById(request.articleId())
                 .orElseThrow(() -> new RuntimeException("Article not found: " + request.articleId()));
 
@@ -116,11 +106,11 @@ public class CommentServiceImpl implements CommentService {
         if (commentLikeRepository.existsByCommentAndUser(comment, user)) {
             throw new AlreadyLikedException(commentId, userId);
         }
-        CommentLike like = new CommentLike(comment, user, comment.getArticle());
-        commentLikeRepository.save(like);
+        CommentLike newLike = new CommentLike(comment, user, comment.getArticle());
+        CommentLike savedLike = commentLikeRepository.save(newLike);
         comment.increaseLikeCount();
-        log.info("댓글 좋아요 등록 완료: likeId={}", like.getId());
-        return commentMapper.toLikeDto(like);
+        log.info("댓글 좋아요 등록 완료: likeId={}", savedLike.getId());
+        return commentMapper.toLikeDto(savedLike);
     }
 
     @Override
@@ -128,7 +118,10 @@ public class CommentServiceImpl implements CommentService {
         log.debug("댓글 좋아요 취소 시작: commentId={}, userId={}", commentId, userId);
         CommentLike like = commentLikeRepository.findByCommentIdAndUserId(commentId, userId)
                 .orElseThrow(() -> LikeNotFoundException.forUserAndComment(userId, commentId));
-        like.getComment().decreaseLikeCount();
+        Comment target = like.getComment();
+        if (target != null) {
+            target.decreaseLikeCount();
+        }
         commentLikeRepository.delete(like);
         log.info("댓글 좋아요 취소 완료: commentId={}, userId={}", commentId, userId);
     }
@@ -143,98 +136,62 @@ public class CommentServiceImpl implements CommentService {
             Instant after,
             UUID requesterId
     ) {
-        log.debug(
-                "댓글 커서 리스트 조회 시작: articleId={}, orderBy={}, direction={}, limit={}, cursor={}, after={}, requesterId={}",
-                articleId, orderBy, direction, limit, cursor, after, requesterId
-        );
-        // 1) 스펙 정의
+        log.debug("댓글 커서 리스트 조회 시작: articleId={}, orderBy={}, direction={}, limit={}, cursor={}, after={}, requesterId={}",
+                articleId, orderBy, direction, limit, cursor, after, requesterId);
+
         Specification<Comment> spec = (root, query, cb) -> {
-            var predicates = cb.conjunction();
-            // articleId & 논리삭제 안 된 것
-            predicates = cb.and(predicates,
+            var p = cb.conjunction();
+            p = cb.and(p,
                     cb.equal(root.get("article").get("id"), articleId),
                     cb.isNull(root.get("deletedAt"))
             );
 
-            // 커서가 있으면 추가 조건
             if (cursor != null) {
-                if (orderBy.equals("createdAt")) {
-                    Instant curTime = Instant.parse(cursor);
-                    if (direction.isDescending()) {
-                        predicates = cb.and(predicates,
-                                cb.lessThan(root.get("createdAt"), curTime));
-                    } else {
-                        predicates = cb.and(predicates,
-                                cb.greaterThan(root.get("createdAt"), curTime));
-                    }
-                } else if (orderBy.equals("likeCount")) {
+                if ("createdAt".equals(orderBy)) {
+                    Instant cur = Instant.parse(cursor);
+                    p = cb.and(p, direction.isDescending()
+                            ? cb.lessThan(root.get("createdAt"), cur)
+                            : cb.greaterThan(root.get("createdAt"), cur));
+                } else {
                     long curLike = Long.parseLong(cursor);
                     var likeExp = root.get("likeCount").as(Long.class);
-                    if (direction.isDescending()) {
-                        // likeCount < curLike OR (likeCount == curLike AND createdAt < after)
-                        var p1 = cb.lessThan(likeExp, curLike);
-                        var p2 = cb.and(
-                                cb.equal(likeExp, curLike),
-                                cb.lessThan(root.get("createdAt"), after)
-                        );
-                        predicates = cb.and(predicates, cb.or(p1, p2));
-                    } else {
-                        var p1 = cb.greaterThan(likeExp, curLike);
-                        var p2 = cb.and(
-                                cb.equal(likeExp, curLike),
-                                cb.greaterThan(root.get("createdAt"), after)
-                        );
-                        predicates = cb.and(predicates, cb.or(p1, p2));
-                    }
+                    var tie = cb.equal(likeExp, curLike);
+                    var timeCond = direction.isDescending()
+                            ? cb.lessThan(root.get("createdAt"), after)
+                            : cb.greaterThan(root.get("createdAt"), after);
+                    p = cb.and(p, cb.or(cb.lessThanOrEqualTo(likeExp, curLike), cb.and(tie, timeCond)));
                 }
             }
-
-            return predicates;
+            return p;
         };
 
-        // 2) 정렬: 기본 정렬 기준 + 생성시간 tie-breaker
-        Sort sort = Sort.by(direction, orderBy)
-                .and(Sort.by(direction, "createdAt"));
+        Sort sort = Sort.by(direction, orderBy).and(Sort.by(direction, "createdAt"));
+        Pageable pageReq = PageRequest.of(0, limit, sort);
+        Page<Comment> page = commentRepository.findAll(spec, pageReq);
 
-        // 3) 페이징: 항상 page=0, pageSize=limit
-        Pageable pageable = PageRequest.of(0, limit, sort);
-
-        // 4) 조회
-        Page<Comment> page = commentRepository.findAll(spec, pageable);
-
-        // 5) DTO 변환
         List<CommentDto> dtos = page.getContent().stream()
-                .map(cmt -> {
-                    boolean likedByMe = false; // 좋아요 여부 체크 로직 삽입
-                    return commentMapper.toDto(cmt, likedByMe);
+                .map(c -> {
+                    boolean liked = commentLikeRepository.existsByCommentIdAndUserId(c.getId(), requesterId);
+                    return commentMapper.toDto(c, liked);
                 })
                 .collect(Collectors.toList());
 
-        // 6) 다음 커서 계산
         String nextCursor = null;
         Instant nextAfter = null;
         if (page.hasNext() && !dtos.isEmpty()) {
-            Comment last = page.getContent().get(page.getContent().size() - 1);
-            Object primary = orderBy.equals("createdAt")
-                    ? last.getCreatedAt()
-                    : last.getLikeCount();
-            nextCursor = primary.toString();
+            Comment last = page.getContent().get(page.getSize() - 1);
+            nextCursor = "createdAt".equals(orderBy)
+                    ? last.getCreatedAt().toString()
+                    : Long.toString(last.getLikeCount());
             nextAfter = last.getCreatedAt();
         }
 
-        CursorPageResponse<CommentDto> response = new CursorPageResponse<>(
-                dtos,
-                nextCursor,
-                nextAfter,
-                dtos.size(),
-                page.getTotalElements(),
-                page.hasNext()
+        CursorPageResponse<CommentDto> resp = new CursorPageResponse<>(
+                dtos, nextCursor, nextAfter, dtos.size(), page.getTotalElements(), page.hasNext()
         );
 
-        log.info(
-                "댓글 커서 리스트 조회 완료: size={}, totalElements={}, hasNext={}",
-                response.size(), response.totalElements(), response.hasNext()
-        );
-        return response;
+        log.info("댓글 커서 리스트 조회 완료: size={}, totalElements={}, hasNext={}",
+                resp.size(), resp.totalElements(), resp.hasNext());
+        return resp;
     }
 }

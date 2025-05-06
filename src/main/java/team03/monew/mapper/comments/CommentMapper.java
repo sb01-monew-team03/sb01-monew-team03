@@ -42,5 +42,8 @@ public interface CommentMapper {
     @Mapping(target = "userNickname", source = "comment.user.nickname")
     @Mapping(target = "content", source = "comment.content")
     @Mapping(target = "createdAt", source = "comment.createdAt")
+    @Mapping(target="articleTitle", source="comment.article.title")
     CommentActivityDto toActivityDto(Comment comment);
+
+
 }
