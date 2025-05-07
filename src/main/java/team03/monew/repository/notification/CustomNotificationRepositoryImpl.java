@@ -15,7 +15,7 @@ import team03.monew.entity.notification.QNotification;
 
 @Repository
 @RequiredArgsConstructor
-public class CumtomNotificationRepositoryImpl implements CustomNotificationRepository {
+public class CustomNotificationRepositoryImpl implements CustomNotificationRepository {
 
   private final JPAQueryFactory queryFactory;
 
@@ -49,10 +49,19 @@ public class CumtomNotificationRepositoryImpl implements CustomNotificationRepos
       }
     }
 
+    // userIdCondition과 confirmedCondition 분리
+    BooleanExpression userIdCondition = QNotification.notification.user.id.eq(userId);
+    BooleanExpression confirmedCondition = QNotification.notification.confirmed.eq(false);
+
+    // 모든 조건 결합 (cursorCondition은 null일 수 있음)
+    BooleanExpression finalCondition = userIdCondition.and(confirmedCondition);
+    if (cursorCondition != null) {
+      finalCondition = finalCondition.and(cursorCondition);
+    }
+
     List<Notification> content = queryFactory
         .selectFrom(QNotification.notification)
-        .where(QNotification.notification.user.id.eq(userId)
-            .and(QNotification.notification.confirmed.eq(false)))
+        .where(finalCondition)  // 결합된 조건 사용
         .orderBy(QNotification.notification.createdAt.desc())
         .limit(pageable.getPageSize() + 1)
         .fetch();

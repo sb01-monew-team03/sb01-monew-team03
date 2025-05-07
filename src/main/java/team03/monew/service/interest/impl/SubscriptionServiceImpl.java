@@ -3,15 +3,21 @@ package team03.monew.service.interest.impl;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.interest.SubscriptionDto;
 import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Subscription;
 import team03.monew.entity.user.User;
+import team03.monew.event.subscription.SubscriptionCreateEvent;
+import team03.monew.event.subscription.SubscriptionDeleteEvent;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.mapper.interest.SubscriptionMapper;
 import team03.monew.repository.interest.SubscriptionRepository;
+import team03.monew.service.interest.InterestReader;
 import team03.monew.service.interest.InterestService;
 import team03.monew.service.interest.SubscriptionService;
 import team03.monew.service.user.UserService;
@@ -28,7 +34,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   private final SubscriptionMapper subscriptionMapper;
   private final InterestMapper interestMapper;
   private final UserService userService;
-  private final InterestService interestService;
+  private final InterestReader interestReader;
+  private final ApplicationEventPublisher eventPublisher;
 
   // 구독
   @Override
@@ -38,7 +45,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     // 필요한 user, interest 세팅
     User user = userService.findUserById(userId);
-    Interest interest = interestService.getInterestEntityById(interestId);
+    Interest interest = interestReader.getInterestEntityById(interestId);
 
     // 예외처리 - 구독 중복 방지
     validateSubscriptionAlreadyExists(userId, interestId);
@@ -48,7 +55,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     subscriptionRepository.save(subscription);
 
     // interest 구독자 수 증가
-    interestService.updateSubscriberCount(interest, true);
+    eventPublisher.publishEvent(new SubscriptionCreateEvent(interest));
 
     // dto 변환
     SubscriptionDto subscriptionDto = subscriptionMapper
@@ -70,7 +77,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     log.debug("[delete] 구독 취소 시작: userId={}, interestId={}", userId, interestId);
 
     // 필요한 user, interest 세팅
-    Interest interest = interestService.getInterestEntityById(interestId);
+    Interest interest = interestReader.getInterestEntityById(interestId);
 
     // subscription 가져오기, 예외처리 - 해당 구독 정보 없는 경우
     Subscription subscription = findByUserIdAndInterestId(userId, interestId);
@@ -79,7 +86,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     subscriptionRepository.delete(subscription);
 
     // 구독자 수 감소
-    interestService.updateSubscriberCount(interest, false);
+    eventPublisher.publishEvent(new SubscriptionDeleteEvent(interest));
 
     log.info("[delete] 구독 취소 완료: subscriptionId={}, userId={}, interestId={}", subscription.getId(),
         userId, interestId);

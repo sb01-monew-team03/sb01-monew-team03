@@ -92,21 +92,20 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
 
     if (!StringUtils.isNullOrEmpty(cursor)) {
       switch (orderBy) {
-        // 내림차순일 경우 cursor의 값이 작거나, 같되 after(create_at)이 커야 함
-        // 오름차순일 경우 cursor의 값이 크거나, 같되 after(create_at)이 커야 함
         case "name":
           return isDesc
               ? qInterest.name.lt(cursor)
-              .or(qInterest.name.eq(cursor).and(afterCondition(after)))
-              : qInterest.name.gt(cursor)
-                  .or(qInterest.name.eq(cursor).and(afterCondition(after)));
+              : qInterest.name.gt(cursor);
         case "subscriberCount":
+          long cursorSubscriberCount = Long.parseLong(cursor);
           return isDesc
-              ? qInterest.subscriberCount.lt(Long.parseLong(cursor))
-              .or(qInterest.subscriberCount.eq(Long.parseLong(cursor))
+              // 내림차순일 경우 cursor의 값이 작거나, 같되 after(create_at)이 커야 함
+              ? qInterest.subscriberCount.lt(cursorSubscriberCount)
+              .or(qInterest.subscriberCount.eq(cursorSubscriberCount)
                   .and(afterCondition(after)))
-              : qInterest.subscriberCount.gt(Long.parseLong(cursor))
-                  .or(qInterest.subscriberCount.eq(Long.parseLong(cursor))
+              // 오름차순일 경우 cursor의 값이 크거나, 같되 after(create_at)이 커야 함
+              : qInterest.subscriberCount.gt(cursorSubscriberCount)
+                  .or(qInterest.subscriberCount.eq(cursorSubscriberCount)
                       .and(afterCondition(after)));
       }
     }

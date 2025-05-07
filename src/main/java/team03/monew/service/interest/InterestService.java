@@ -24,7 +24,4 @@ public interface InterestService {
 
   // 관심사 구독자 수 변경
   void updateSubscriberCount(Interest interest, boolean increase);
-
-  // 관심사 엔티티 반환
-  Interest getInterestEntityById(UUID interestId);
 }

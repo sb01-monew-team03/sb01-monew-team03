@@ -38,7 +38,7 @@ public class NotificationRepositoryTest {
   private JPAQueryFactory queryFactory;
 
   @InjectMocks
-  private CumtomNotificationRepositoryImpl customNotificationRepository;
+  private CustomNotificationRepositoryImpl customNotificationRepository;
 
   private UUID userId;
   private Instant testTime;
@@ -95,7 +95,7 @@ public class NotificationRepositoryTest {
     JPAQueryFactory mockFactory = mock(JPAQueryFactory.class);
 
     // 실제 로직을 우회하고 최종 결과만 모킹하는 접근 방식 사용
-    CumtomNotificationRepositoryImpl spyRepository = spy(customNotificationRepository);
+    CustomNotificationRepositoryImpl spyRepository = spy(customNotificationRepository);
     List<Notification> mockNotifications = createMockNotifications(5);
     Page<Notification> expectedPage = new PageImpl<>(mockNotifications, pageable, 5);
 
@@ -122,7 +122,7 @@ public class NotificationRepositoryTest {
     JPAQueryFactory mockFactory = mock(JPAQueryFactory.class);
 
     // 실제 로직을 우회하고 최종 결과만 모킹하는 접근 방식 사용
-    CumtomNotificationRepositoryImpl spyRepository = spy(customNotificationRepository);
+    CustomNotificationRepositoryImpl spyRepository = spy(customNotificationRepository);
     List<Notification> mockNotifications = createMockNotifications(10);
 
     // 다음 페이지가 있는 결과 페이지 생성

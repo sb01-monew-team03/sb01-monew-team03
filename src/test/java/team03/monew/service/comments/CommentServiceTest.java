@@ -86,7 +86,7 @@ class CommentServiceTest {
             given(userRepository.findById(userId)).willReturn(Optional.of(user));
             given(articleRepository.findById(articleId)).willReturn(Optional.of(article));
             given(commentRepository.save(any(Comment.class))).willReturn(savedComment);
-            given(commentMapper.toDto(savedComment)).willReturn(dto);
+            given(commentMapper.toDto(savedComment, false)).willReturn(dto);
 
             // when
             CommentDto result = commentService.create(request);
@@ -96,7 +96,7 @@ class CommentServiceTest {
             assertEquals(dto.content(), result.content());
             assertEquals(dto.userNickname(), result.userNickname());
             then(commentRepository).should().save(any(Comment.class));
-            then(commentMapper).should().toDto(savedComment);
+            then(commentMapper).should().toDto(savedComment, false);
         }
 
         @Test

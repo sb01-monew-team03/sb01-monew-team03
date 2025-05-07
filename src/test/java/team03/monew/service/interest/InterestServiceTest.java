@@ -53,6 +53,9 @@ public class InterestServiceTest {
   @Mock
   private SubscriptionService subscriptionService;
 
+  @Mock
+  private InterestReader interestReader;
+
   @InjectMocks
   private InterestServiceImpl interestService;
 
@@ -127,7 +130,7 @@ public class InterestServiceTest {
   class UpdateTest {
 
     @Test
-    @DisplayName("[success] InterestRespository의 findById()를 호출하고, 새로운 키워드로 교체된 InterestDto가 반환되어야 함")
+    @DisplayName("[success] 새로운 키워드로 교체된 InterestDto가 반환되어야 함")
     void successTest() {
       // given
       UUID interestId = UUID.randomUUID();
@@ -136,7 +139,6 @@ public class InterestServiceTest {
       InterestUpdateRequest request = new InterestUpdateRequest(List.of("java", "spring", "boot"));
 
       // Mocking
-      given(interestRepository.findById(interestId)).willReturn(Optional.of(interest));
       given(interestMapper.toDto(any(Interest.class), anyBoolean()))
           .willAnswer(
               Input -> {
@@ -153,12 +155,12 @@ public class InterestServiceTest {
               }
           );
       given(subscriptionService.existByUserIdAndInterestId(any(UUID.class), any(UUID.class))).willReturn(true);
+      given(interestReader.getInterestEntityById(interestId)).willReturn(interest);
 
       // when
       InterestDto result = interestService.update(interestId, request, UUID.randomUUID());
 
       // then
-      verify(interestRepository).findById(any(UUID.class));
       assertThat(result.keywords()).hasSize(3);
       assertThat(result.keywords()).contains("java", "spring", "boot");
     }
@@ -172,13 +174,13 @@ public class InterestServiceTest {
     @DisplayName("[success] InterestRepository의 delete()를 호출해야 함")
     void successTest() {
       // given
-      UUID id = UUID.randomUUID();
+      UUID interestId = UUID.randomUUID();
       Interest interest = new Interest("관심사 삭제 테스트");
 
-      given(interestRepository.findById(id)).willReturn(Optional.of(interest));
+      given(interestReader.getInterestEntityById(interestId)).willReturn(interest);
 
       // when
-      interestService.delete(id);
+      interestService.delete(interestId);
 
       // then
       verify(interestRepository).delete(interest);

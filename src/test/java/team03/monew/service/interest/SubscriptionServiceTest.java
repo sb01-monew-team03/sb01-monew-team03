@@ -19,10 +19,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import team03.monew.dto.interest.SubscriptionDto;
 import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Subscription;
 import team03.monew.entity.user.User;
+import team03.monew.event.subscription.SubscriptionCreateEvent;
+import team03.monew.event.subscription.SubscriptionDeleteEvent;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.mapper.interest.SubscriptionMapper;
 import team03.monew.repository.interest.SubscriptionRepository;
@@ -44,10 +47,13 @@ public class SubscriptionServiceTest {
   private InterestMapper interestMapper;
 
   @Mock
-  private InterestService interestService;
+  private UserService userService;
 
   @Mock
-  private UserService userService;
+  private InterestReader interestReader;
+
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
 
   @InjectMocks
   private SubscriptionServiceImpl subscriptionService;
@@ -57,7 +63,7 @@ public class SubscriptionServiceTest {
   class CreateTest {
 
     @Test
-    @DisplayName("[success] SubscriptionRepository의 save()와 InterestService의 increaseSubscriberCount()를 호출하고, SubscriptionDto를 반환해야 함")
+    @DisplayName("[success] SubscriptionRepository의 save()를 호출하고 이벤트를 발행하며, SubscriptionDto를 반환해야 함")
     void successTest() {
       // given
       UUID userId = UUID.randomUUID();
@@ -68,7 +74,7 @@ public class SubscriptionServiceTest {
       SubscriptionDto subscriptionDto = mock(SubscriptionDto.class);
 
       // Mocking
-      given(interestService.getInterestEntityById(interestId)).willReturn(interest);
+      given(interestReader.getInterestEntityById(interestId)).willReturn(interest);
       given(subscriptionRepository.existsByUser_IdAndInterest_Id(userId, interestId)).willReturn(false);
       given(subscriptionRepository.save(any(Subscription.class))).willReturn(subscription);
       given(subscriptionMapper.toDto(any(Subscription.class), any())).willReturn(subscriptionDto);
@@ -79,7 +85,7 @@ public class SubscriptionServiceTest {
 
       // then
       verify(subscriptionRepository).save(any(Subscription.class));
-      verify(interestService).updateSubscriberCount(interest, true);
+      verify(eventPublisher).publishEvent(any(SubscriptionCreateEvent.class));
       assertThat(result).isEqualTo(subscriptionDto);
     }
 
@@ -93,7 +99,7 @@ public class SubscriptionServiceTest {
       Interest interest = mock(Interest.class);
 
       // Mocking
-      given(interestService.getInterestEntityById(interestId)).willReturn(interest);
+      given(interestReader.getInterestEntityById(interestId)).willReturn(interest);
       given(subscriptionRepository.existsByUser_IdAndInterest_Id(userId, interestId)).willReturn(true);
       given(userService.findUserById(userId)).willReturn(user);
 
@@ -119,7 +125,7 @@ public class SubscriptionServiceTest {
       Subscription subscription = new Subscription(user, interest);
 
       // Mocking
-      given(interestService.getInterestEntityById(interestId)).willReturn(interest);
+      given(interestReader.getInterestEntityById(interestId)).willReturn(interest);
       given(subscriptionRepository.findByUser_IdAndInterest_Id(any(UUID.class),
           any(UUID.class))).willReturn(
           Optional.of(subscription));
@@ -129,7 +135,7 @@ public class SubscriptionServiceTest {
 
       // then
       verify(subscriptionRepository).delete(any(Subscription.class));
-      verify(interestService).updateSubscriberCount(interest, false);
+      verify(eventPublisher).publishEvent(any(SubscriptionDeleteEvent.class));
     }
 
     @Test
@@ -142,7 +148,7 @@ public class SubscriptionServiceTest {
       Interest interest = mock(Interest.class);
 
       // Mocking
-      given(interestService.getInterestEntityById(interestId)).willReturn(interest);
+      given(interestReader.getInterestEntityById(interestId)).willReturn(interest);
       given(subscriptionRepository.findByUser_IdAndInterest_Id(any(UUID.class),
           any(UUID.class))).willReturn(
           Optional.empty());
