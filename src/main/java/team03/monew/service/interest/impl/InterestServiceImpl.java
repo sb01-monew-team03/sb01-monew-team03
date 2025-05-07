@@ -19,6 +19,7 @@ import team03.monew.dto.interest.PaginationDto;
 import team03.monew.entity.interest.Interest;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.repository.interest.InterestRepository;
+import team03.monew.service.interest.InterestReader;
 import team03.monew.service.interest.InterestService;
 import team03.monew.service.interest.SubscriptionService;
 import team03.monew.util.exception.interest.EmptyKeywordListException;
@@ -39,9 +40,8 @@ public class InterestServiceImpl implements InterestService {
 
   private final InterestRepository interestRepository;
   private final InterestMapper interestMapper;
-
-  @Lazy   // 순환참조 해결을 위한 지연 로딩
   private final SubscriptionService subscriptionService;
+  private final InterestReader interestReader;
 
   // 관심사 등록
   @Override
@@ -87,7 +87,7 @@ public class InterestServiceImpl implements InterestService {
         userId);
 
     // 해당 관심사 검색
-    Interest interest = getInterestEntityById(interestId);
+    Interest interest = interestReader.getInterestEntityById(interestId);
 
     // 키워드 수정
     List<String> keywords = request.keywords();
@@ -112,7 +112,7 @@ public class InterestServiceImpl implements InterestService {
     log.debug("[delete] 관심사 삭제 시작: interestId={}", interestId);
 
     // 예외처리 - 해당 관심사가 존재하는지 확인
-    Interest interest = getInterestEntityById(interestId);
+    Interest interest = interestReader.getInterestEntityById(interestId);
 
     // 삭제
     interestRepository.delete(interest);
@@ -195,19 +195,6 @@ public class InterestServiceImpl implements InterestService {
         interest.getId(),
         interest.getSubscriberCount(),
         increase ? "증가" : "감소");
-  }
-
-  // 관심사 엔티티 반환
-  @Override
-  @Transactional(readOnly = true)
-  public Interest getInterestEntityById(UUID interestId) {
-
-    Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
-
-    log.info("관심사 엔티티 반환: interestId={}, interestName={}", interest.getId(), interest.getName());
-
-    return interest;
   }
 
 

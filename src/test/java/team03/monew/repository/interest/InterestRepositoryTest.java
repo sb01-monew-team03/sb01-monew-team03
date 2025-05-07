@@ -286,7 +286,6 @@ class InterestRepositoryTest {
       assertThat(result.get(0).getName()).isEqualTo("관심사2");
     }
 
-    // TODO: 커서 기반 페이지네이션 커서 본인을 포함하는 문제 확인 -> 됐다 안됐다 함...로그 관련 코드 작성 후 다시 보기
     @Test
     @DisplayName("[findInterest()] 이름 커서 기반 페이지네이션")
     void findInterestCursorPaginationNameTest() {
