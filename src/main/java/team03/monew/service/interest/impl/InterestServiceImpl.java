@@ -233,7 +233,7 @@ public class InterestServiceImpl implements InterestService {
 
     // 다음 페이지가 없는 경우
     if (interestList.size() <= request.limit()) {
-      return new PaginationDto(null, null, null, false, interestList.size());
+      return new PaginationDto(toDtoList(interestList, userId), null, null, false, interestList.size());
     }
 
     // 다음 페이지가 있는 경우
@@ -244,12 +244,17 @@ public class InterestServiceImpl implements InterestService {
     Instant nextAfter = lastInterest.getCreatedAt();
     boolean hasNext = true;
 
-    List<InterestDto> content = paginatedList.stream()
+    List<InterestDto> content = toDtoList(paginatedList, userId);
+
+    return new PaginationDto(content, nextCursor, nextAfter, hasNext, paginatedList.size());
+  }
+
+  // dto 변환
+  private List<InterestDto> toDtoList(List<Interest> interestList, UUID userId) {
+    return interestList.stream()
         .map(interest -> interestMapper.toDto(interest,
             subscriptionService.existByUserIdAndInterestId(userId, interest.getId())))
         .toList();
-
-    return new PaginationDto(content, nextCursor, nextAfter, hasNext, paginatedList.size());
   }
 
   // 커서 세팅
