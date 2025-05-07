@@ -45,20 +45,21 @@ public class CommentServiceImpl implements CommentService {
     private final ArticleRepository articleRepository;
     private final CommentMapper commentMapper;
 
-
     @Override
     public CommentDto create(CommentCreateRequest request) {
         log.debug("댓글 등록 시작: articleId={}, userId={}", request.articleId(), request.userId());
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> UserNotFoundException.withId(request.userId()));
+            .orElseThrow(() -> UserNotFoundException.withId(request.userId()));
         // ArticleNotFoundException 임시 미존재 처리
         Article article = articleRepository.findById(request.articleId())
-                .orElseThrow(() -> new RuntimeException("Article not found: " + request.articleId()));
+            .orElseThrow(() -> new RuntimeException("Article not found: " + request.articleId()));
 
         Comment comment = new Comment(request.content(), user, article);
         Comment saved = commentRepository.save(comment);
         log.info("댓글 등록 완료: commentId={}", saved.getId());
-        return commentMapper.toDto(saved);
+
+        boolean likedByMe = commentLikeRepository.existsByCommentIdAndUserId(saved.getId(), user.getId());
+        return commentMapper.toDto(saved, likedByMe);
     }
 
     @Override
