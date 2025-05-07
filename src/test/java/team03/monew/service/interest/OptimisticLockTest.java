@@ -32,7 +32,7 @@ public class OptimisticLockTest {
   @BeforeAll
   void setUp() {
     InterestRegisterRequest request = new InterestRegisterRequest(
-        "test",
+        UUID.randomUUID().toString(),
         List.of("test")
     );
     InterestDto interestDto = interestService.create(request);
