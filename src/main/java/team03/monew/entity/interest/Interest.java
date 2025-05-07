@@ -56,8 +56,6 @@ public class Interest extends BaseEntity {
 
   // 키워드 수정
   public void updateKeywords(List<String> keywords) {
-    this.keywords.clear();    // keywords 내부 비움
-
     Set<String> keywordsSet = new LinkedHashSet<>(keywords);    // 중복 제거, 사용자 요청 순서 보장
 
     for (String keywordName : keywordsSet) {    // keywords 내부 다시 채움

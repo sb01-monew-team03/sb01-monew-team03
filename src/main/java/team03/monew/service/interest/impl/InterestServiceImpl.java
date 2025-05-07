@@ -1,5 +1,6 @@
 package team03.monew.service.interest.impl;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
 import java.time.Instant;
 import java.util.List;
@@ -42,6 +43,7 @@ public class InterestServiceImpl implements InterestService {
   private final InterestMapper interestMapper;
   private final SubscriptionService subscriptionService;
   private final InterestReader interestReader;
+  private final EntityManager entityManager;
 
   // 관심사 등록
   @Override
@@ -91,6 +93,7 @@ public class InterestServiceImpl implements InterestService {
 
     // 키워드 수정
     List<String> keywords = request.keywords();
+    setKeywords(interest);
     interest.updateKeywords(keywords);
 
     // dto로 변환
@@ -131,17 +134,11 @@ public class InterestServiceImpl implements InterestService {
     List<Interest> interestList = interestRepository.findInterest(request);
 
     // 다음 페이지에 필요한 정보(nextCursor, nextAfter, hasNext) 세팅
-    PaginationDto paginationDto = setPaginationDto(interestList, request);
-
-    // dto 변환
-    List<InterestDto> content = interestList.stream()
-        .map(interest -> interestMapper.toDto(interest,
-            subscriptionService.existByUserIdAndInterestId(userId, interest.getId())))
-        .toList();
+    PaginationDto paginationDto = setPaginationDto(interestList, request, userId);
 
     // 커서 페이지네이션 응답용 dto 세팅
     CursorPageResponse<InterestDto> cursorPageResponse = new CursorPageResponse<>(
-        content,
+        paginationDto.content(),
         paginationDto.nextCursor(),
         paginationDto.nextAfter(),
         paginationDto.size(),
@@ -151,7 +148,7 @@ public class InterestServiceImpl implements InterestService {
 
     log.info(
         "[find] 관심사 목록 조회 완료: userId={}, 반환 개수={}, hasNext={}, nextCursor={}, totalElements={}",
-        userId, content.size(), paginationDto.hasNext(), paginationDto.nextCursor(),
+        userId, paginationDto.content().size(), paginationDto.hasNext(), paginationDto.nextCursor(),
         cursorPageResponse.totalElements());
 
     return cursorPageResponse;
@@ -225,12 +222,18 @@ public class InterestServiceImpl implements InterestService {
     }
   }
 
+  // 키워드 수정 세팅
+  private void setKeywords(Interest interest) {
+    interest.getKeywords().clear();
+    entityManager.flush();  // 키워드 삭제 후 강제로 db에 저장
+  }
+
   // 다음 페이지에 필요한 정보 세팅
-  private PaginationDto setPaginationDto(List<Interest> interestList, InterestFindRequest request) {
+  private PaginationDto setPaginationDto(List<Interest> interestList, InterestFindRequest request, UUID userId) {
 
     // 다음 페이지가 없는 경우
     if (interestList.size() <= request.limit()) {
-      return new PaginationDto(null, null, false, interestList.size());
+      return new PaginationDto(null, null, null, false, interestList.size());
     }
 
     // 다음 페이지가 있는 경우
@@ -241,7 +244,12 @@ public class InterestServiceImpl implements InterestService {
     Instant nextAfter = lastInterest.getCreatedAt();
     boolean hasNext = true;
 
-    return new PaginationDto(nextCursor, nextAfter, hasNext, paginatedList.size());
+    List<InterestDto> content = paginatedList.stream()
+        .map(interest -> interestMapper.toDto(interest,
+            subscriptionService.existByUserIdAndInterestId(userId, interest.getId())))
+        .toList();
+
+    return new PaginationDto(content, nextCursor, nextAfter, hasNext, paginatedList.size());
   }
 
   // 커서 세팅
