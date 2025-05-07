@@ -42,7 +42,7 @@ public class InterestController implements InterestApi {
 
     log.info("관심사 등록 요청: {}", request);
 
-    AdminValidator.adminValidator(session);
+//    AdminValidator.adminValidator(session);
 
     InterestDto interestDto = interestService.create(request);
 
@@ -62,7 +62,7 @@ public class InterestController implements InterestApi {
 
     log.info("관심사 정보 수정 요청: interestId={}", interestId);
 
-    AdminValidator.adminValidator(session);
+//    AdminValidator.adminValidator(session);
 
     InterestDto interestDto = interestService.update(interestId, request, userId);
 
@@ -79,7 +79,7 @@ public class InterestController implements InterestApi {
 
     log.info("관심사 물리 삭제 요청: interestId={}", interestId);
 
-    AdminValidator.adminValidator(session);
+//    AdminValidator.adminValidator(session);
 
     interestService.delete(interestId);
 
