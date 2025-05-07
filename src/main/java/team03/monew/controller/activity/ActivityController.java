@@ -16,7 +16,7 @@ import team03.monew.service.activity.ActivityService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user-activities")
-public class Activity {
+public class ActivityController {
 
   private final ActivityService activityService;
 

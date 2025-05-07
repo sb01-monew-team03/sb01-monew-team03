@@ -3,6 +3,8 @@ package team03.monew.service.interest.impl;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.interest.SubscriptionDto;
@@ -22,13 +24,17 @@ import team03.monew.util.exception.subscription.SubscriptionNotFoundException;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Lazy
 public class SubscriptionServiceImpl implements SubscriptionService {
 
   private final SubscriptionRepository subscriptionRepository;
   private final SubscriptionMapper subscriptionMapper;
   private final InterestMapper interestMapper;
   private final UserService userService;
-  private final InterestService interestService;
+
+  @Autowired
+  @Lazy
+  private InterestService interestService;
 
   // 구독
   @Override

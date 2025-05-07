@@ -16,7 +16,7 @@ import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 import team03.monew.entity.interest.Subscription;
 import team03.monew.entity.user.User;
-import team03.monew.mapper.ArticleViewMapper;
+import team03.monew.mapper.article.ArticleViewMapper;
 import team03.monew.mapper.comments.CommentLikeMapper;
 import team03.monew.mapper.comments.CommentMapper;
 import team03.monew.mapper.interest.SubscriptionMapper;
@@ -65,7 +65,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     List<CommentLike> commentLikes = commentLikeRepository.findTop10ByUserOrderByCreatedAtDesc(user);
     List<CommentLikeActivityDto> commentLikeDtos = commentLikes.stream()
-        .map(commentLikeMapper::toDto).toList();
+        .map(commentLikeMapper::toActivityDto).toList();
 
     List<ArticleView> articleViews = articleViewRepository.findTop10ByUserOrderByViewedAtDesc(user);
     List<ArticleViewDto> articleViewDtos = articleViews.stream()
