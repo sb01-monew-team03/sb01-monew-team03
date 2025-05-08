@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import team03.monew.dto.comments.*;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.service.comments.CommentService;
-import team03.monew.util.exception.comments.AlreadyLikedException;
-import team03.monew.util.exception.comments.LikeNotFoundException;
 
 import java.util.UUID;
 
@@ -126,13 +124,4 @@ public class CommentController {
         return ResponseEntity.ok().build();
     }
 
-    @ExceptionHandler(AlreadyLikedException.class)
-    public ResponseEntity<Void> handleAlreadyLiked(AlreadyLikedException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).build();
-    }
-
-    @ExceptionHandler(LikeNotFoundException.class)
-    public ResponseEntity<Void> handleLikeNotFound(LikeNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
 }
