@@ -32,7 +32,7 @@ public class NotificationScheduler {
         .register(meterRegistry);
   }
 
-  @Scheduled(cron = "0 30 2 * * *")
+  @Scheduled(cron = "0 0 4 * * *")
   public void runJob() throws Exception {
     JobParameters parameters = new JobParametersBuilder()
         .addLong("timestamp", System.currentTimeMillis())
