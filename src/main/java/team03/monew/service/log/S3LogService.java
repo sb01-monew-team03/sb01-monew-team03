@@ -35,8 +35,10 @@ public class S3LogService {
     String fileName = "/logFile." + yesterday + ".log";
     File logFile = new File(logFilePath + fileName);
 
+    String folderName = logFilePath.split("./")[1];
+
     if (logFile.exists()) {
-      PutObjectRequest request = new PutObjectRequest(bucketName, "logs" + fileName, logFile);
+      PutObjectRequest request = new PutObjectRequest(bucketName, folderName + fileName, logFile);
       amazonS3Client.putObject(request);
       log.info("로그 파일 S3 업로드 성공: {}", logFile.getName());
     } else {
