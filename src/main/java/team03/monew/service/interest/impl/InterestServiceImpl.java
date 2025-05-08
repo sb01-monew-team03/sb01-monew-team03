@@ -128,7 +128,7 @@ public class InterestServiceImpl implements InterestService {
 
     log.debug("[find] 관심사 목록 조회 시작: request={}, userId={}", request, userId);
 
-    // 해당 유저가 구독중인 관심사 가져오기
+    // 해당 유저가 구독중인 관심사 아이디 가져오기
     List<UUID> subscribedInterestIds = subscriptionService.findInterestIdsByUserId(userId);
 
     // 조건에 부합하는 관심사 리스트 가져오기
@@ -234,7 +234,7 @@ public class InterestServiceImpl implements InterestService {
 
     // 다음 페이지가 없는 경우
     if (interestList.size() <= request.limit()) {
-      return new PaginationDto(toDtoList(interestList, userId, subscribedInterestIds), null, null, false, interestList.size());
+      return new PaginationDto(toDtoList(interestList, subscribedInterestIds), null, null, false, interestList.size());
     }
 
     // 다음 페이지가 있는 경우
@@ -245,13 +245,13 @@ public class InterestServiceImpl implements InterestService {
     Instant nextAfter = lastInterest.getCreatedAt();
     boolean hasNext = true;
 
-    List<InterestDto> content = toDtoList(paginatedList, userId, subscribedInterestIds);
+    List<InterestDto> content = toDtoList(paginatedList, subscribedInterestIds);
 
     return new PaginationDto(content, nextCursor, nextAfter, hasNext, paginatedList.size());
   }
 
   // dto 변환
-  private List<InterestDto> toDtoList(List<Interest> interestList, UUID userId, List<UUID> subscribedInterestIds) {
+  private List<InterestDto> toDtoList(List<Interest> interestList, List<UUID> subscribedInterestIds) {
     return interestList.stream()
         .map(interest -> interestMapper.toDto(interest,
             subscribedInterestIds.contains(interest.getId())))

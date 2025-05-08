@@ -27,12 +27,4 @@ public class CustomSubscriptionRepositoryImpl implements CustomSubscriptionRepos
         .where(qSubscription.user.id.eq(userId))
         .fetch();
   }
-
-  @Override
-  public List<Interest> findInterestsByUserId(UUID userId) {
-    return queryFactory
-        .selectFrom(qSubscription.interest)
-        .where(qSubscription.user.id.eq(userId))
-        .fetch();
-  }
 }
