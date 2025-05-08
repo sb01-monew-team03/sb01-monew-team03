@@ -29,11 +29,11 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
   }
 
   @Override
-  public void deleteAllConfirmNotification(Instant time) {
-    queryFactory
+  public int deleteAllConfirmNotification(Instant time) {
+    return (int) queryFactory
         .delete(QNotification.notification)
         .where(QNotification.notification.updatedAt.before(time)
-        .and(QNotification.notification.confirmed.eq(true)))
+        .and(QNotification.notification.confirmed.isTrue()))
         .execute();
   }
 
