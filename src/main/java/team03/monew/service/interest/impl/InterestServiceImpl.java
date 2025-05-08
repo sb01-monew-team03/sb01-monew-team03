@@ -135,7 +135,7 @@ public class InterestServiceImpl implements InterestService {
     List<Interest> interestList = interestRepository.findInterest(request);
 
     // 다음 페이지에 필요한 정보(content, nextCursor, nextAfter, hasNext) 세팅
-    PaginationDto paginationDto = setPaginationDto(interestList, request, userId, subscribedInterestIds);
+    PaginationDto paginationDto = setPaginationDto(interestList, request, subscribedInterestIds);
 
     // 커서 페이지네이션 응답용 dto 세팅
     CursorPageResponse<InterestDto> cursorPageResponse = new CursorPageResponse<>(
@@ -230,7 +230,7 @@ public class InterestServiceImpl implements InterestService {
   }
 
   // 다음 페이지에 필요한 정보 세팅
-  private PaginationDto setPaginationDto(List<Interest> interestList, InterestFindRequest request, UUID userId, List<UUID> subscribedInterestIds) {
+  private PaginationDto setPaginationDto(List<Interest> interestList, InterestFindRequest request, List<UUID> subscribedInterestIds) {
 
     // 다음 페이지가 없는 경우
     if (interestList.size() <= request.limit()) {
