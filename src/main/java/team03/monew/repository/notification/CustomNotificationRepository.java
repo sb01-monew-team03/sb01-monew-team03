@@ -10,7 +10,7 @@ public interface CustomNotificationRepository {
 
   void confirmAllByUserId(UUID userId);
 
-  void deleteAllConfirmNotification(Instant time);
+  int deleteByConfirmedIsTrueAndCreatedAtBefore(Instant time);
 
   Page<Notification> findPageWithCursor(UUID userId, String cursor, Pageable pageable);
 
