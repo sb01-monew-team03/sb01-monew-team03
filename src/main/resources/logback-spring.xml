@@ -39,5 +39,13 @@
       <appender-ref ref="CONSOLE"/>
     </root>
   </springProfile>
+  <!-- prod -->
+  <springProfile name="prod">
+    <property name="LOG_PATH" value="./logs-prod"/> <!-- 실제 서버 경로로 설정 -->
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="FILE"/>
+    </root>
+  </springProfile>
 
 </configuration>
