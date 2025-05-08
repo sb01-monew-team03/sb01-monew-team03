@@ -7,9 +7,6 @@ spring:
     active: dev
   datasource:
     driver-class-name: org.postgresql.Driver
-  batch:
-    jdbc:
-      initialize-schema: always
 
 logging:
   level:
