@@ -11,7 +11,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,6 +37,7 @@ import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 import team03.monew.entity.article.Article;
+import team03.monew.entity.comments.QComment;
 import team03.monew.entity.user.User;
 import team03.monew.entity.user.User.Role;
 import team03.monew.mapper.comments.CommentMapper;
@@ -62,6 +68,8 @@ class CommentServiceTest {
     private ArticleRepository articleRepository;
     @Mock
     private CommentMapper commentMapper;
+    @Mock
+    private JPAQueryFactory queryFactory;
 
     @Nested
     @DisplayName("댓글 등록")
@@ -176,7 +184,8 @@ class CommentServiceTest {
     @Nested
     @DisplayName("댓글 페이지네이션 조회 (Cursor 기반)")
     class CursorPaginationTest {
-        @Test @DisplayName("createdAt 기준 커서 페이지네이션 성공")
+        @Test
+        @DisplayName("createdAt 기준 커서 페이지네이션 성공")
         void cursorPagination_success() {
             // given
             UUID articleId = UUID.randomUUID();
@@ -199,28 +208,29 @@ class CommentServiceTest {
             given(comment.getLikeCount()).willReturn(1);
             given(comment.getCreatedAt()).willReturn(createdAt);
 
-            Page<Comment> page = new PageImpl<>(
-                    List.of(comment),
-                    PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC,"createdAt")
-                            .and(Sort.by(Sort.Direction.DESC,"createdAt"))),
-                    1
-            );
+            QComment c = QComment.comment;
+            @SuppressWarnings("unchecked")
+            JPAQuery<Comment> jpaQuery = mock(JPAQuery.class);
+            given(queryFactory.selectFrom(c)).willReturn(jpaQuery);
+            given(jpaQuery.where(any(BooleanExpression.class))).willReturn(jpaQuery);
+            given(jpaQuery.orderBy(any(OrderSpecifier.class), any(OrderSpecifier.class))).willReturn(jpaQuery);
+            given(jpaQuery.limit(6L)).willReturn(jpaQuery); // limit + 1
+            given(jpaQuery.fetch()).willReturn(List.of(comment));
 
-            given(commentRepository.findAll(any(Specification.class), any(Pageable.class)))
-                    .willReturn(page);
             given(commentLikeRepository.existsByCommentIdAndUserId(commentId, reqId))
                     .willReturn(false);
 
-            CommentDto dto = new CommentDto(commentId, articleId, userId,
-                    "nick","paging!",1L,false, createdAt);
-            given(commentMapper.toDto(comment,false)).willReturn(dto);
+            CommentDto dto = new CommentDto(
+                    commentId, articleId, userId,
+                    "nick", "paging!", 1L, false, createdAt
+            );
+            given(commentMapper.toDto(comment, false)).willReturn(dto);
 
             // when
-            CursorPageResponse<CommentDto> resp =
-                    commentService.listByArticleCursor(
-                            articleId, "createdAt", Sort.Direction.DESC,
-                            5, null, null, reqId
-                    );
+            CursorPageResponse<CommentDto> resp = commentService.listByArticleCursor(
+                    articleId, "createdAt", Sort.Direction.DESC,
+                    5, null, null, reqId
+            );
 
             // then
             assertNotNull(resp);

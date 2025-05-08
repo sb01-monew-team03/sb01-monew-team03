@@ -1,14 +1,16 @@
 package team03.monew.service.comments;
 
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.comments.*;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.entity.comments.Comment;
+import team03.monew.entity.comments.QComment;
 import team03.monew.entity.comments.CommentLike;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.user.User;
@@ -36,6 +38,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
     private final CommentMapper commentMapper;
+    private final JPAQueryFactory queryFactory;  // QueryDSL
 
     @Override
     public CommentDto create(CommentCreateRequest request) {
@@ -43,7 +46,7 @@ public class CommentServiceImpl implements CommentService {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> UserNotFoundException.withId(request.userId()));
         Article article = articleRepository.findById(request.articleId())
-            .orElseThrow(() -> new RuntimeException("Article not found: " + request.articleId()));
+                .orElseThrow(() -> new RuntimeException("Article not found: " + request.articleId()));
 
         Comment comment = new Comment(request.content(), user, article);
         Comment saved = commentRepository.save(comment);
@@ -108,8 +111,7 @@ public class CommentServiceImpl implements CommentService {
         if (commentLikeRepository.existsByCommentAndUser(comment, user)) {
             throw new AlreadyLikedException(commentId, userId);
         }
-        CommentLike newLike = new CommentLike(comment, user, comment.getArticle());
-        CommentLike savedLike = commentLikeRepository.save(newLike);
+        CommentLike savedLike = commentLikeRepository.save(new CommentLike(comment, user, comment.getArticle()));
         comment.increaseLikeCount();
         log.info("댓글 좋아요 등록 완료: likeId={}", savedLike.getId());
         return commentMapper.toLikeDto(savedLike);
@@ -138,62 +140,77 @@ public class CommentServiceImpl implements CommentService {
             Instant after,
             UUID requesterId
     ) {
-        log.debug("댓글 커서 리스트 조회 시작: articleId={}, orderBy={}, direction={}, limit={}, cursor={}, after={}, requesterId={}",
+        log.debug("댓글 커서 조회 시작: articleId={}, orderBy={}, direction={}, limit={}, cursor={}, after={}, requesterId={}",
                 articleId, orderBy, direction, limit, cursor, after, requesterId);
 
-        Specification<Comment> spec = (root, query, cb) -> {
-            var p = cb.conjunction();
-            p = cb.and(p,
-                    cb.equal(root.get("article").get("id"), articleId),
-                    cb.isNull(root.get("deletedAt"))
-            );
+        QComment c = QComment.comment;
 
-            if (cursor != null) {
-                if ("createdAt".equals(orderBy)) {
-                    Instant cur = Instant.parse(cursor);
-                    p = cb.and(p, direction.isDescending()
-                            ? cb.lessThan(root.get("createdAt"), cur)
-                            : cb.greaterThan(root.get("createdAt"), cur));
-                } else {
-                    long curLike = Long.parseLong(cursor);
-                    var likeExp = root.get("likeCount").as(Long.class);
-                    var tie = cb.equal(likeExp, curLike);
-                    var timeCond = direction.isDescending()
-                            ? cb.lessThan(root.get("createdAt"), after)
-                            : cb.greaterThan(root.get("createdAt"), after);
-                    p = cb.and(p, cb.or(cb.lessThanOrEqualTo(likeExp, curLike), cb.and(tie, timeCond)));
-                }
+        var predicate = c.article.id.eq(articleId)
+                .and(c.deletedAt.isNull());
+
+        if (cursor != null) {
+            if ("createdAt".equals(orderBy)) {
+                Instant curTime = Instant.parse(cursor);
+                predicate = direction.isDescending()
+                        ? predicate.and(c.createdAt.lt(curTime))
+                        : predicate.and(c.createdAt.gt(curTime));
+            } else {
+                long curLike = Long.parseLong(cursor);
+                // likeCount < curLike  OR  (likeCount == curLike AND createdAt 비교)
+                var lessCount = direction.isDescending()
+                        ? c.likeCount.lt(curLike)
+                        : c.likeCount.gt(curLike);
+                var tieTime = direction.isDescending()
+                        ? c.createdAt.lt(after)
+                        : c.createdAt.gt(after);
+                var tieExpr = c.likeCount.eq((int) curLike).and(tieTime);
+                predicate = predicate.and(lessCount.or(tieExpr));
             }
-            return p;
-        };
+        }
 
-        Sort sort = Sort.by(direction, orderBy).and(Sort.by(direction, "createdAt"));
-        Pageable pageReq = PageRequest.of(0, limit, sort);
-        Page<Comment> page = commentRepository.findAll(spec, pageReq);
+        OrderSpecifier<?> primary = "createdAt".equals(orderBy)
+                ? (direction.isAscending() ? c.createdAt.asc() : c.createdAt.desc())
+                : (direction.isAscending() ? c.likeCount.asc()   : c.likeCount.desc());
+        OrderSpecifier<?> secondary = direction.isAscending()
+                ? c.createdAt.asc() : c.createdAt.desc();
 
-        List<CommentDto> dtos = page.getContent().stream()
-                .map(c -> {
-                    boolean liked = commentLikeRepository.existsByCommentIdAndUserId(c.getId(), requesterId);
-                    return commentMapper.toDto(c, liked);
+        List<Comment> fetched = queryFactory
+                .selectFrom(c)
+                .where(predicate)
+                .orderBy(primary, secondary)
+                .limit(limit + 1)
+                .fetch();
+
+        boolean hasNext = fetched.size() > limit;
+        List<Comment> content = hasNext ? fetched.subList(0, limit) : fetched;
+
+        List<CommentDto> dtos = content.stream()
+                .map(item -> {
+                    boolean liked = commentLikeRepository
+                            .existsByCommentIdAndUserId(item.getId(), requesterId);
+                    return commentMapper.toDto(item, liked);
                 })
                 .collect(Collectors.toList());
 
         String nextCursor = null;
         Instant nextAfter = null;
-        if (page.hasNext() && !dtos.isEmpty()) {
-            Comment last = page.getContent().get(page.getSize() - 1);
+        if (hasNext && !content.isEmpty()) {
+            Comment last = content.get(content.size() - 1);
             nextCursor = "createdAt".equals(orderBy)
                     ? last.getCreatedAt().toString()
                     : Long.toString(last.getLikeCount());
             nextAfter = last.getCreatedAt();
         }
 
-        CursorPageResponse<CommentDto> resp = new CursorPageResponse<>(
-                dtos, nextCursor, nextAfter, dtos.size(), page.getTotalElements(), page.hasNext()
-        );
+        long totalElements = dtos.size();
 
-        log.info("댓글 커서 리스트 조회 완료: size={}, totalElements={}, hasNext={}",
-                resp.size(), resp.totalElements(), resp.hasNext());
-        return resp;
+        return new CursorPageResponse<>(
+                dtos,
+                nextCursor,
+                nextAfter,
+                dtos.size(),
+                totalElements,
+                hasNext
+        );
     }
 }
