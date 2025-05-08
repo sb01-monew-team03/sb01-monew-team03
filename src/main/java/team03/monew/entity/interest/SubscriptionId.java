@@ -1,16 +1,12 @@
 package team03.monew.entity.interest;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team03.monew.entity.user.User;
 
 // 복합 키용 클래스
 @NoArgsConstructor

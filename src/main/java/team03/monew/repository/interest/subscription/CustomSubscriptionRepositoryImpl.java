@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.QInterest;
 import team03.monew.entity.interest.QSubscription;
 import team03.monew.entity.user.QUser;

@@ -24,7 +24,6 @@ import team03.monew.dto.interest.InterestFindRequest;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.service.interest.InterestService;
-import team03.monew.util.interest.AdminValidator;
 
 @Slf4j
 @RestController

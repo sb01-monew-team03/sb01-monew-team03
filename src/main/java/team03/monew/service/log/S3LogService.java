@@ -3,9 +3,6 @@ package team03.monew.service.log;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +32,7 @@ public class S3LogService {
 
     String yesterday = LocalDate.now().minusDays(1)
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    String fileName =  "/logFile." + yesterday + ".log";
+    String fileName = "/logFile." + yesterday + ".log";
     File logFile = new File(logFilePath + fileName);
 
     if (logFile.exists()) {
