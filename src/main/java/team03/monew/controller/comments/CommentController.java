@@ -35,13 +35,15 @@ public class CommentController {
                 req.getCursor(), req.getAfter(), requesterId
         );
 
-        if (req.getLimit() != DEFAULT_LIMIT) {
+        int limit = req.getLimit();
+
+        if (limit != DEFAULT_LIMIT) {
             CursorPageResponse<CommentDto> page =
                     commentService.listByArticleCursor(
                             req.getArticleId(),
                             req.getOrderBy(),
                             req.getDirection(),
-                            req.getLimit(),
+                            limit,
                             req.getCursor(),
                             req.getAfter(),
                             requesterId
@@ -52,12 +54,11 @@ public class CommentController {
             return ResponseEntity.ok(page);
         }
 
-        // limit=10 이면 Page 기반으로
         Page<CommentDto> page = commentService.listByArticle(
                 req.getArticleId(),
                 req.getOrderBy(),
                 req.getDirection(),
-                req.getLimit(),
+                limit,
                 requesterId
         );
         log.info("댓글 페이징 조회 완료: size={}, totalElements={}, hasNext={}",
