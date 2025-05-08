@@ -19,7 +19,7 @@ public class S3LogService {
 
   private final AmazonS3Client amazonS3Client;
 
-  @Value("${cloud.aws.s3.bucket}")
+  @Value("${monew.storage.s3.bucket}")
   private String bucketName;
 
   @Value("${log.file.path}")
