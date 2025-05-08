@@ -1,6 +1,5 @@
 package team03.monew.event.subscription;
 
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

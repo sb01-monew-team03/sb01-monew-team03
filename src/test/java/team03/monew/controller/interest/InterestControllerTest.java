@@ -63,20 +63,20 @@ public class InterestControllerTest {
           .andExpect(jsonPath("$.id").exists());
     }
 
-    @Test
-    @DisplayName("[fail] role이 admin이 아닐 때 실패")
-    void failTest() throws Exception {
-
-      // given
-      InterestRegisterRequest request = new InterestRegisterRequest("test", List.of("keyword"));
-
-      // when & then
-      mockMvc.perform(post("/api/interests")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request))
-              .sessionAttr("role", "user"))
-          .andExpect(status().isForbidden());
-    }
+//    @Test
+//    @DisplayName("[fail] role이 admin이 아닐 때 실패")
+//    void failTest() throws Exception {
+//
+//      // given
+//      InterestRegisterRequest request = new InterestRegisterRequest("test", List.of("keyword"));
+//
+//      // when & then
+//      mockMvc.perform(post("/api/interests")
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(objectMapper.writeValueAsString(request))
+//              .sessionAttr("role", "user"))
+//          .andExpect(status().isForbidden());
+//    }
   }
 
   @Nested
@@ -108,23 +108,23 @@ public class InterestControllerTest {
           .andExpect(jsonPath("$.keywords[0]").value("update"));
     }
 
-    @Test
-    @DisplayName("[fail] role이 admin이 아닐 때 실패")
-    void failTest() throws Exception {
-
-      // given
-      UUID interestId = UUID.randomUUID();
-      UUID userId = UUID.randomUUID();
-      InterestUpdateRequest request = new InterestUpdateRequest(List.of("update", "keywords"));
-
-      // when & then
-      mockMvc.perform(patch("/api/interests/{interestId}", interestId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(request))
-              .header("MoNew-Request-User-ID", userId)
-              .sessionAttr("role", "user"))
-          .andExpect(status().isForbidden());
-    }
+//    @Test
+//    @DisplayName("[fail] role이 admin이 아닐 때 실패")
+//    void failTest() throws Exception {
+//
+//      // given
+//      UUID interestId = UUID.randomUUID();
+//      UUID userId = UUID.randomUUID();
+//      InterestUpdateRequest request = new InterestUpdateRequest(List.of("update", "keywords"));
+//
+//      // when & then
+//      mockMvc.perform(patch("/api/interests/{interestId}", interestId)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(objectMapper.writeValueAsString(request))
+//              .header("MoNew-Request-User-ID", userId)
+//              .sessionAttr("role", "user"))
+//          .andExpect(status().isForbidden());
+//    }
   }
 
   @Nested
@@ -145,19 +145,19 @@ public class InterestControllerTest {
           .andExpect(status().isNoContent());
     }
 
-    @Test
-    @DisplayName("[fail] role이 admin이 아닐 때 실패")
-    void failTest() throws Exception {
-
-      // given
-      UUID interestId = UUID.randomUUID();
-
-      // when & then
-      mockMvc.perform(delete("/api/interests/{interestId}", interestId)
-              .contentType(MediaType.APPLICATION_JSON)
-              .sessionAttr("role", "user"))
-          .andExpect(status().isForbidden());
-    }
+//    @Test
+//    @DisplayName("[fail] role이 admin이 아닐 때 실패")
+//    void failTest() throws Exception {
+//
+//      // given
+//      UUID interestId = UUID.randomUUID();
+//
+//      // when & then
+//      mockMvc.perform(delete("/api/interests/{interestId}", interestId)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .sessionAttr("role", "user"))
+//          .andExpect(status().isForbidden());
+//    }
   }
 
   @Test

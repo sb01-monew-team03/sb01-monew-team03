@@ -32,7 +32,7 @@ public class S3LogService {
 
     String yesterday = LocalDate.now().minusDays(1)
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    String fileName =  "/logFile." + yesterday + ".log";
+    String fileName = "/logFile." + yesterday + ".log";
     File logFile = new File(logFilePath + fileName);
 
     if (logFile.exists()) {

@@ -23,7 +23,7 @@ import team03.monew.mapper.interest.SubscriptionMapper;
 import team03.monew.repository.article.ArticleViewRepository;
 import team03.monew.repository.comments.CommentLikeRepository;
 import team03.monew.repository.comments.CommentRepository;
-import team03.monew.repository.interest.SubscriptionRepository;
+import team03.monew.repository.interest.subscription.SubscriptionRepository;
 import team03.monew.repository.user.UserRepository;
 import team03.monew.util.exception.user.UserNotFoundException;
 
