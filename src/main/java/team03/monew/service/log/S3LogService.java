@@ -3,9 +3,6 @@ package team03.monew.service.log;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +16,7 @@ public class S3LogService {
 
   private final AmazonS3Client amazonS3Client;
 
-  @Value("${cloud.aws.s3.bucket}")
+  @Value("${monew.storage.s3.bucket}")
   private String bucketName;
 
   @Value("${log.file.path}")
