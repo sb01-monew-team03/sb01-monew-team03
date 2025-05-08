@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.dto.comments.CommentDto;
 import team03.monew.dto.comments.CommentLikeDto;
+import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,6 +31,7 @@ import team03.monew.dto.comments.CommentLikeDto;
 import team03.monew.dto.comments.CommentUpdateRequest;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.service.comments.CommentService;
+import team03.monew.util.exception.GlobalExceptionHandler;
 import team03.monew.util.exception.comments.CommentNotFoundException;
 import team03.monew.util.exception.comments.AlreadyLikedException;
 import team03.monew.util.exception.comments.LikeNotFoundException;
@@ -276,7 +278,7 @@ class CommentControllerTest {
         void like_already() throws Exception {
             UUID commentId = UUID.randomUUID();
             UUID requesterId = UUID.randomUUID();
-            willThrow(AlreadyLikedException.class)
+            willThrow(new AlreadyLikedException(commentId, requesterId))
                     .given(commentService).likeComment(commentId, requesterId);
 
             mockMvc.perform(post("/api/comments/{commentId}/comment-likes", commentId)
@@ -305,7 +307,7 @@ class CommentControllerTest {
         void unlike_notFound() throws Exception {
             UUID commentId = UUID.randomUUID();
             UUID requesterId = UUID.randomUUID();
-            willThrow(LikeNotFoundException.class)
+            willThrow(LikeNotFoundException.forUserAndComment(requesterId, commentId))
                     .given(commentService).unlikeComment(commentId, requesterId);
 
             mockMvc.perform(delete("/api/comments/{commentId}/comment-likes", commentId)
