@@ -8,7 +8,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.similarity.LevenshteinDistance;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.common.CursorPageResponse;
@@ -19,14 +18,13 @@ import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.dto.interest.PaginationDto;
 import team03.monew.entity.interest.Interest;
 import team03.monew.mapper.interest.InterestMapper;
-import team03.monew.repository.interest.InterestRepository;
+import team03.monew.repository.interest.interest.InterestRepository;
 import team03.monew.service.interest.InterestReader;
 import team03.monew.service.interest.InterestService;
 import team03.monew.service.interest.SubscriptionService;
 import team03.monew.util.exception.interest.EmptyKeywordListException;
 import team03.monew.util.exception.interest.ExcessiveRetryException;
 import team03.monew.util.exception.interest.InterestAlreadyExistException;
-import team03.monew.util.exception.interest.InterestNotFoundException;
 import team03.monew.util.exception.interest.OrderByValueException;
 
 @Slf4j
@@ -130,11 +128,14 @@ public class InterestServiceImpl implements InterestService {
 
     log.debug("[find] 관심사 목록 조회 시작: request={}, userId={}", request, userId);
 
+    // 해당 유저가 구독중인 관심사 가져오기
+    List<UUID> subscribedInterestIds = subscriptionService.findInterestIdsByUserId(userId);
+
     // 조건에 부합하는 관심사 리스트 가져오기
     List<Interest> interestList = interestRepository.findInterest(request);
 
-    // 다음 페이지에 필요한 정보(nextCursor, nextAfter, hasNext) 세팅
-    PaginationDto paginationDto = setPaginationDto(interestList, request, userId);
+    // 다음 페이지에 필요한 정보(content, nextCursor, nextAfter, hasNext) 세팅
+    PaginationDto paginationDto = setPaginationDto(interestList, request, userId, subscribedInterestIds);
 
     // 커서 페이지네이션 응답용 dto 세팅
     CursorPageResponse<InterestDto> cursorPageResponse = new CursorPageResponse<>(
@@ -229,11 +230,11 @@ public class InterestServiceImpl implements InterestService {
   }
 
   // 다음 페이지에 필요한 정보 세팅
-  private PaginationDto setPaginationDto(List<Interest> interestList, InterestFindRequest request, UUID userId) {
+  private PaginationDto setPaginationDto(List<Interest> interestList, InterestFindRequest request, UUID userId, List<UUID> subscribedInterestIds) {
 
     // 다음 페이지가 없는 경우
     if (interestList.size() <= request.limit()) {
-      return new PaginationDto(toDtoList(interestList, userId), null, null, false, interestList.size());
+      return new PaginationDto(toDtoList(interestList, userId, subscribedInterestIds), null, null, false, interestList.size());
     }
 
     // 다음 페이지가 있는 경우
@@ -244,16 +245,16 @@ public class InterestServiceImpl implements InterestService {
     Instant nextAfter = lastInterest.getCreatedAt();
     boolean hasNext = true;
 
-    List<InterestDto> content = toDtoList(paginatedList, userId);
+    List<InterestDto> content = toDtoList(paginatedList, userId, subscribedInterestIds);
 
     return new PaginationDto(content, nextCursor, nextAfter, hasNext, paginatedList.size());
   }
 
   // dto 변환
-  private List<InterestDto> toDtoList(List<Interest> interestList, UUID userId) {
+  private List<InterestDto> toDtoList(List<Interest> interestList, UUID userId, List<UUID> subscribedInterestIds) {
     return interestList.stream()
         .map(interest -> interestMapper.toDto(interest,
-            subscriptionService.existByUserIdAndInterestId(userId, interest.getId())))
+            subscribedInterestIds.contains(interest.getId())))
         .toList();
   }
 

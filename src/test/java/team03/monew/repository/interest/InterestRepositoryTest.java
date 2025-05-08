@@ -21,6 +21,7 @@ import team03.monew.dto.interest.InterestFindRequest;
 import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Keyword;
 import team03.monew.entity.user.User;
+import team03.monew.repository.interest.interest.InterestRepository;
 
 @DataJpaTest
 @ActiveProfiles("test")

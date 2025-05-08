@@ -1,4 +1,4 @@
-package team03.monew.repository.interest.custom;
+package team03.monew.repository.interest.interest;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -27,7 +27,7 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
     return queryFactory
         .select(qInterest).distinct() // 중복 제거(키워드 수만큼 row 반복 막음)
         .from(qInterest)
-        .join(qInterest.keywords, qKeyword).fetchJoin()
+        .join(qInterest.keywords, qKeyword)
         .where(
             getWhere(request.keyword()),
             cursorCondition(request.cursor(), request.orderBy(), request.direction(),

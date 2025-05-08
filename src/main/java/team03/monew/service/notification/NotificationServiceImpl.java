@@ -26,7 +26,7 @@ import team03.monew.entity.notification.Notification;
 import team03.monew.entity.user.User;
 import team03.monew.mapper.notification.NotificationMapper;
 import team03.monew.repository.comments.CommentRepository;
-import team03.monew.repository.interest.SubscriptionRepository;
+import team03.monew.repository.interest.subscription.SubscriptionRepository;
 import team03.monew.repository.notification.NotificationRepository;
 import team03.monew.repository.user.UserRepository;
 import team03.monew.util.exception.comments.CommentNotFoundException;

@@ -1,11 +1,10 @@
 package team03.monew.service.interest.impl;
 
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.interest.SubscriptionDto;
@@ -16,9 +15,8 @@ import team03.monew.event.subscription.SubscriptionCreateEvent;
 import team03.monew.event.subscription.SubscriptionDeleteEvent;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.mapper.interest.SubscriptionMapper;
-import team03.monew.repository.interest.SubscriptionRepository;
+import team03.monew.repository.interest.subscription.SubscriptionRepository;
 import team03.monew.service.interest.InterestReader;
-import team03.monew.service.interest.InterestService;
 import team03.monew.service.interest.SubscriptionService;
 import team03.monew.service.user.UserService;
 import team03.monew.util.exception.subscription.SubscriptionAlreadyExistException;
@@ -102,6 +100,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         userId, interestId, isExisted);
 
     return isExisted;
+  }
+
+  // 해당 유저가 구독하고 있는 관심사 아이디 반환
+  @Override
+  public List<UUID> findInterestIdsByUserId(UUID userId) {
+
+    List<UUID> interestIds = subscriptionRepository.findInterestIdsByUserId(userId);
+
+    log.info("[findInterestIdsByUserId] 구독 리스트 검색: userId={}, 구독중인 관심사 개수={}",
+        userId, interestIds.size());
+
+    return interestIds;
   }
 
   // 구독 중복 방지
