@@ -95,19 +95,17 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
         case "name":
           return isDesc
               ? qInterest.name.lt(cursor)
-              .or(qInterest.name.eq(cursor).and(afterCondition(after)))
-              : qInterest.name.gt(cursor)
-                  .or(qInterest.name.eq(cursor).and(afterCondition(after)));
+              : qInterest.name.gt(cursor);
         case "subscriberCount":
           long cursorSubscriberCount = Long.parseLong(cursor);
           return isDesc
               // 내림차순일 경우 cursor의 값이 작거나, 같되 after(create_at)이 커야 함
               ? qInterest.subscriberCount.lt(cursorSubscriberCount)
-              .or(qInterest.subscriberCount.eq(cursorSubscriberCount)
+              .or(qInterest.subscriberCount.loe(cursorSubscriberCount)
                   .and(afterCondition(after)))
               // 오름차순일 경우 cursor의 값이 크거나, 같되 after(create_at)이 커야 함
               : qInterest.subscriberCount.gt(cursorSubscriberCount)
-                  .or(qInterest.subscriberCount.eq(cursorSubscriberCount)
+                  .or(qInterest.subscriberCount.goe(cursorSubscriberCount)
                       .and(afterCondition(after)));
       }
     }
