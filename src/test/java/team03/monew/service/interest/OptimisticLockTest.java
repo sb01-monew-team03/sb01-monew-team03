@@ -48,7 +48,6 @@ public class OptimisticLockTest {
 
     Runnable task = () -> {
       try {
-        UUID interestId = UUID.randomUUID();
         interestService.updateSubscriberCount(interest, true);
       } catch (Exception e) {
         e.printStackTrace();
