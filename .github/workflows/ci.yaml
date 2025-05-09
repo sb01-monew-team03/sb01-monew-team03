@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SPRING_PROFILES_ACTIVE: test
+      AWS_ACCESS_KEY: dummy
+      AWS_SECRET_KEY: dummy
+      DB_HOST: localhost
 
     steps:
       - name: Checkout code
