@@ -13,7 +13,7 @@ import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.dto.comments.CommentLikeActivityDto;
 import team03.monew.dto.interest.SubscriptionDto;
-import team03.monew.dto.user.UserActivityDto;
+import team03.monew.dto.user.ActivityDto;
 import team03.monew.service.activity.ActivityService;
 import team03.monew.util.exception.user.UserNotFoundException;
 
@@ -94,7 +94,7 @@ class ActivityControllerTest {
         70L
     );
 
-    UserActivityDto userActivityDto = new UserActivityDto(
+    ActivityDto userActivityDto = new ActivityDto(
         userId,
         "test@example.com",
         "testUser",
