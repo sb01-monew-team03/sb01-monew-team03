@@ -101,11 +101,11 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
           return isDesc
               // 내림차순일 경우 cursor의 값이 작거나, 같되 after(create_at)이 커야 함
               ? qInterest.subscriberCount.lt(cursorSubscriberCount)
-              .or(qInterest.subscriberCount.loe(cursorSubscriberCount)
+              .or(qInterest.subscriberCount.eq(cursorSubscriberCount)
                   .and(afterCondition(after)))
               // 오름차순일 경우 cursor의 값이 크거나, 같되 after(create_at)이 커야 함
               : qInterest.subscriberCount.gt(cursorSubscriberCount)
-                  .or(qInterest.subscriberCount.goe(cursorSubscriberCount)
+                  .or(qInterest.subscriberCount.eq(cursorSubscriberCount)
                       .and(afterCondition(after)));
       }
     }
@@ -119,6 +119,8 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
       return null;
     }
 
-    return qInterest.createdAt.gt(Instant.parse(after));
+    Instant afterInstant = Instant.parse(after);
+
+    return qInterest.createdAt.gt(afterInstant);
   }
 }
