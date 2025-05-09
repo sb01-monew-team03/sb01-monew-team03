@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team03.monew.dto.user.UserActivityDto;
+import team03.monew.dto.user.ActivityDto;
 import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.dto.comments.CommentLikeActivityDto;
@@ -45,7 +45,7 @@ public class ActivityServiceImpl implements ActivityService {
   private final ArticleViewMapper articleViewMapper;
 
   @Override
-  public UserActivityDto findUserActivity(UUID userId) {
+  public ActivityDto findUserActivity(UUID userId) {
     if (!userRepository.existsById(userId)) {
       log.error("존재하지 않는 사용자 ID");
       throw UserNotFoundException.withId(userId);
@@ -72,7 +72,7 @@ public class ActivityServiceImpl implements ActivityService {
         .map(articleView -> articleViewMapper.toDto(articleView, commentRepository)
         ).toList();
 
-    UserActivityDto userActivityDto = new UserActivityDto(
+    ActivityDto activityDto = new ActivityDto(
         userId,
         user.getEmail(),
         user.getNickname(),
@@ -83,6 +83,6 @@ public class ActivityServiceImpl implements ActivityService {
         articleViewDtos);
 
     log.info("사용자 활동 내역 조회 완료: 사용자 ID = {}", userId);
-    return userActivityDto;
+    return activityDto;
   }
 }
