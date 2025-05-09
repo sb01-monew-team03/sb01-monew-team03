@@ -1,8 +1,8 @@
 # <span><img src="https://notion-emojis.s3-us-west-2.amazonaws.com/prod/svg-twitter/1f4f0.svg" width="30" height="30"/></span> 모뉴 / 3조
 
 
-[![ci](https://github.com/sb01-monew-team03/sb01-monew-team03/actions/workflows/ci.yaml/badge.svg)](https://github.com/sb01-monew-team03/sb01-monew-team03/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/sb01-monew-team03/sb01-monew-team03/graph/badge.svg?token=NY2BMVH8VF)](https://codecov.io/gh/sb01-monew-team03/sb01-monew-team03)
+[![CI](https://github.com/sb01-monew-team03/sb01-monew-team03/actions/workflows/ci.yaml/badge.svg)](https://github.com/sb01-monew-team03/sb01-monew-team03/actions/workflows/ci.yaml)
+[![Codecov](https://codecov.io/gh/sb01-monew-team03/sb01-monew-team03/graph/badge.svg?token=NY2BMVH8VF)](https://codecov.io/gh/sb01-monew-team03/sb01-monew-team03)
 
 
 ## 팀원 R&R
@@ -14,6 +14,7 @@
 |                                                   팀장                                                    |                                                    팀원                                                    |                                                   팀원                                                    |                                                   팀원                                                    |                                                    팀원                                                    |
 |                                              알림 관리<br/>활동 내역 관리                                              |                                                  댓글 관리                                                   |                                                사용자 관리<br/>배포                                                 |                                                뉴스 기사 관리                                                 |                                               관심사 관리<br/>로그 관리                                                |
 
+<br/>
 
 ## 프로젝트 소개
 
@@ -21,6 +22,7 @@
 
 [🔗**모뉴 배포 사이트**](http://3.34.146.23/)
 
+<br/>
 
 ## 기술 스택
 ### 📌 Back-End
@@ -49,6 +51,7 @@
 ### ☁️ 인프라 & 스토리지
 - **AWS S3 SDK** (파일 업로드/다운로드)
 
+<br/>
 
 ## 폴더 구조
 전반적인 구성은 **계층형 아키텍처(layered architecture)** 를 따르되,  

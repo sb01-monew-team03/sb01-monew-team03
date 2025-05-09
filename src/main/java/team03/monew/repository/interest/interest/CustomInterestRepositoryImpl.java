@@ -66,7 +66,7 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
 
     return where;
   }
-  
+
   // orderBy
   // 관심사 이름 or 구독자 수
   private OrderSpecifier<?> getOrderBy(String orderBy, String direction) {
@@ -115,6 +115,7 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
 
   // after
   private BooleanExpression afterCondition(String after) {
+
     if (StringUtils.isNullOrEmpty(after)) {
       return null;
     }

@@ -2,6 +2,7 @@ package team03.monew.repository.interest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import team03.monew.config.JpaConfig;
 import team03.monew.config.QueryDslConfig;
 import team03.monew.dto.interest.InterestFindRequest;
@@ -94,6 +96,14 @@ class InterestRepositoryTest {
     @BeforeEach
     void setUp() {
 
+      Interest interest1 = new Interest("관심사1");
+      interest1.updateKeywords(List.of("키워드1", "키워드2", "키워드3"));
+      saved1 = interestRepository.save(interest1);
+
+      Interest interest2 = new Interest("관심사2");
+      interest2.updateKeywords(List.of("키워드1", "키워드5"));
+      saved2 = interestRepository.save(interest2);
+
       Interest interest3 = new Interest("관심사3");
       interest3.updateKeywords(List.of("키워드1"));
       saved3 = interestRepository.save(interest3);
@@ -102,13 +112,15 @@ class InterestRepositoryTest {
       interest4.updateKeywords(List.of("키워드4"));
       saved4 = interestRepository.save(interest4);
 
-      Interest interest1 = new Interest("관심사1");
-      interest1.updateKeywords(List.of("키워드1", "키워드2", "키워드3"));
-      saved1 = interestRepository.save(interest1);
+      ReflectionTestUtils.setField(saved1, "subscriberCount", 1);
+      ReflectionTestUtils.setField(saved2, "subscriberCount", 3);
+      ReflectionTestUtils.setField(saved3, "subscriberCount", 0);
+      ReflectionTestUtils.setField(saved4, "subscriberCount", 2);
 
-      Interest interest2 = new Interest("관심사2");
-      interest2.updateKeywords(List.of("키워드1", "키워드5"));
-      saved2 = interestRepository.save(interest2);
+      ReflectionTestUtils.setField(saved1, "createdAt", Instant.now());
+      ReflectionTestUtils.setField(saved2, "createdAt", Instant.now().plusSeconds(1));
+      ReflectionTestUtils.setField(saved3, "createdAt", Instant.now().plusSeconds(2));
+      ReflectionTestUtils.setField(saved4, "createdAt", Instant.now().plusSeconds(3));
     }
 
     @Test
@@ -228,14 +240,8 @@ class InterestRepositoryTest {
     @Test
     @DisplayName("[findInterest()] 구독자 수 오름차순 정렬")
     void findInterestOrderBySubscriberCountAscTest() {
-      // given
-      saved1.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved4.increaseSubscribers();
-      saved4.increaseSubscribers();
 
+      // given
       InterestFindRequest request = new InterestFindRequest(
           "",
           "subscriberCount",
@@ -259,14 +265,8 @@ class InterestRepositoryTest {
     @Test
     @DisplayName("[findInterest()] 구독자 수 내림차순 정렬")
     void findInterestOrderBySubscriberCountDescTest() {
-      // given
-      saved1.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved4.increaseSubscribers();
-      saved4.increaseSubscribers();
 
+      // given
       InterestFindRequest request = new InterestFindRequest(
           "",
           "subscriberCount",
@@ -288,8 +288,8 @@ class InterestRepositoryTest {
     }
 
     @Test
-    @DisplayName("[findInterest()] 이름 커서 기반 페이지네이션")
-    void findInterestCursorPaginationNameTest() {
+    @DisplayName("[findInterest()] 이름 오름차순 커서 기반 페이지네이션")
+    void findInterestAscCursorPaginationNameTest() {
 
       // given
       InterestFindRequest request = new InterestFindRequest(
@@ -308,20 +308,35 @@ class InterestRepositoryTest {
       assertThat(result).hasSize(1);
       assertThat(result.get(0).getName()).isEqualTo("관심사4");
     }
-    
+
+    @Test
+    @DisplayName("[findInterest()] 이름 내림차순 커서 기반 페이지네이션")
+    void findInterestDescCursorPaginationNameTest() {
+
+      // given
+      InterestFindRequest request = new InterestFindRequest(
+          null,
+          "name",
+          "desc",
+          saved3.getName(), // 관심사3
+          saved3.getCreatedAt().toString(),
+          10
+      );
+
+      // when
+      List<Interest> result = interestRepository.findInterest(request);
+
+      // then
+      assertThat(result).hasSize(2);
+      assertThat(result.get(0).getName()).isEqualTo("관심사2");
+      assertThat(result.get(1).getName()).isEqualTo("관심사1");
+    }
+
 //    @Test
-//    @DisplayName("[findInterest()] 구독자 수 커서 기반 페이지네이션")
-//    void findInterestCursorPaginationSubscriberCountTest() {
+//    @DisplayName("[findInterest()] 구독자 수 오름차순 커서 기반 페이지네이션")
+//    void findInterestAscCursorPaginationSubscriberCountTest() {
 //
 //      // given
-//      // 오름차순 기준 3-1-4-2 순서
-//      saved1.increaseSubscribers();
-//      saved2.increaseSubscribers();
-//      saved2.increaseSubscribers();
-//      saved2.increaseSubscribers();
-//      saved4.increaseSubscribers();
-//      saved4.increaseSubscribers();
-//
 //      InterestFindRequest request = new InterestFindRequest(
 //          null,
 //          "subscriberCount",
@@ -335,9 +350,31 @@ class InterestRepositoryTest {
 //      List<Interest> result = interestRepository.findInterest(request);
 //
 //      // then
-////      assertThat(result).hasSize(2);  // TODO: 프론트 fix된 후 주석 풀기
+//      assertThat(result).hasSize(2);
 //      assertThat(result.get(0).getName()).isEqualTo("관심사4");
 //      assertThat(result.get(1).getName()).isEqualTo("관심사2");
+//    }
+//
+//    @Test
+//    @DisplayName("[findInterest()] 구독자 수 내림차순 커서 기반 페이지네이션")
+//    void findInterestDescCursorPaginationSubscriberCountTest() {
+//
+//      // given
+//      InterestFindRequest request = new InterestFindRequest(
+//          null,
+//          "subscriberCount",
+//          "desc",
+//          String.valueOf(saved1.getSubscriberCount()), // 관심사1
+//          saved1.getCreatedAt().toString(),
+//          10
+//      );
+//
+//      // when
+//      List<Interest> result = interestRepository.findInterest(request);
+//
+//      // then
+//      assertThat(result).hasSize(1);
+//      assertThat(result.get(0).getName()).isEqualTo("관심사3");
 //    }
 
     @Test
