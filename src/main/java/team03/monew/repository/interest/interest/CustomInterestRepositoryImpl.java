@@ -120,8 +120,6 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
       return null;
     }
 
-    Instant afterInstant = Instant.parse(after);
-
-    return qInterest.createdAt.gt(afterInstant);
+    return qInterest.createdAt.gt(Instant.parse(after));
   }
 }
