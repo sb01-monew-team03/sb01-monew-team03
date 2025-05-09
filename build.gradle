@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'jacoco'
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -88,6 +89,19 @@ tasks.withType(JavaCompile).configureEach {
     options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
     // 어노테이션 프로세서가 JPA 엔티티를 인식하도록 설정
     options.annotationProcessorPath = configurations.annotationProcessor
+}
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+jacocoTestReport {
+    dependsOn test // 테스트가 먼저 실행되어야 리포트 생성 가능
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
 
 clean {
