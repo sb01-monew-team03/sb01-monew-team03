@@ -2,7 +2,6 @@ package team03.monew.repository.interest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -332,7 +331,7 @@ class InterestRepositoryTest {
       assertThat(result.get(0).getName()).isEqualTo("관심사2");
       assertThat(result.get(1).getName()).isEqualTo("관심사1");
     }
-    
+
     @Test
     @DisplayName("[findInterest()] 구독자 수 오름차순 커서 기반 페이지네이션")
     void findInterestAscCursorPaginationSubscriberCountTest() {

@@ -115,6 +115,7 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
 
   // after
   private BooleanExpression afterCondition(String after) {
+
     if (StringUtils.isNullOrEmpty(after)) {
       return null;
     }
