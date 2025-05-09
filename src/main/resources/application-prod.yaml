@@ -11,6 +11,10 @@ spring:
       hibernate:
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  batch:
+    jdbc:
+      initialize-schema: never
+
 log:
   file:
     path: ./logs-prod
