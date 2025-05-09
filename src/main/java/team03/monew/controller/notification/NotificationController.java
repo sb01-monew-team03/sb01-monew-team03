@@ -1,7 +1,9 @@
 package team03.monew.controller.notification;
 
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,7 @@ public class NotificationController implements NotificationApi {
   @Override
   @GetMapping
   public ResponseEntity<CursorPageResponse<NotificationDto>> findAll (
-      @ModelAttribute NotificationFindRequest request) {
+      @ModelAttribute @Valid NotificationFindRequest request) {
     log.info("알림 조회 요청: {}", request);
 
     CursorPageResponse<NotificationDto> notificationDtos = notificationService.findAll(request);
