@@ -12,10 +12,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.entity.interest.Interest;
 
+@Transactional
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
