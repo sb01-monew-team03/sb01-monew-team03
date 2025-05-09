@@ -1,8 +1,8 @@
 # <span><img src="https://notion-emojis.s3-us-west-2.amazonaws.com/prod/svg-twitter/1f4f0.svg" width="30" height="30"/></span> 모뉴 / 3조
 
 ## 테스트 커버리지
-
-
+[![ci](https://github.com/sb01-monew-team03/sb01-monew-team03/actions/workflows/ci.yaml/badge.svg)](https://github.com/sb01-monew-team03/sb01-monew-team03/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/sb01-monew-team03/sb01-monew-team03/graph/badge.svg?token=NY2BMVH8VF)](https://codecov.io/gh/sb01-monew-team03/sb01-monew-team03)
 ## 팀원 R&R
 
 |                                                   이유빈                                                   |                                                   김도일                                                    |                                                   이병규                                                   |                                                   이승주                                                   |                                                   한성지                                                    |
