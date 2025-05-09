@@ -66,7 +66,7 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
 
     return where;
   }
-  
+
   // orderBy
   // 관심사 이름 or 구독자 수
   private OrderSpecifier<?> getOrderBy(String orderBy, String direction) {
@@ -95,7 +95,9 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
         case "name":
           return isDesc
               ? qInterest.name.lt(cursor)
-              : qInterest.name.gt(cursor);
+              .or(qInterest.name.eq(cursor).and(afterCondition(after)))
+              : qInterest.name.gt(cursor)
+                  .or(qInterest.name.eq(cursor).and(afterCondition(after)));
         case "subscriberCount":
           long cursorSubscriberCount = Long.parseLong(cursor);
           return isDesc
