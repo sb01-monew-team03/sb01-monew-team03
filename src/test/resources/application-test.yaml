@@ -25,9 +25,3 @@ logging:
 log:
   file:
     path: ./logs-test
-monew:
-  storage:
-    s3:
-      region: dummy-region
-      access-key: dummy-access
-      secret-key: dummy-secret
