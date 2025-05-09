@@ -90,7 +90,6 @@ tasks.withType(JavaCompile).configureEach {
     options.annotationProcessorPath = configurations.annotationProcessor
 }
 
-
 clean {
     delete file(querydslDir)
 }
