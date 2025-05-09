@@ -3,6 +3,7 @@ package team03.monew.repository.interest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -96,6 +97,14 @@ class InterestRepositoryTest {
     @BeforeEach
     void setUp() {
 
+      Interest interest1 = new Interest("관심사1");
+      interest1.updateKeywords(List.of("키워드1", "키워드2", "키워드3"));
+      saved1 = interestRepository.save(interest1);
+
+      Interest interest2 = new Interest("관심사2");
+      interest2.updateKeywords(List.of("키워드1", "키워드5"));
+      saved2 = interestRepository.save(interest2);
+
       Interest interest3 = new Interest("관심사3");
       interest3.updateKeywords(List.of("키워드1"));
       saved3 = interestRepository.save(interest3);
@@ -104,13 +113,15 @@ class InterestRepositoryTest {
       interest4.updateKeywords(List.of("키워드4"));
       saved4 = interestRepository.save(interest4);
 
-      Interest interest1 = new Interest("관심사1");
-      interest1.updateKeywords(List.of("키워드1", "키워드2", "키워드3"));
-      saved1 = interestRepository.save(interest1);
+      ReflectionTestUtils.setField(saved1, "subscriberCount", 1);
+      ReflectionTestUtils.setField(saved2, "subscriberCount", 3);
+      ReflectionTestUtils.setField(saved3, "subscriberCount", 0);
+      ReflectionTestUtils.setField(saved4, "subscriberCount", 2);
 
-      Interest interest2 = new Interest("관심사2");
-      interest2.updateKeywords(List.of("키워드1", "키워드5"));
-      saved2 = interestRepository.save(interest2);
+      ReflectionTestUtils.setField(saved1, "createdAt", Instant.now());
+      ReflectionTestUtils.setField(saved2, "createdAt", Instant.now().plusSeconds(1));
+      ReflectionTestUtils.setField(saved3, "createdAt", Instant.now().plusSeconds(2));
+      ReflectionTestUtils.setField(saved4, "createdAt", Instant.now().plusSeconds(3));
     }
 
     @Test
@@ -230,14 +241,8 @@ class InterestRepositoryTest {
     @Test
     @DisplayName("[findInterest()] 구독자 수 오름차순 정렬")
     void findInterestOrderBySubscriberCountAscTest() {
-      // given
-      saved1.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved4.increaseSubscribers();
-      saved4.increaseSubscribers();
 
+      // given
       InterestFindRequest request = new InterestFindRequest(
           "",
           "subscriberCount",
@@ -261,14 +266,8 @@ class InterestRepositoryTest {
     @Test
     @DisplayName("[findInterest()] 구독자 수 내림차순 정렬")
     void findInterestOrderBySubscriberCountDescTest() {
-      // given
-      saved1.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved2.increaseSubscribers();
-      saved4.increaseSubscribers();
-      saved4.increaseSubscribers();
 
+      // given
       InterestFindRequest request = new InterestFindRequest(
           "",
           "subscriberCount",
@@ -339,11 +338,6 @@ class InterestRepositoryTest {
     void findInterestAscCursorPaginationSubscriberCountTest() {
 
       // given
-      ReflectionTestUtils.setField(saved1, "subscriberCount", 1);
-      ReflectionTestUtils.setField(saved2, "subscriberCount", 3);
-      ReflectionTestUtils.setField(saved3, "subscriberCount", 0);
-      ReflectionTestUtils.setField(saved4, "subscriberCount", 2);
-
       InterestFindRequest request = new InterestFindRequest(
           null,
           "subscriberCount",
@@ -367,11 +361,6 @@ class InterestRepositoryTest {
     void findInterestDescCursorPaginationSubscriberCountTest() {
 
       // given
-      ReflectionTestUtils.setField(saved1, "subscriberCount", 1);
-      ReflectionTestUtils.setField(saved2, "subscriberCount", 3);
-      ReflectionTestUtils.setField(saved3, "subscriberCount", 0);
-      ReflectionTestUtils.setField(saved4, "subscriberCount", 2);
-
       InterestFindRequest request = new InterestFindRequest(
           null,
           "subscriberCount",
