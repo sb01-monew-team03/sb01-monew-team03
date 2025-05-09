@@ -1,6 +1,8 @@
 # <span><img src="https://notion-emojis.s3-us-west-2.amazonaws.com/prod/svg-twitter/1f4f0.svg" width="30" height="30"/></span> 모뉴 / 3조
 
-## 테스트 커버리지
+
+[![ci](https://github.com/sb01-monew-team03/sb01-monew-team03/actions/workflows/ci.yaml/badge.svg)](https://github.com/sb01-monew-team03/sb01-monew-team03/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/sb01-monew-team03/sb01-monew-team03/graph/badge.svg?token=NY2BMVH8VF)](https://codecov.io/gh/sb01-monew-team03/sb01-monew-team03)
 
 
 ## 팀원 R&R
@@ -10,13 +12,15 @@
 | <span><img src="https://avatars.githubusercontent.com/u/80386881?v=4" width="150" height="150"/></span> | <span><img src="https://avatars.githubusercontent.com/u/207847768?v=4" width="150" height="150"/></span> | <span><img src="https://avatars.githubusercontent.com/u/93171052?v=4" width="150" height="150"/></span> | <span><img src="https://avatars.githubusercontent.com/u/61524863?v=4" width="150" height="150"/></span> | <span><img src="https://avatars.githubusercontent.com/u/158116933?v=4" width="150" height="150"/></span> |
 |                                  [@iiyubb](https://github.com/iiyubb)                                   |                                 [@doil1130](https://github.com/doil1130)                                 |                                 [@naron88](https://github.com/naron88)                                  |                                [@leesj092](https://github.com/leesj092)                                 |                                  [@hyanyul](https://github.com/hyanyul)                                  |
 |                                                   팀장                                                    |                                                    팀원                                                    |                                                   팀원                                                    |                                                   팀원                                                    |                                                    팀원                                                    |
-|                                               알림+활동 내역 관리                                               |                                                  댓글 관리                                                   |                                               사용자 관리, 배포                                                |                                                뉴스 기사 관리                                                 |                                              관심사 관리, 로그 관리                                               |
+|                                              알림 관리<br/>활동 내역 관리                                              |                                                  댓글 관리                                                   |                                                사용자 관리<br/>배포                                                 |                                                뉴스 기사 관리                                                 |                                               관심사 관리<br/>로그 관리                                                |
+
 
 ## 프로젝트 소개
 
 **모뉴**는 여러 뉴스 API를 통합하여 **사용자에게 맞춤형 뉴스를 제공**하고, 의견을 나눌 수 있는 **소셜 기능**을 갖춘 서비스입니다.
 
 [🔗**모뉴 배포 사이트**](http://3.34.146.23/)
+
 
 ## 기술 스택
 ### 📌 Back-End
@@ -44,6 +48,7 @@
 
 ### ☁️ 인프라 & 스토리지
 - **AWS S3 SDK** (파일 업로드/다운로드)
+
 
 ## 폴더 구조
 전반적인 구성은 **계층형 아키텍처(layered architecture)** 를 따르되,  
