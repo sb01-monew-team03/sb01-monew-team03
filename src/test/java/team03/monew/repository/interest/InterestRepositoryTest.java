@@ -309,36 +309,36 @@ class InterestRepositoryTest {
       assertThat(result.get(0).getName()).isEqualTo("관심사4");
     }
     
-//    @Test
-//    @DisplayName("[findInterest()] 구독자 수 커서 기반 페이지네이션")
-//    void findInterestCursorPaginationSubscriberCountTest() {
-//
-//      // given
-//      // 오름차순 기준 3-1-4-2 순서
-//      saved1.increaseSubscribers();
-//      saved2.increaseSubscribers();
-//      saved2.increaseSubscribers();
-//      saved2.increaseSubscribers();
-//      saved4.increaseSubscribers();
-//      saved4.increaseSubscribers();
-//
-//      InterestFindRequest request = new InterestFindRequest(
-//          null,
-//          "subscriberCount",
-//          "asc",
-//          String.valueOf(saved1.getSubscriberCount()), // 관심사1
-//          saved1.getCreatedAt().toString(),
-//          10
-//      );
-//
-//      // when
-//      List<Interest> result = interestRepository.findInterest(request);
-//
-//      // then
-////      assertThat(result).hasSize(2);  // TODO: 프론트 fix된 후 주석 풀기
-//      assertThat(result.get(0).getName()).isEqualTo("관심사4");
-//      assertThat(result.get(1).getName()).isEqualTo("관심사2");
-//    }
+    @Test
+    @DisplayName("[findInterest()] 구독자 수 커서 기반 페이지네이션")
+    void findInterestCursorPaginationSubscriberCountTest() {
+
+      // given
+      // 오름차순 기준 3-1-4-2 순서
+      saved1.increaseSubscribers();
+      saved2.increaseSubscribers();
+      saved2.increaseSubscribers();
+      saved2.increaseSubscribers();
+      saved4.increaseSubscribers();
+      saved4.increaseSubscribers();
+
+      InterestFindRequest request = new InterestFindRequest(
+          null,
+          "subscriberCount",
+          "asc",
+          String.valueOf(saved1.getSubscriberCount()), // 관심사1
+          saved1.getCreatedAt().toString(),
+          10
+      );
+
+      // when
+      List<Interest> result = interestRepository.findInterest(request);
+
+      // then
+//      assertThat(result).hasSize(2);  // TODO: 프론트 fix 후 주석 수정
+      assertThat(result.get(0).getName()).isEqualTo("관심사4");
+      assertThat(result.get(1).getName()).isEqualTo("관심사2");
+    }
 
     @Test
     @DisplayName("[totalCountInterest()] 검색어에 해당하는 요소 총 개수 - 관심사명")
