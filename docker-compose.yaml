@@ -42,6 +42,8 @@ services:
       AWS_S3_REGION: ${AWS_S3_REGION}
       AWS_S3_BUCKET: ${AWS_S3_BUCKET}
       AWS_S3_PRESIGNED_URL_EXPIRATION: ${AWS_S3_PRESIGNED_URL_EXPIRATION}
+
+      MONGO_URI: ${MONGO_URI}
     depends_on:
       db:
         condition: service_healthy
