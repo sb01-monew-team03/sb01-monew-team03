@@ -8,7 +8,7 @@ import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.dto.comments.CommentLikeActivityDto;
 import team03.monew.dto.interest.SubscriptionDto;
 
-public record UserActivityDto(
+public record ActivityDto(
     UUID id,
     String email,
     String nickname,

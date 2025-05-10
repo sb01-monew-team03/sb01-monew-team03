@@ -1,10 +1,10 @@
 package team03.monew.service.activity;
 
 import java.util.UUID;
-import team03.monew.dto.user.UserActivityDto;
+import team03.monew.dto.user.ActivityDto;
 
 public interface ActivityService {
 
-  UserActivityDto findUserActivity(UUID userId);
+  ActivityDto findUserActivity(UUID userId);
 
 }

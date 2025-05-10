@@ -12,7 +12,7 @@ import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.dto.comments.CommentLikeActivityDto;
 import team03.monew.dto.interest.SubscriptionDto;
-import team03.monew.dto.user.UserActivityDto;
+import team03.monew.dto.user.ActivityDto;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.article.ArticleView;
 import team03.monew.entity.comments.Comment;
@@ -162,7 +162,7 @@ class ActivityServiceTest {
     given(articleViewMapper.toDto(eq(articleView), any(CommentRepository.class))).willReturn(articleViewDto);
 
     // When
-    UserActivityDto result = activityService.findUserActivity(userId);
+    ActivityDto result = activityService.findUserActivity(userId);
 
     // Then
     assertThat(result).isNotNull();
