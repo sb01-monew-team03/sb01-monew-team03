@@ -47,7 +47,7 @@ public interface NotificationApi {
           )
       )
   })
-  ResponseEntity<CursorPageResponse<NotificationDto>> findAll(NotificationFindRequest request);
+  ResponseEntity<CursorPageResponse<NotificationDto>> findAll(UUID userId, String cursor, Instant after, Integer limit);
 
   //PATCH /api/notifications
   @Operation(

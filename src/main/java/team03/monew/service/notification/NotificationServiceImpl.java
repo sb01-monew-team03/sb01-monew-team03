@@ -16,7 +16,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
-import team03.monew.dto.notification.NotificationFindRequest;
 import team03.monew.dto.notification.ResourceType;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.comments.Comment;
@@ -124,15 +123,15 @@ public class NotificationServiceImpl implements NotificationService {
   // 알림 목록 조회
   @Transactional
   @Override
-  public CursorPageResponse<NotificationDto> findAll(NotificationFindRequest request) {
-    if (!userRepository.existsById(request.userId())) {
+  public CursorPageResponse<NotificationDto> findAll(UUID userId, String cursor, Instant after, Integer limit) {
+    if (!userRepository.existsById(userId)) {
       log.error("존재하지 않는 사용자 ID");
-      throw UserNotFoundException.withId(request.userId());
+      throw UserNotFoundException.withId(userId);
     }
 
     try {
-      Pageable pageable = PageRequest.of(0, request.limit(), Sort.by(Direction.DESC, "createdAt"));
-      Page<Notification> pages = notificationRepository.findPageWithCursor(request.userId(), request.cursor(),
+      Pageable pageable = PageRequest.of(0, limit, Sort.by(Direction.DESC, "createdAt"));
+      Page<Notification> pages = notificationRepository.findPageWithCursor(userId, cursor,
           pageable);
 
       List<NotificationDto> notificationDtos = pages.getContent()

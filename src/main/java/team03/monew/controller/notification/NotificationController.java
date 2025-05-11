@@ -1,6 +1,7 @@
 package team03.monew.controller.notification;
 
 import jakarta.validation.Valid;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -8,16 +9,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import team03.monew.config.api.NotificationApi;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
-import team03.monew.dto.notification.NotificationFindRequest;
 import team03.monew.service.notification.NotificationService;
 
 @Slf4j
@@ -31,10 +31,13 @@ public class NotificationController implements NotificationApi {
   @Override
   @GetMapping
   public ResponseEntity<CursorPageResponse<NotificationDto>> findAll (
-      @ModelAttribute @Valid NotificationFindRequest request) {
-    log.info("알림 조회 요청: {}", request);
+          @RequestHeader("Monew-Request-User-Id") UUID userId,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) Instant after,
+      @RequestParam(required = true) Integer limit) {
+    log.info("알림 조회 요청: {}", userId);
 
-    CursorPageResponse<NotificationDto> notificationDtos = notificationService.findAll(request);
+    CursorPageResponse<NotificationDto> notificationDtos = notificationService.findAll(userId, cursor, after, limit);
     log.debug("알림 조회 응답: {}", notificationDtos);
 
     return ResponseEntity
