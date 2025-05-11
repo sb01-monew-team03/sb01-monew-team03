@@ -1,11 +1,10 @@
 package team03.monew.service.article;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.util.HashSet;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +17,14 @@ import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.article.ArticleView;
+import team03.monew.entity.user.User;
 import team03.monew.mapper.article.ArticleMapper;
 import team03.monew.repository.article.ArticleRepository;
 import team03.monew.repository.article.ArticleViewRepository;
+import team03.monew.repository.comments.CommentRepository;
+import team03.monew.repository.user.UserRepository;
 import team03.monew.util.exception.article.ArticleNotFoundException;
+import team03.monew.util.exception.user.UserNotFoundException;
 
 @Slf4j
 @Service
@@ -32,45 +35,59 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleViewRepository articleViewRepository;
     private final ArticleMapper articleMapper;
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
     public CursorPageResponse<ArticleDto> findArticles(ArticleFindRequest request, UUID userId) {
-        log.debug("기사 목록 조회 시작: request={}, userId={}", request, userId);
+        log.debug("기사 목록 조회 시작");
+
+        LocalDateTime publishDateFrom = request.publishDateFrom() != null
+            ? LocalDateTime.ofInstant(request.publishDateFrom(), ZoneId.systemDefault())
+            : null;
+        LocalDateTime publishDateTo = request.publishDateTo() != null
+            ? LocalDateTime.ofInstant(request.publishDateTo(), ZoneId.systemDefault())
+            : null;
+        LocalDateTime after = request.after() != null
+            ? LocalDateTime.parse(request.after())
+            : null;
 
         List<Article> articles = articleRepository.findAllByCursor(
             request.keyword(),
             request.interestId(),
             request.sourceIn(),
-            request.publishDateFrom(),
-            request.publishDateTo(),
+            publishDateFrom,
+            publishDateTo,
             request.orderBy(),
             request.direction(),
             request.cursor(),
-            request.after(),
-            request.limit()
+            after,
+            request.limit() + 1
         );
 
-        Set<UUID> viewedArticleIds = new HashSet<>(
-            articleViewRepository.findViewedArticleIds(userId));
+        boolean hasNext = articles.size() > request.limit();
+        if (hasNext) {
+            articles.remove(articles.size() - 1);
+        }
 
-        List<ArticleDto> articleDtos = articles.stream()
-            .limit(request.limit())
-            .map(article -> {
-                boolean viewedByMe = viewedArticleIds.contains(article.getId());
-                return articleMapper.toDto(article, viewedByMe);
-            })
-            .toList();
+        List<ArticleDto> articleDtos = articles.stream().map(article -> {
+            long commentCount = commentRepository.countByArticle(article);
+            boolean viewedByMe = articleViewRepository.existsByArticleIdAndUserId(article.getId(),
+                userId);
+            return articleMapper.toDto(article, (int) commentCount, viewedByMe);
+        }).toList();
 
         String nextCursor = null;
         Instant nextAfter = null;
 
-        if (articles.size() > request.limit()) {
-            Article last = articles.get(request.limit());
-            nextAfter = last.getPublishedAt().toInstant(ZoneOffset.UTC);
+        if (hasNext && !articles.isEmpty()) {
+            Article last = articles.get(articles.size() - 1);
+            nextAfter = last.getPublishedAt().atZone(ZoneId.systemDefault()).toInstant();
 
             switch (request.orderBy()) {
-                case "commentCount" -> nextCursor = String.valueOf(last.getComments().size());
+                case "commentCount" ->
+                    nextCursor = String.valueOf(commentRepository.countByArticle(last));
                 case "viewCount" -> nextCursor = String.valueOf(last.getViewCount());
                 default -> nextCursor = last.getPublishedAt().toString();
             }
@@ -80,11 +97,9 @@ public class ArticleServiceImpl implements ArticleService {
             request.keyword(),
             request.interestId(),
             request.sourceIn(),
-            request.publishDateFrom(),
-            request.publishDateTo()
+            publishDateFrom,
+            publishDateTo
         );
-
-        log.info("기사 목록 조회 완료: size={}, total={}", articleDtos.size(), totalElements);
 
         return new CursorPageResponse<>(
             articleDtos,
@@ -92,7 +107,7 @@ public class ArticleServiceImpl implements ArticleService {
             nextAfter,
             articleDtos.size(),
             totalElements,
-            articles.size() > request.limit()
+            hasNext
         );
     }
 
@@ -120,29 +135,34 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional
     public ArticleViewDto registerView(UUID articleId, UUID userId) {
-        log.debug("기사 뷰 등록 시작: articleId={}, userId={}", articleId, userId);
-
         Article article = articleRepository.findByIdAndDeletedAtIsNull(articleId)
             .orElseThrow(() -> ArticleNotFoundException.withId(articleId));
 
-        Optional<ArticleView> optionalView = articleViewRepository.findByArticleIdAndViewedBy(
-            articleId, userId);
+        User user = userRepository.findActiveById(userId)
+            .orElseThrow(() -> UserNotFoundException.withId(userId));
 
-        if (optionalView.isEmpty()) {
-            ArticleView view = new ArticleView(article, userId);
-            article.increaseViewCount();
-            articleViewRepository.save(view);
-            log.info("기사 뷰 등록 완료: articleId={}, userId={}", articleId, userId);
-            return articleMapper.toViewDto(view, article);
+        // 이미 본 적 있다면 리턴
+        Optional<ArticleView> existing = articleViewRepository.findByArticleIdAndUserId(articleId,
+            userId);
+        if (existing.isPresent()) {
+            long commentCount = commentRepository.countByArticle(article);
+            return articleMapper.toViewDto(existing.get(), article, commentCount);
         }
 
-        log.debug("이미 조회한 기사입니다: articleId={}, userId={}", articleId, userId);
-        return articleMapper.toViewDto(optionalView.get(), article);
+        // 새로 조회 등록
+        ArticleView view = new ArticleView(user, article);
+        articleViewRepository.save(view);
+
+        article.increaseViewCount();
+
+        long commentCount = commentRepository.countByArticle(article);
+        return articleMapper.toViewDto(view, article, commentCount);
     }
 
     @Override
-    public List<String> findSources() {
-        return articleRepository.findDistinctSources();
+    public List<String> getSources() {
+        return List.of("HANKYUNG", "CHOSUN", "YONHAP");
     }
 }

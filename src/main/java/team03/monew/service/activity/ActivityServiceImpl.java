@@ -11,12 +11,13 @@ import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.dto.comments.CommentLikeActivityDto;
 import team03.monew.dto.interest.SubscriptionDto;
+import team03.monew.entity.article.Article;
 import team03.monew.entity.article.ArticleView;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 import team03.monew.entity.interest.Subscription;
 import team03.monew.entity.user.User;
-import team03.monew.mapper.article.ArticleViewMapper;
+import team03.monew.mapper.article.ArticleMapper;
 import team03.monew.mapper.comments.CommentLikeMapper;
 import team03.monew.mapper.comments.CommentMapper;
 import team03.monew.mapper.interest.SubscriptionMapper;
@@ -33,56 +34,62 @@ import team03.monew.util.exception.user.UserNotFoundException;
 @Transactional
 public class ActivityServiceImpl implements ActivityService {
 
-  private final UserRepository userRepository;
-  private final SubscriptionRepository subscriptionRepository;
-  private final CommentRepository commentRepository;
-  private final CommentLikeRepository commentLikeRepository;
-  private final ArticleViewRepository articleViewRepository;
+    private final UserRepository userRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final ArticleViewRepository articleViewRepository;
 
-  private final SubscriptionMapper subscriptionMapper;
-  private final CommentMapper commentMapper;
-  private final CommentLikeMapper commentLikeMapper;
-  private final ArticleViewMapper articleViewMapper;
+    private final SubscriptionMapper subscriptionMapper;
+    private final CommentMapper commentMapper;
+    private final CommentLikeMapper commentLikeMapper;
+    private final ArticleMapper articleMapper;
 
-  @Override
-  public ActivityDto findUserActivity(UUID userId) {
-    if (!userRepository.existsById(userId)) {
-      log.error("존재하지 않는 사용자 ID");
-      throw UserNotFoundException.withId(userId);
+    @Override
+    public ActivityDto findUserActivity(UUID userId) {
+        if (!userRepository.existsById(userId)) {
+            log.error("존재하지 않는 사용자 ID");
+            throw UserNotFoundException.withId(userId);
+        }
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> UserNotFoundException.withId(userId));
+
+        log.debug("사용자 활동 내역 조회 시작: 사용자 ID = {}", userId);
+        List<Subscription> subscriptions = subscriptionRepository.findAllByUser(user);
+        List<SubscriptionDto> subscriptionDtos = subscriptions.stream()
+            .map(subscriptionMapper::toDto).toList();
+
+        List<Comment> comments = commentRepository.findTop10ByUserOrderByCreatedAtDesc(user);
+        List<CommentActivityDto> commentDtos = comments.stream()
+            .map(commentMapper::toActivityDto).toList();
+
+        List<CommentLike> commentLikes = commentLikeRepository.findTop10ByUserOrderByCreatedAtDesc(
+            user);
+        List<CommentLikeActivityDto> commentLikeDtos = commentLikes.stream()
+            .map(commentLikeMapper::toActivityDto).toList();
+
+        List<ArticleView> articleViews = articleViewRepository.findTop10ByUserOrderByViewedAtDesc(
+            user);
+        List<ArticleViewDto> articleViewDtos = articleViews.stream()
+            .map(articleView -> {
+                Article article = articleView.getArticle();
+                long commentCount = commentRepository.countByArticle(article);
+                return articleMapper.toViewDto(articleView, article, commentCount);
+            })
+            .toList();
+
+        ActivityDto activityDto = new ActivityDto(
+            userId,
+            user.getEmail(),
+            user.getNickname(),
+            user.getCreatedAt(),
+            subscriptionDtos,
+            commentDtos,
+            commentLikeDtos,
+            articleViewDtos);
+
+        log.info("사용자 활동 내역 조회 완료: 사용자 ID = {}", userId);
+        return activityDto;
     }
-
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> UserNotFoundException.withId(userId));
-
-    log.debug("사용자 활동 내역 조회 시작: 사용자 ID = {}", userId);
-    List<Subscription> subscriptions = subscriptionRepository.findAllByUser(user);
-    List<SubscriptionDto> subscriptionDtos = subscriptions.stream()
-        .map(subscriptionMapper::toDto).toList();
-
-    List<Comment> comments = commentRepository.findTop10ByUserOrderByCreatedAtDesc(user);
-    List<CommentActivityDto> commentDtos = comments.stream()
-        .map(commentMapper::toActivityDto).toList();
-
-    List<CommentLike> commentLikes = commentLikeRepository.findTop10ByUserOrderByCreatedAtDesc(user);
-    List<CommentLikeActivityDto> commentLikeDtos = commentLikes.stream()
-        .map(commentLikeMapper::toActivityDto).toList();
-
-    List<ArticleView> articleViews = articleViewRepository.findTop10ByUserOrderByViewedAtDesc(user);
-    List<ArticleViewDto> articleViewDtos = articleViews.stream()
-        .map(articleView -> articleViewMapper.toDto(articleView, commentRepository)
-        ).toList();
-
-    ActivityDto activityDto = new ActivityDto(
-        userId,
-        user.getEmail(),
-        user.getNickname(),
-        user.getCreatedAt(),
-        subscriptionDtos,
-        commentDtos,
-        commentLikeDtos,
-        articleViewDtos);
-
-    log.info("사용자 활동 내역 조회 완료: 사용자 ID = {}", userId);
-    return activityDto;
-  }
 }

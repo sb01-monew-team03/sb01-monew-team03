@@ -65,7 +65,7 @@ public class ArticleController implements ArticleApi {
     @GetMapping("/sources")
     public ResponseEntity<List<String>> findSources() {
         log.info("출처 목록 조회 요청");
-        List<String> sources = articleService.findSources();
+        List<String> sources = articleService.getSources();
         log.debug("출처 목록 조회 응답: {}", sources);
         return ResponseEntity.ok(sources);
     }

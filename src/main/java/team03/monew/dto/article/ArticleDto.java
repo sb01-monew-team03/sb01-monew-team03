@@ -1,16 +1,15 @@
 package team03.monew.dto.article;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 public record ArticleDto(
     UUID id,
     String source,
-    String originalLink,
+    String sourceUrl,
     String title,
+    LocalDateTime publishDate,
     String summary,
-    LocalDateTime publishedAt,
     int commentCount,
     int viewCount,
     boolean viewedByMe

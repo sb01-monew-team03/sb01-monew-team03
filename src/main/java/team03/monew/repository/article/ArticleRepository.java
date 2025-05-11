@@ -17,6 +17,8 @@ public interface ArticleRepository extends JpaRepository<Article, UUID>, Article
 
     Optional<Article> findByIdAndDeletedAtIsNull(UUID id);
 
+    boolean existsByOriginalLink(String originalLink);
+
     @Query("""
             SELECT a FROM Article a
             WHERE a.deletedAt IS NULL

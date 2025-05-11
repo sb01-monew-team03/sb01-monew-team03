@@ -9,7 +9,7 @@ public record ArticleViewDto(
     Instant createdAt,
     UUID articleId,
     String source,
-    String originalLink,
+    String sourceUrl,
     String articleTitle,
     Instant articlePublishedDate,
     String articleSummary,

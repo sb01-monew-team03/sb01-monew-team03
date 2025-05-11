@@ -31,7 +31,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         QComment comment = QComment.comment;
         BooleanBuilder where = new BooleanBuilder();
 
-        where.and(article.isDeleted().not());
+        where.and(article.deletedAt.isNull());
 
         if (keyword != null && !keyword.isBlank()) {
             where.and(article.title.containsIgnoreCase(keyword)

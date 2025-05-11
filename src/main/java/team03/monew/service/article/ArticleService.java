@@ -15,7 +15,7 @@ public interface ArticleService {
     CursorPageResponse<ArticleDto> findArticles(ArticleFindRequest request, UUID userId);
 
     // 출처 목록 조회
-    List<String> findSources();
+    List<String> getSources();
 
     // 뉴스 복구
     List<ArticleRestoreDto> restore(Instant from, Instant to);
