@@ -31,7 +31,7 @@ public class RssFetcherService {
     public void fetchAll() {
         fetchFrom("https://www.hankyung.com/feed/all-news", "HANKYUNG");
         fetchFrom("https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml", "CHOSUN");
-        //fetchFrom("http://www.yonhapnewstv.co.kr/browse/feed/", "Yonhap");
+        //fetchFrom("http://www.yonhapnewstv.co.kr/browse/feed/", "YONHAP");
     }
 
     private void fetchFrom(String feedUrl, String source) {
@@ -70,8 +70,6 @@ public class RssFetcherService {
                         )
                     ).collect(Collectors.toSet());
 
-                log.info("✅ 기사에 관심사가 새로 매칭되었습니다: {}",
-                    matchedInterests.stream().map(Interest::getName).toList());
                 article.updateInterests(matchedInterests);
                 articleRepository.save(article);
             }
