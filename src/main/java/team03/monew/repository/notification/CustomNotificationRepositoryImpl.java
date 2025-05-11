@@ -2,7 +2,6 @@ package team03.monew.repository.notification;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +28,6 @@ public class CustomNotificationRepositoryImpl implements CustomNotificationRepos
             .execute();
     }
 
-    @Transactional
     @Override
     public int deleteAllConfirmNotification(Instant time) {
         return (int) queryFactory
