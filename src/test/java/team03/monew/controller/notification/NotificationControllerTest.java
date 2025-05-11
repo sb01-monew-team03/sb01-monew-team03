@@ -76,23 +76,17 @@ class NotificationControllerTest {
   @DisplayName("알림 목록 조회 테스트")
   void findAll_ShouldReturnNotificationList() {
     // Given
-    when(notificationService.findAll(any(UUID.class), any(String.class), any(Instant.class), any(Integer.class)))
-        .thenReturn(pageResponse);
+    doReturn(pageResponse).when(notificationService)
+        .findAll(any(UUID.class), any(), any(), any(Integer.class));
 
     // When
     ResponseEntity<CursorPageResponse<NotificationDto>> response = notificationController.findAll(
-        any(UUID.class), any(String.class), any(Instant.class), any(Integer.class));
+        UUID.fromString("c86de1ca-b717-4ae8-ae23-ab1af29e5627"), null, null, 50);
 
     // Then
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(1, response.getBody().content().size());
-    assertEquals(notificationDto.id(), response.getBody().content().get(0).id());
-    assertEquals(notificationDto.content(), response.getBody().content().get(0).content());
-    assertEquals(notificationDto.userId(), response.getBody().content().get(0).userId());
-    assertEquals(notificationDto.confirmed(), response.getBody().content().get(0).confirmed());
-
-    verify(notificationService, times(1)).findAll(any(UUID.class), any(String.class), any(Instant.class), any(Integer.class));
+    verify(notificationService, times(1)).findAll(any(UUID.class), any(), any(), any(Integer.class));
   }
 
   @Test

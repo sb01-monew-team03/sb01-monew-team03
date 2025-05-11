@@ -104,7 +104,7 @@ public class InterestControllerTest {
               .header("MoNew-Request-User-ID", userId)
               .sessionAttr("role", "admin"))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id").value(interestId))
+          .andExpect(jsonPath("$.id").value(interestId.toString()))
           .andExpect(jsonPath("$.keywords[0]").value("update"));
     }
 
