@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
 import team03.monew.dto.notification.ResourceType;
 import team03.monew.entity.article.Article;
+import team03.monew.entity.article.ArticleInterest;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Subscription;
@@ -96,7 +98,10 @@ class NotificationServiceImplTest {
         interest.updateKeywords(keywords);
         interests = new ArrayList<>();
         interests.add(interest);
-        article.updateInterests(new HashSet<>(interests));
+        ArticleInterest articleInterest = new ArticleInterest(article, interest);
+        Set<ArticleInterest> interestSet = new HashSet<>();
+        interestSet.add(articleInterest);
+        article.updateInterests(interestSet);
 
         comment = new Comment("Nice article!", user, article);
     }

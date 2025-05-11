@@ -8,6 +8,7 @@ import team03.monew.dto.article.ArticleFindRequest;
 import team03.monew.dto.article.ArticleRestoreDto;
 import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.dto.common.CursorPageResponse;
+import team03.monew.entity.article.Article;
 
 public interface ArticleService {
 
@@ -28,4 +29,8 @@ public interface ArticleService {
 
     // 물리 삭제
     void hardDelete(UUID articleId);
+
+    Article addInterestToArticle(UUID articleId, UUID interestId);
+
+    List<Article> saveArticlesWithInterests(List<Article> articles, List<UUID> interestIds);
 }
