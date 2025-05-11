@@ -76,10 +76,12 @@ class NotificationControllerTest {
   @DisplayName("알림 목록 조회 테스트")
   void findAll_ShouldReturnNotificationList() {
     // Given
-    when(notificationService.findAll(any(NotificationFindRequest.class))).thenReturn(pageResponse);
+    when(notificationService.findAll(any(UUID.class), any(String.class), any(Instant.class), any(Integer.class)))
+        .thenReturn(pageResponse);
 
     // When
-    ResponseEntity<CursorPageResponse<NotificationDto>> response = notificationController.findAll(findRequest);
+    ResponseEntity<CursorPageResponse<NotificationDto>> response = notificationController.findAll(
+        any(UUID.class), any(String.class), any(Instant.class), any(Integer.class));
 
     // Then
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -90,7 +92,7 @@ class NotificationControllerTest {
     assertEquals(notificationDto.userId(), response.getBody().content().get(0).userId());
     assertEquals(notificationDto.confirmed(), response.getBody().content().get(0).confirmed());
 
-    verify(notificationService, times(1)).findAll(findRequest);
+    verify(notificationService, times(1)).findAll(any(UUID.class), any(String.class), any(Instant.class), any(Integer.class));
   }
 
   @Test

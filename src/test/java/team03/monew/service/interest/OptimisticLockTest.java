@@ -38,7 +38,7 @@ public class OptimisticLockTest {
         List.of("test")
     );
     InterestDto interestDto = interestService.create(request);
-    interest = interestReader.getInterestEntityById(UUID.fromString(interestDto.id()));
+    interest = interestReader.getInterestEntityById(UUID.fromString(interestDto.id().toString()));
   }
 
   @RepeatedTest(10)

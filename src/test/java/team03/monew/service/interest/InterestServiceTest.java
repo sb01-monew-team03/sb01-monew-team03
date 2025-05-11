@@ -148,7 +148,7 @@ public class InterestServiceTest {
               Input -> {
                 Interest inputInterest = Input.getArgument(0);
                 return new InterestDto(
-                    interestId.toString(),
+                    interestId,
                     inputInterest.getName(),
                     inputInterest.getKeywords().stream()
                         .map(Keyword::getName)
@@ -219,7 +219,7 @@ public class InterestServiceTest {
       given(interestRepository.findInterest(eq(request))).willReturn(fakeResults);
       given(interestRepository.totalCountInterest(eq(request))).willReturn(1L);
       given(interestMapper.toDto(any(), anyBoolean())).willReturn(new InterestDto(
-          UUID.randomUUID().toString(),
+          UUID.randomUUID(),
           "관심사 검색 테스트",
           List.of("키워드1", "키워드2"),
           0,

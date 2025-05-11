@@ -38,8 +38,8 @@ public class SubscriptionControllerTest {
     // given
     UUID userId = UUID.randomUUID();
     UUID interestId = UUID.randomUUID();
-    SubscriptionDto subscriptionDto = new SubscriptionDto(UUID.randomUUID().toString(),
-        interestId.toString(),
+    SubscriptionDto subscriptionDto = new SubscriptionDto(UUID.randomUUID(),
+        interestId,
         "test", List.of("keyword"), 1, Instant.now());
 
     // mocking

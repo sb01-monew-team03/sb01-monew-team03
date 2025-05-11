@@ -48,7 +48,7 @@ public class InterestControllerTest {
 
       // given
       InterestRegisterRequest request = new InterestRegisterRequest("test", List.of("keyword"));
-      InterestDto interestDto = new InterestDto(UUID.randomUUID().toString(), request.name(),
+      InterestDto interestDto = new InterestDto(UUID.randomUUID(), request.name(),
           request.keywords(), 0, false);
 
       // mocking
@@ -91,7 +91,7 @@ public class InterestControllerTest {
       UUID interestId = UUID.randomUUID();
       UUID userId = UUID.randomUUID();
       InterestUpdateRequest request = new InterestUpdateRequest(List.of("update", "keywords"));
-      InterestDto interestDto = new InterestDto(interestId.toString(), "test",
+      InterestDto interestDto = new InterestDto(interestId, "test",
           request.keywords(), 0, false);
 
       // mocking
@@ -104,7 +104,7 @@ public class InterestControllerTest {
               .header("MoNew-Request-User-ID", userId)
               .sessionAttr("role", "admin"))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id").value(interestId.toString()))
+          .andExpect(jsonPath("$.id").value(interestId))
           .andExpect(jsonPath("$.keywords[0]").value("update"));
     }
 
@@ -168,7 +168,7 @@ public class InterestControllerTest {
     InterestFindRequest request = new InterestFindRequest("test", "name", "asc",
         null, null, 50);
     UUID userId = UUID.randomUUID();
-    InterestDto interestDto = new InterestDto(UUID.randomUUID().toString(), "test",
+    InterestDto interestDto = new InterestDto(UUID.randomUUID(), "test",
         List.of("keyword"), 0, false);
     CursorPageResponse<InterestDto> response = new CursorPageResponse<>(List.of(interestDto),
         null, null, 1, 1, false);

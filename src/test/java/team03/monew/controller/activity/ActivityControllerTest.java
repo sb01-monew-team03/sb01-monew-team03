@@ -45,8 +45,8 @@ class ActivityControllerTest {
 
     UUID interestId = UUID.randomUUID();
     SubscriptionDto subscriptionDto = new SubscriptionDto(
-        UUID.randomUUID().toString(),
-        interestId.toString(),
+        UUID.randomUUID(),
+        interestId,
         "Technology",
         List.of("Backend", "AI"),
         100L,
