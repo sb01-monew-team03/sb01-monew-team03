@@ -1,6 +1,5 @@
 package team03.monew.service.activity;
 
-import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -147,7 +146,6 @@ class ActivityServiceTest {
         CommentLikeActivityDto commentLikeActivityDto = commentLikeMapper.toActivityDto(
             commentLike);
 
-        Article article = articleView.getArticle();
         long commentCount = 3;
         ArticleViewDto articleViewDto = articleMapper.toViewDto(articleView, article, commentCount);
 
@@ -164,9 +162,8 @@ class ActivityServiceTest {
         given(subscriptionMapper.toDto(subscription)).willReturn(subscriptionDto);
         given(commentMapper.toActivityDto(comment)).willReturn(commentActivityDto);
         given(commentLikeMapper.toActivityDto(commentLike)).willReturn(commentLikeActivityDto);
-        given(articleMapper.toViewDto(articleView, article, commentCount)).willReturn(
-            articleViewDto);
-
+        given(articleMapper.toViewDto(any(ArticleView.class), any(Article.class), anyLong()))
+            .willReturn(articleViewDto);
         // When
         ActivityDto result = activityService.findUserActivity(userId);
 
