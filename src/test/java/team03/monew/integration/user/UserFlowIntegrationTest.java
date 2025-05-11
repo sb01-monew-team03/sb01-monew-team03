@@ -12,9 +12,11 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import team03.monew.dto.user.UserDto;
 import team03.monew.dto.user.UserLoginRequest;
 import team03.monew.dto.user.UserRegisterRequest;
+import team03.monew.service.activity.ActivityService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -22,6 +24,9 @@ public class UserFlowIntegrationTest {
 
   @Autowired
   private TestRestTemplate restTemplate;
+
+  @MockitoBean
+  private ActivityService activityService;
 
   @Test
   @DisplayName("회원 가입 -> 로그인 테스트")
