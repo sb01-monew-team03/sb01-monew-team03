@@ -56,10 +56,10 @@ public class NotificationDeleteBatchConfig {
         int deleteCount = notificationRepository.deleteAllConfirmNotification(oneweek);
 
         Counter.builder("batch.notification.deleted.count")
-                .description("배치 작업으로 삭제된 알림 수")
-                    .tag("type", "confirmed")
-                        .register(meterRegistry)
-                            .increment(deleteCount);
+            .description("배치 작업으로 삭제된 알림 수")
+            .tag("type", "confirmed")
+            .register(meterRegistry)
+            .increment(deleteCount);
         log.info("일주일 경과된 확인한 알림 모두 삭제 완료: 삭제 개수 = {}", deleteCount);
         return RepeatStatus.FINISHED;
       } finally {

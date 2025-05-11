@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class UserController {
   private final UserService userService;
 
   @PostMapping()
+  @Transactional
   public ResponseEntity<UserDto> create(@RequestBody @Valid UserRegisterRequest request) {
     log.info("사용자 생성 요청: {}", request);
     UserDto userDto = userService.create(request);

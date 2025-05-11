@@ -12,7 +12,7 @@ import team03.monew.entity.interest.Keyword;
 @Mapper(componentModel = "spring")
 public interface InterestMapper {
 
-  @Mapping(target = "id", expression = "java(interest.getId().toString())")
+  @Mapping(target = "id", expression = "java(interest.getId())")
   @Mapping(source = "interest.keywords", target = "keywords", qualifiedByName = "keywordsToNames")
   @Mapping(target = "subscribedByMe", source = "subscribedByMe")
   InterestDto toDto(Interest interest, boolean subscribedByMe);

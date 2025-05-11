@@ -36,7 +36,7 @@ public class MongoActivityServiceImpl implements ActivityService {
               });
 
           ActivityDocument newActivityDocument = ActivityDocument.builder()
-              .userId(userId)
+              .userId(user.getId())
               .email(user.getEmail())
               .nickname(user.getNickname())
               .createdAt(user.getCreatedAt())

@@ -3,7 +3,9 @@ package team03.monew.dto.comments;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.Builder;
 
+@Builder
 public record CommentLikeDto(
         UUID id,
         UUID likedBy,

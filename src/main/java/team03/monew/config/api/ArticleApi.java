@@ -43,7 +43,7 @@ public interface ArticleApi {
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    ResponseEntity<CursorPageResponse<ArticleDto>> find(ArticleFindRequest request, UUID userId);
+    ResponseEntity<CursorPageResponse<ArticleDto>> find(UUID userId, ArticleFindRequest request);
 
     // GET /api/articles/sources
     @Operation(summary = "출처 목록 조회", description = "출처 목록을 조회합니다.")

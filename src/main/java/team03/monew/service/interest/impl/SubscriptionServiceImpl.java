@@ -53,7 +53,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     subscriptionRepository.save(subscription);
 
     // interest 구독자 수 증가
-    eventPublisher.publishEvent(new SubscriptionCreateEvent(interest));
+    eventPublisher.publishEvent(new SubscriptionCreateEvent(interest, subscription));
 
     // dto 변환
     SubscriptionDto subscriptionDto = subscriptionMapper

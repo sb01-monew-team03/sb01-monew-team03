@@ -20,6 +20,7 @@ import team03.monew.util.exception.user.UserNotFoundException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+
 @Transactional
 public class UserServiceImpl implements UserService {
 

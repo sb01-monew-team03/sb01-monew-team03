@@ -1,12 +1,10 @@
 package team03.monew.event.subscription;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import team03.monew.entity.interest.Interest;
+import team03.monew.entity.interest.Subscription;
 
-@Getter
-@RequiredArgsConstructor
-public class SubscriptionCreateEvent {
+public record SubscriptionCreateEvent(
+    Interest interest,
+    Subscription subscription) {
 
-  private final Interest interest;
 }

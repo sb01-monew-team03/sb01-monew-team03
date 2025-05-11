@@ -78,7 +78,7 @@ public class NotificationRepositoryTest {
     when(deleteClause.execute()).thenReturn(3L); // 3개의 레코드가 삭제되었다고 가정
 
     // When
-    customNotificationRepository.deleteAllConfirmNotification(testTime);
+    int deleteCount = customNotificationRepository.deleteAllConfirmNotification(testTime);
 
     // Then
     verify(queryFactory).delete(QNotification.notification);

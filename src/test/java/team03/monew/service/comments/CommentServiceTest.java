@@ -11,12 +11,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,8 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.data.domain.*;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -37,7 +30,6 @@ import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.comments.CommentLike;
 import team03.monew.entity.article.Article;
-import team03.monew.entity.comments.QComment;
 import team03.monew.entity.user.User;
 import team03.monew.entity.user.User.Role;
 import team03.monew.mapper.comments.CommentMapper;
@@ -52,7 +44,6 @@ import team03.monew.util.exception.comments.LikeNotFoundException;
 import team03.monew.util.exception.user.UserNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class CommentServiceTest {
 
     @InjectMocks
@@ -68,8 +59,6 @@ class CommentServiceTest {
     private ArticleRepository articleRepository;
     @Mock
     private CommentMapper commentMapper;
-    @Mock
-    private JPAQueryFactory queryFactory;
 
     @Nested
     @DisplayName("댓글 등록")
@@ -94,7 +83,7 @@ class CommentServiceTest {
             given(userRepository.findById(userId)).willReturn(Optional.of(user));
             given(articleRepository.findById(articleId)).willReturn(Optional.of(article));
             given(commentRepository.save(any(Comment.class))).willReturn(savedComment);
-            given(commentMapper.toDto(savedComment, false)).willReturn(dto);
+            given(commentMapper.toDto(savedComment)).willReturn(dto);
 
             // when
             CommentDto result = commentService.create(request);
@@ -104,7 +93,7 @@ class CommentServiceTest {
             assertEquals(dto.content(), result.content());
             assertEquals(dto.userNickname(), result.userNickname());
             then(commentRepository).should().save(any(Comment.class));
-            then(commentMapper).should().toDto(savedComment, false);
+            then(commentMapper).should().toDto(savedComment);
         }
 
         @Test
@@ -144,17 +133,11 @@ class CommentServiceTest {
         @DisplayName("댓글 목록 조회 성공")
         void listByArticle_success() {
             // given
-            UUID articleId   = UUID.randomUUID();
+            UUID articleId = UUID.randomUUID();
             UUID requesterId = UUID.randomUUID();
-            Comment comment  = mock(Comment.class);
+            Comment comment = mock(Comment.class);
             List<Comment> comments = List.of(comment);
-            // → PageRequest, totalElements(=comments.size()) 함께 넘겨줘야 unpaged 가 아니어서 hasNext() false 처리
-            Page<Comment> page = new PageImpl<>(
-                    comments,
-                    PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt")),
-                    comments.size()
-            );
-
+            Page<Comment> page = new PageImpl<>(comments);
             CommentDto dto = new CommentDto(
                     comment.getId(), articleId, UUID.randomUUID(),
                     "nick", "content", 5L, true,
@@ -165,8 +148,7 @@ class CommentServiceTest {
                     articleId,
                     PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"))
             )).willReturn(page);
-            given(commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), requesterId))
-                    .willReturn(true);
+            given(commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), requesterId)).willReturn(true);
             given(commentMapper.toDto(comment, true)).willReturn(dto);
 
             // when
@@ -184,8 +166,7 @@ class CommentServiceTest {
     @Nested
     @DisplayName("댓글 페이지네이션 조회 (Cursor 기반)")
     class CursorPaginationTest {
-        @Test
-        @DisplayName("createdAt 기준 커서 페이지네이션 성공")
+        @Test @DisplayName("createdAt 기준 커서 페이지네이션 성공")
         void cursorPagination_success() {
             // given
             UUID articleId = UUID.randomUUID();
@@ -208,29 +189,28 @@ class CommentServiceTest {
             given(comment.getLikeCount()).willReturn(1);
             given(comment.getCreatedAt()).willReturn(createdAt);
 
-            QComment c = QComment.comment;
-            @SuppressWarnings("unchecked")
-            JPAQuery<Comment> jpaQuery = mock(JPAQuery.class);
-            given(queryFactory.selectFrom(c)).willReturn(jpaQuery);
-            given(jpaQuery.where(any(BooleanExpression.class))).willReturn(jpaQuery);
-            given(jpaQuery.orderBy(any(OrderSpecifier.class), any(OrderSpecifier.class))).willReturn(jpaQuery);
-            given(jpaQuery.limit(6L)).willReturn(jpaQuery); // limit + 1
-            given(jpaQuery.fetch()).willReturn(List.of(comment));
+            Page<Comment> page = new PageImpl<>(
+                    List.of(comment),
+                    PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC,"createdAt")
+                            .and(Sort.by(Sort.Direction.DESC,"createdAt"))),
+                    1
+            );
 
+            given(commentRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .willReturn(page);
             given(commentLikeRepository.existsByCommentIdAndUserId(commentId, reqId))
                     .willReturn(false);
 
-            CommentDto dto = new CommentDto(
-                    commentId, articleId, userId,
-                    "nick", "paging!", 1L, false, createdAt
-            );
-            given(commentMapper.toDto(comment, false)).willReturn(dto);
+            CommentDto dto = new CommentDto(commentId, articleId, userId,
+                    "nick","paging!",1L,false, createdAt);
+            given(commentMapper.toDto(comment,false)).willReturn(dto);
 
             // when
-            CursorPageResponse<CommentDto> resp = commentService.listByArticleCursor(
-                    articleId, "createdAt", Sort.Direction.DESC,
-                    5, null, null, reqId
-            );
+            CursorPageResponse<CommentDto> resp =
+                    commentService.listByArticleCursor(
+                            articleId, "createdAt", Sort.Direction.DESC,
+                            5, null, null, reqId
+                    );
 
             // then
             assertNotNull(resp);

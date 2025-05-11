@@ -3,11 +3,13 @@ package team03.monew.dto.user;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import lombok.Builder;
 import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.dto.comments.CommentActivityDto;
 import team03.monew.dto.comments.CommentLikeActivityDto;
 import team03.monew.dto.interest.SubscriptionDto;
 
+@Builder
 public record ActivityDto(
     UUID id,
     String email,

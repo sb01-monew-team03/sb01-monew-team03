@@ -14,7 +14,7 @@ public class SubscriptionEventListener {
 
   @EventListener
   public void handleSubscriptionCreate(SubscriptionCreateEvent event) {
-    Interest interest = event.getInterest();
+    Interest interest = event.interest();
     interestService.updateSubscriberCount(interest, true);
   }
 

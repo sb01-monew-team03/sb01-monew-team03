@@ -11,7 +11,7 @@ import team03.monew.entity.interest.Subscription;
 @Mapper(componentModel = "spring")
 public interface SubscriptionMapper {
 
-  @Mapping(target = "id", expression = "java(subscription.getId().toString())")
+  @Mapping(target = "id", expression = "java(subscription.getId())")
   @Mapping(target = "interestId", source = "interestDto.id")
   @Mapping(target = "interestName", source = "interestDto.name")
   @Mapping(target = "interestKeywords", source = "interestDto.keywords")
@@ -19,8 +19,8 @@ public interface SubscriptionMapper {
   @Mapping(target = "createdAt", source = "subscription.createdAt")
   SubscriptionDto toDto(Subscription subscription, InterestDto interestDto);
 
-  @Mapping(target = "id", expression = "java(subscription.getId().toString())")
-  @Mapping(target = "interestId", expression = "java(subscription.getInterest().getId().toString())")
+  @Mapping(target = "id", expression = "java(subscription.getId())")
+  @Mapping(target = "interestId", expression = "java(subscription.getInterest().getId())")
   @Mapping(target = "interestName", source = "subscription.interest.name")
   @Mapping(target = "interestKeywords", source = "subscription.interest.keywords")
   @Mapping(target = "interestSubscriberCount", source = "subscription.interest.subscriberCount")

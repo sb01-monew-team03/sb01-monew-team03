@@ -2,7 +2,9 @@ package team03.monew.dto.article;
 
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Builder;
 
+@Builder
 public record ArticleViewDto(
     UUID id,
     UUID viewedBy,

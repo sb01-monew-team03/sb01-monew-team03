@@ -16,7 +16,7 @@ CREATE TABLE users
 CREATE TABLE interests
 (
     id               UUID PRIMARY KEY,
-    name             VARCHAR(60) COLLATE  "ko_KR.utf8" NOT NULL UNIQUE,
+    name             VARCHAR(60) COLLATE  "ko_KR.UTF-8" NOT NULL UNIQUE,
     subscriber_count INTEGER     NOT NULL DEFAULT 0,
     created_at       TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMPTZ,
@@ -67,7 +67,7 @@ CREATE TABLE articles
     title         VARCHAR     NOT NULL,
     published_at  TIMESTAMPTZ NOT NULL,
     summary       VARCHAR     NOT NULL,
-    views         INT         NOT NULL DEFAULT 0,
+    view_count         INT         NOT NULL DEFAULT 0,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMPTZ NULL,
     deleted_at    TIMESTAMPTZ NULL
@@ -88,7 +88,7 @@ ALTER TABLE articles
 
 ALTER TABLE articles
     ADD CONSTRAINT chk_articles_views_non_negative
-        CHECK (views >= 0);
+        CHECK (view_count >= 0);
 
 ALTER TABLE articles
     ADD CONSTRAINT chk_articles_deleted

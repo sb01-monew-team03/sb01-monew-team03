@@ -38,7 +38,7 @@ public class ArticleController implements ArticleApi {
     @PostMapping("/{articleId}/article-views")
     public ResponseEntity<ArticleViewDto> createView(
         @PathVariable UUID articleId,
-        @RequestHeader("MoNew-Request-User-ID") UUID userId
+        @RequestHeader("Monew-Request-User-Id") UUID userId
     ) {
         log.info("기사 뷰 등록 요청: articleId={}, userId={}", articleId, userId);
         ArticleViewDto viewDto = articleService.registerView(articleId, userId);
@@ -50,8 +50,8 @@ public class ArticleController implements ArticleApi {
     @Override
     @GetMapping
     public ResponseEntity<CursorPageResponse<ArticleDto>> find(
-        @ModelAttribute @Valid ArticleFindRequest request,
-        @RequestHeader("MoNew-Request-User-ID") UUID userId
+        @RequestHeader("Monew-Request-User-Id") UUID userId,
+        @ModelAttribute @Valid ArticleFindRequest request
     ) {
         log.info("기사 목록 조회 요청: userId={}, request={}", userId, request);
         CursorPageResponse<ArticleDto> result = articleService.findArticles(request, userId);

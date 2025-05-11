@@ -1,11 +1,11 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USER}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/monew
+    username: monew
+    password: 1234
   jpa:
     hibernate:
-      ddl-auto: none #'update'로 처음 실행 후 'none'으로 변경
+      ddl-auto: update  # 또는 create, create-drop (처음 실행 시)
     show-sql: true
     open-in-view: false
     properties:
@@ -14,9 +14,14 @@ spring:
   batch:
     jdbc:
       initialize-schema: always
+    job:
+      enabled: true
   data:
     mongodb:
-      uri: ${MONGO_URI}
+      uri: mongodb://localhost:27017/monew
+
+add:
+  db-type: mongodb
 
 log:
   file:

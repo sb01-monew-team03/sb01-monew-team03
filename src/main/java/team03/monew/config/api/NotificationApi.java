@@ -12,7 +12,6 @@ import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
-import team03.monew.dto.notification.NotificationFindRequest;
 
 @Tag(name = "알림 관리 API")
 public interface NotificationApi {
@@ -47,7 +46,7 @@ public interface NotificationApi {
           )
       )
   })
-  ResponseEntity<CursorPageResponse<NotificationDto>> findAll(NotificationFindRequest request);
+  ResponseEntity<CursorPageResponse<NotificationDto>> findAll(UUID userId, String cursor, Instant after, Integer limit);
 
   //PATCH /api/notifications
   @Operation(
