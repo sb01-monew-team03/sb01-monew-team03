@@ -3,6 +3,7 @@ package team03.monew.entity.article;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -21,7 +22,7 @@ import team03.monew.entity.user.User;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleView extends BaseUpdatableEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
