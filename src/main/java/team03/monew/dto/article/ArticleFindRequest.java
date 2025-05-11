@@ -25,7 +25,8 @@ public record ArticleFindRequest(
 
     String cursor,                    // 커서 값
 
-    String after,                    // 보조 커서 (createdAt)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    Instant after,                    // 보조 커서 (createdAt)
 
     @NotNull(message = "limit은 필수입니다.")
     Integer limit                     // 페이지 크기
