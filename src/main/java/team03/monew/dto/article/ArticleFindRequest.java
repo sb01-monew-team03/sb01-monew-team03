@@ -31,4 +31,9 @@ public record ArticleFindRequest(
     Integer limit                     // 페이지 크기
 ) {
 
+    // limit 문제를 해결하기 위한 임시방편
+    public ArticleFindRequest {
+        limit = 50;
+    }
+
 }

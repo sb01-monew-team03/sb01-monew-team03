@@ -17,12 +17,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import team03.monew.entity.article.Article;
 import team03.monew.mapper.article.ArticleMapper;
 import team03.monew.repository.article.ArticleRepository;
 import team03.monew.util.exception.article.ArticleNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ArticleServiceTest {
 
     @InjectMocks
@@ -44,7 +47,8 @@ class ArticleServiceTest {
             // given
             UUID id = UUID.randomUUID();
             Article article = mock(Article.class);
-            given(articleRepository.findById(id)).willReturn(Optional.of(article));
+            given(articleRepository.findByIdAndDeletedAtIsNull(id)).willReturn(
+                Optional.of(article));
 
             // when
             articleService.softDelete(id);
