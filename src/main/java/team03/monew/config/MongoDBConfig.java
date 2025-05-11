@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoRepositories(basePackages = "team03.monew.repository.activity")
 public class MongoDBConfig {
 
-  @Bean
+  @Bean(name = "mongoTransactionManager")
   MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
     return new MongoTransactionManager(dbFactory);
   }
