@@ -13,7 +13,7 @@ spring:
         format_sql: true
   batch:
     jdbc:
-      initialize-schema: never
+      initialize-schema: always
   data:
     mongodb:
       uri: ${MONGO_URI}
