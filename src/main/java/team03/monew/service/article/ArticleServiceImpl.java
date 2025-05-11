@@ -43,12 +43,6 @@ public class ArticleServiceImpl implements ArticleService {
     public CursorPageResponse<ArticleDto> findArticles(ArticleFindRequest request, UUID userId) {
         log.debug("기사 목록 조회 시작");
 
-        LocalDateTime publishDateFrom = request.publishDateFrom() != null
-            ? LocalDateTime.ofInstant(request.publishDateFrom(), ZoneId.systemDefault())
-            : null;
-        LocalDateTime publishDateTo = request.publishDateTo() != null
-            ? LocalDateTime.ofInstant(request.publishDateTo(), ZoneId.systemDefault())
-            : null;
         LocalDateTime after = request.after() != null
             ? LocalDateTime.ofInstant(request.after(), ZoneId.systemDefault())
             : null;
@@ -57,8 +51,8 @@ public class ArticleServiceImpl implements ArticleService {
             request.keyword(),
             request.interestId(),
             request.sourceIn(),
-            publishDateFrom,
-            publishDateTo,
+            request.publishDateFrom(),
+            request.publishDateTo(),
             request.orderBy(),
             request.direction(),
             request.cursor(),
@@ -97,8 +91,8 @@ public class ArticleServiceImpl implements ArticleService {
             request.keyword(),
             request.interestId(),
             request.sourceIn(),
-            publishDateFrom,
-            publishDateTo
+            request.publishDateFrom(),
+            request.publishDateTo()
         );
 
         return new CursorPageResponse<>(
@@ -163,6 +157,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<String> getSources() {
-        return List.of("HANKYUNG", "CHOSUN", "YONHAP");
+        return List.of("HANKYUNG", "CHOSUN");
     }
 }

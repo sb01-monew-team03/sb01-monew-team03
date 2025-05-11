@@ -3,6 +3,7 @@ package team03.monew.dto.article;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,10 +13,10 @@ public record ArticleFindRequest(
     UUID interestId,                  // 관심사 ID
     List<String> sourceIn,            // 출처 목록 (NAVER 등)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    Instant publishDateFrom,          // 시작 날짜
+    LocalDateTime publishDateFrom,          // 시작 날짜
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    Instant publishDateTo,            // 종료 날짜
+    LocalDateTime publishDateTo,            // 종료 날짜
 
     @NotBlank(message = "orderBy는 필수입니다.")
     String orderBy,                   // 정렬 기준 (publishDate, commentCount, viewCount)
