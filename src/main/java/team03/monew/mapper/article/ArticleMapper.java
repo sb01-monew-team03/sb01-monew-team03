@@ -12,14 +12,7 @@ import team03.monew.entity.interest.Interest;
 @Mapper(componentModel = "spring")
 public interface ArticleMapper {
 
-    @Mapping(target = "interestNames", source = "interests", qualifiedByName = "interestsToNames")
-    ArticleDto toDto(Article article);
-
-    @Named("interestsToNames")
-    default Set<String> interestsToNames(Set<Interest> interests) {
-        return interests.stream()
-            .map(Interest::getName)
-            .collect(Collectors.toSet());
-    }
-
+    @Mapping(target = "commentCount", source = "commentCount")
+    @Mapping(target = "viewedByMe", source = "viewedByMe")
+    ArticleDto toDto(Article article, int commentCount, boolean viewedByMe);
 }

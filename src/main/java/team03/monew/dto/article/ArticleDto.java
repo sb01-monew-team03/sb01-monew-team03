@@ -5,12 +5,15 @@ import java.util.Set;
 import java.util.UUID;
 
 public record ArticleDto(
-        UUID id,
-        String source,
-        String originalLink,
-        String title,
-        String summary,
-        LocalDateTime publishedAt,
-        int viewCount,
-        Set<String> interestNames
-) {}
+    UUID id,
+    String source,
+    String originalLink,
+    String title,
+    String summary,
+    LocalDateTime publishedAt,
+    int commentCount,
+    int viewCount,
+    boolean viewedByMe
+) {
+
+}
