@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team03.monew.entity.interest.Interest;
-import team03.monew.repository.interest.InterestRepository;
+import team03.monew.repository.interest.interest.InterestRepository;
 import team03.monew.service.interest.InterestReader;
 import team03.monew.util.exception.interest.InterestNotFoundException;
 

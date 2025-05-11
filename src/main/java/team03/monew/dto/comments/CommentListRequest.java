@@ -20,18 +20,14 @@ public class CommentListRequest {
 
     private Sort.Direction direction = Sort.Direction.DESC;
 
-    private int limit = 10;
+    private Integer limit;
 
-    /**
-     * 커서 값 (정렬 기준의 마지막 값)
-     */
     private String cursor;
 
-    /**
-     * 보조 커서(createdAt) 값
-     */
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Instant after;
 
-
+    public int getLimit() {
+        return (limit == null) ? 10 : limit;
+    }
 }

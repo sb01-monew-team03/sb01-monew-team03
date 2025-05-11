@@ -190,7 +190,7 @@ CREATE TABLE notification
     id                UUID PRIMARY KEY,
     user_id           UUID         NOT NULL,
     content           VARCHAR(255) NOT NULL,
-    read              BOOLEAN      NOT NULL DEFAULT FALSE,
+    confirmed         BOOLEAN      NOT NULL DEFAULT FALSE,
     message_id        UUID,
     notification_type VARCHAR(50)  NOT NULL CHECK ( notification_type IN ('INTEREST', 'COMMENT') ),
     created_at        TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,

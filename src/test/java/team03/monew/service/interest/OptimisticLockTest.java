@@ -3,7 +3,7 @@ package team03.monew.service.interest;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInstance;
@@ -12,10 +12,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import team03.monew.dto.interest.InterestDto;
 import team03.monew.dto.interest.InterestRegisterRequest;
 import team03.monew.entity.interest.Interest;
 
+@Transactional
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
@@ -29,7 +31,7 @@ public class OptimisticLockTest {
 
   private Interest interest;
 
-  @BeforeAll
+  @BeforeEach
   void setUp() {
     InterestRegisterRequest request = new InterestRegisterRequest(
         UUID.randomUUID().toString(),
@@ -48,7 +50,6 @@ public class OptimisticLockTest {
 
     Runnable task = () -> {
       try {
-        UUID interestId = UUID.randomUUID();
         interestService.updateSubscriberCount(interest, true);
       } catch (Exception e) {
         e.printStackTrace();

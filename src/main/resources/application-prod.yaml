@@ -1,0 +1,24 @@
+server:
+  port: ${APP_PORT:8080}
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  batch:
+    jdbc:
+      initialize-schema: never
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+
+
+log:
+  file:
+    path: ./logs-prod

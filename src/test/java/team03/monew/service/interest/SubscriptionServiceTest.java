@@ -28,7 +28,7 @@ import team03.monew.event.subscription.SubscriptionCreateEvent;
 import team03.monew.event.subscription.SubscriptionDeleteEvent;
 import team03.monew.mapper.interest.InterestMapper;
 import team03.monew.mapper.interest.SubscriptionMapper;
-import team03.monew.repository.interest.SubscriptionRepository;
+import team03.monew.repository.interest.subscription.SubscriptionRepository;
 import team03.monew.service.interest.impl.SubscriptionServiceImpl;
 import team03.monew.service.user.UserService;
 import team03.monew.util.exception.subscription.SubscriptionAlreadyExistException;

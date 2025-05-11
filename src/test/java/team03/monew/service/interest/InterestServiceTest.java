@@ -7,16 +7,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +36,7 @@ import team03.monew.dto.interest.InterestUpdateRequest;
 import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Keyword;
 import team03.monew.mapper.interest.InterestMapper;
-import team03.monew.repository.interest.InterestRepository;
+import team03.monew.repository.interest.interest.InterestRepository;
 import team03.monew.service.interest.impl.InterestServiceImpl;
 import team03.monew.util.exception.interest.EmptyKeywordListException;
 import team03.monew.util.exception.interest.ExcessiveRetryException;
@@ -55,6 +56,9 @@ public class InterestServiceTest {
 
   @Mock
   private InterestReader interestReader;
+
+  @Mock
+  private EntityManager entityManager;
 
   @InjectMocks
   private InterestServiceImpl interestService;
@@ -156,6 +160,7 @@ public class InterestServiceTest {
           );
       given(subscriptionService.existByUserIdAndInterestId(any(UUID.class), any(UUID.class))).willReturn(true);
       given(interestReader.getInterestEntityById(interestId)).willReturn(interest);
+      doNothing().when(entityManager).flush();
 
       // when
       InterestDto result = interestService.update(interestId, request, UUID.randomUUID());
@@ -219,8 +224,6 @@ public class InterestServiceTest {
           List.of("키워드1", "키워드2"),
           0,
           false));
-      given(subscriptionService.existByUserIdAndInterestId(any(UUID.class), any(UUID.class))).willReturn(true);
-
 
       // when
       CursorPageResponse<InterestDto> results = interestService.find(request, UUID.randomUUID());

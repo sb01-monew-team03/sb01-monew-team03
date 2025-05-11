@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import team03.monew.dto.user.UserActivityDto;
+import team03.monew.dto.user.ActivityDto;
 import team03.monew.service.activity.ActivityService;
 
 @Slf4j
@@ -21,10 +21,10 @@ public class ActivityController {
   private final ActivityService activityService;
 
   @GetMapping("/{userId}")
-  public ResponseEntity<UserActivityDto> find(@PathVariable UUID userId) {
+  public ResponseEntity<ActivityDto> find(@PathVariable UUID userId) {
     log.info("사용자 활동 내역 조회 요청: User Id: {}", userId);
 
-    UserActivityDto userActivityDto = activityService.findUserActivity(userId);
+    ActivityDto userActivityDto = activityService.findUserActivity(userId);
 
     log.debug("사용자 활동 내역 조회 응답: User Id: {}", userId);
     return ResponseEntity

@@ -15,4 +15,8 @@ public record InterestFindRequest(
     Integer limit      // 커서 페이지 크기
 ) {
 
+    // limit 문제를 해결하기 위한 임시방편
+    public InterestFindRequest {
+        limit = 50;
+    }
 }

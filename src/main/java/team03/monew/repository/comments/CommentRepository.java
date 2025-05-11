@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import team03.monew.entity.article.Article;
+import team03.monew.entity.user.User;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.user.User;
 
@@ -19,7 +20,6 @@ public interface CommentRepository
         JpaSpecificationExecutor<Comment> {
 
     Page<Comment> findByArticleIdAndDeletedAtIsNull(UUID articleId, Pageable pageable);
-
     Optional<Comment> findByIdAndUserId(UUID commentId, UUID userId);
 
     Long countByArticle(Article article);

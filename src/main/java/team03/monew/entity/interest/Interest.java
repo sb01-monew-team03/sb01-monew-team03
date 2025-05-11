@@ -14,6 +14,7 @@ import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import team03.monew.entity.base.BaseEntity;
 
 @Entity
@@ -34,6 +35,7 @@ public class Interest extends BaseEntity {
 
   // 부모 객체 저장/수정/삭제 시 자식 객체도 저장/수정/삭제, 고아 객체 삭제
   @OneToMany(mappedBy = "interest", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+  @BatchSize(size = 50)
   private List<Keyword> keywords;   // 키워드
 
   public Interest(String name) {

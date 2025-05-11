@@ -3,6 +3,8 @@ package team03.monew.controller.comments;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team03.monew.dto.comments.*;
@@ -12,15 +14,17 @@ import team03.monew.service.comments.CommentService;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/api/comments")
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/comments")
 public class CommentController {
+
+    private static final int DEFAULT_LIMIT = 10;
 
     private final CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<CursorPageResponse<CommentDto>> listByArticle(
+    public ResponseEntity<?> listByArticle(
             @ModelAttribute CommentListRequest req,
             @RequestHeader("MoNew-Request-User-ID") UUID requesterId
     ) {
@@ -29,21 +33,35 @@ public class CommentController {
                 req.getCursor(), req.getAfter(), requesterId
         );
 
-        CursorPageResponse<CommentDto> page =
-                commentService.listByArticleCursor(
-                        req.getArticleId(),
-                        req.getOrderBy(),
-                        req.getDirection(),
-                        req.getLimit(),
-                        req.getCursor(),
-                        req.getAfter(),
-                        requesterId
-                );
+        int limit = req.getLimit();
 
-        log.info("댓글 목록 조회 응답: size={}, totalElements={}, hasNext={}",
-                page.size(), page.totalElements(), page.hasNext()
+        if (limit != DEFAULT_LIMIT) {
+            CursorPageResponse<CommentDto> page =
+                    commentService.listByArticleCursor(
+                            req.getArticleId(),
+                            req.getOrderBy(),
+                            req.getDirection(),
+                            limit,
+                            req.getCursor(),
+                            req.getAfter(),
+                            requesterId
+                    );
+            log.info("댓글 커서 조회 완료: size={}, totalElements={}, hasNext={}",
+                    page.size(), page.totalElements(), page.hasNext()
+            );
+            return ResponseEntity.ok(page);
+        }
+
+        Page<CommentDto> page = commentService.listByArticle(
+                req.getArticleId(),
+                req.getOrderBy(),
+                req.getDirection(),
+                limit,
+                requesterId
         );
-
+        log.info("댓글 페이징 조회 완료: size={}, totalElements={}, hasNext={}",
+                page.getSize(), page.getTotalElements(), page.hasNext()
+        );
         return ResponseEntity.ok(page);
     }
 
@@ -52,7 +70,7 @@ public class CommentController {
         log.info("댓글 등록 요청: {}", request);
         CommentDto dto = commentService.create(request);
         log.info("댓글 등록 완료: commentId={}", dto.id());
-        return ResponseEntity.status(201).body(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @PatchMapping("/{commentId}")
@@ -105,4 +123,5 @@ public class CommentController {
         commentService.unlikeComment(commentId, requesterId);
         return ResponseEntity.ok().build();
     }
+
 }
