@@ -1,20 +1,27 @@
 package team03.monew.service.article;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import team03.monew.dto.article.ArticleCreateRequest;
 import team03.monew.dto.article.ArticleDto;
+import team03.monew.dto.article.ArticleFindRequest;
+import team03.monew.dto.article.ArticleRestoreDto;
+import team03.monew.dto.article.ArticleViewDto;
+import team03.monew.dto.common.CursorPageResponse;
 
 public interface ArticleService {
 
-    // 기사 등록
-    ArticleDto create(ArticleCreateRequest request);
+    // 뉴스 기사 목록 조회
+    CursorPageResponse<ArticleDto> findArticles(ArticleFindRequest request, UUID userId);
 
-    // 단일 기사 조회
-    ArticleDto findById(UUID articleId);
+    // 출처 목록 조회
+    List<String> getSources();
 
-    // 기사 검색
-    //List<ArticleDto> search();
+    // 뉴스 복구
+    List<ArticleRestoreDto> restore(Instant from, Instant to);
+
+    // 기사 뷰 등록
+    ArticleViewDto registerView(UUID articleId, UUID userId);
 
     // 논리 삭제
     void softDelete(UUID articleId);

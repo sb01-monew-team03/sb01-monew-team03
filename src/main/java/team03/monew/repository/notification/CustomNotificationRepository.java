@@ -8,10 +8,10 @@ import team03.monew.entity.notification.Notification;
 
 public interface CustomNotificationRepository {
 
-  void confirmAllByUserId(UUID userId);
+    void confirmAllByUserId(UUID userId);
 
-  int deleteAllConfirmNotification(Instant time);
+    int deleteAllConfirmNotification(Instant time);
 
-  Page<Notification> findPageWithCursor(UUID userId, String cursor, Pageable pageable);
+    Page<Notification> findPageWithCursor(UUID userId, String cursor, Pageable pageable);
 
 }

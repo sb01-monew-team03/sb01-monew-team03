@@ -8,9 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,14 +17,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team03.monew.dto.article.ArticleCreateRequest;
-import team03.monew.dto.article.ArticleDto;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import team03.monew.entity.article.Article;
 import team03.monew.mapper.article.ArticleMapper;
 import team03.monew.repository.article.ArticleRepository;
 import team03.monew.util.exception.article.ArticleNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ArticleServiceTest {
 
     @InjectMocks
@@ -39,42 +38,6 @@ class ArticleServiceTest {
     private ArticleMapper articleMapper;
 
     @Nested
-    @DisplayName("create() - 기사 등록")
-    class CreateArticleTest {
-
-        @Test
-        @DisplayName("기사 등록 성공")
-        void create_success() {
-            // given
-            ArticleCreateRequest request = new ArticleCreateRequest(
-                "Naver", "https://news.com/a", "뉴스 제목", "요약입니다", LocalDateTime.now()
-            );
-
-            Article article = new Article(
-                request.source(), request.originalLink(), request.title(), request.summary(),
-                request.publishedAt()
-            );
-
-            ArticleDto articleDto = new ArticleDto(
-                UUID.randomUUID(), request.source(), request.originalLink(),
-                request.title(), request.summary(), request.publishedAt(), 0, Set.of()
-            );
-
-            given(articleRepository.save(any(Article.class))).willReturn(article);
-            given(articleMapper.toDto(any(Article.class))).willReturn(articleDto);
-
-            // when
-            ArticleDto result = articleService.create(request);
-
-            // then
-            assertNotNull(result);
-            assertEquals(result.title(), request.title());
-            then(articleRepository).should().save(any(Article.class));
-            then(articleMapper).should().toDto(any(Article.class));
-        }
-    }
-
-    @Nested
     @DisplayName("softDelete() - 기사 논리 삭제")
     class SoftDeleteTest {
 
@@ -84,7 +47,8 @@ class ArticleServiceTest {
             // given
             UUID id = UUID.randomUUID();
             Article article = mock(Article.class);
-            given(articleRepository.findById(id)).willReturn(Optional.of(article));
+            given(articleRepository.findByIdAndDeletedAtIsNull(id)).willReturn(
+                Optional.of(article));
 
             // when
             articleService.softDelete(id);

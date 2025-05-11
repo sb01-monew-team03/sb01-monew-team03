@@ -1,26 +1,20 @@
 package team03.monew.entity.article;
 
 import jakarta.persistence.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-import team03.monew.entity.base.BaseEntity;
+import team03.monew.entity.base.BaseDeletableEntity;
+import java.time.LocalDateTime;
 import team03.monew.entity.interest.Interest;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
-@Table(name = "article")
+@Table(name = "articles")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE articles SET deleted = true WHERE id = ?")
-@Where(clause = "deleted = false")
-public class Article extends BaseEntity {
+public class Article extends BaseDeletableEntity {
 
     @Column(nullable = false)
     private String source;
@@ -37,13 +31,9 @@ public class Article extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime publishedAt;
 
-    @Column(nullable = false, columnDefinition = "integer default 0")
-    private int viewCount = 0;
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private long viewCount = 0;
 
-    @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean deleted = false;
-
-    // 연관 관심사 (ManyToMany)
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "article_interest",
@@ -61,17 +51,13 @@ public class Article extends BaseEntity {
         this.publishedAt = publishedAt;
     }
 
-    public void updateInterests(Set<Interest> interests) {
-        this.interests.clear();
-        this.interests.addAll(interests);
-    }
-
     public void increaseViewCount() {
         this.viewCount++;
     }
 
-    public void delete() {
-        this.deleted = true;
+    public void updateInterests(Set<Interest> newInterests) {
+        this.interests.clear();
+        this.interests.addAll(newInterests);
     }
 
 }

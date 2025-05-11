@@ -55,6 +55,12 @@ dependencies {
     // 문자열 유틸
     implementation 'org.apache.commons:commons-text:1.12.0'
 
+    // RSS Parser
+    implementation 'com.rometools:rome:2.1.0'
+
+    // HTML Parser
+    implementation 'org.jsoup:jsoup:1.15.3'
+
     // QueryDSL - 수정된 부분
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
