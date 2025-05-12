@@ -8,8 +8,7 @@ public record PaginationDto(
     List<InterestDto> content,
     String nextCursor,
     Instant nextAfter,
-    boolean hasNext,
-    int size
+    boolean hasNext
 ) {
 
 }
