@@ -17,13 +17,16 @@ import team03.monew.dto.article.ArticleViewDto;
 import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.article.ArticleView;
+import team03.monew.entity.interest.Interest;
 import team03.monew.entity.user.User;
 import team03.monew.mapper.article.ArticleMapper;
 import team03.monew.repository.article.ArticleRepository;
 import team03.monew.repository.article.ArticleViewRepository;
 import team03.monew.repository.comments.CommentRepository;
+import team03.monew.repository.interest.interest.InterestRepository;
 import team03.monew.repository.user.UserRepository;
 import team03.monew.util.exception.article.ArticleNotFoundException;
+import team03.monew.util.exception.interest.InterestNotFoundException;
 import team03.monew.util.exception.user.UserNotFoundException;
 
 @Slf4j
@@ -37,6 +40,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleMapper articleMapper;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final InterestRepository interestRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -164,5 +168,46 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<String> getSources() {
         return List.of("HANKYUNG", "CHOSUN", "YONHAP");
+    }
+
+    @Transactional
+    public Article addInterestToArticle(UUID articleId, UUID interestId) {
+        log.info("기사 ID={}에 관심사 ID={} 추가 시도", articleId, interestId);
+
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> ArticleNotFoundException.withId(articleId));
+
+        Interest interest = interestRepository.findById(interestId)
+            .orElseThrow(() -> InterestNotFoundException.withInterestId(interestId));
+
+        article.addInterest(interest);
+        Article savedArticle = articleRepository.save(article);
+
+        log.info("기사 ID={}에 관심사 '{}'(ID={}) 추가 완료", articleId, interest.getName(), interestId);
+        return savedArticle;
+    }
+
+    @Transactional
+    public List<Article> saveArticlesWithInterests(List<Article> articles, List<UUID> interestIds) {
+        log.info("{}개의 기사와 {}개의 관심사로 저장 시작", articles.size(), interestIds.size());
+
+        // 관심사 조회
+        List<Interest> interests = interestRepository.findAllById(interestIds);
+        if (interests.size() != interestIds.size()) {
+            log.warn("일부 관심사를 찾을 수 없음: 요청={}, 찾음={}", interestIds.size(), interests.size());
+        }
+
+        // 각 기사에 모든 관심사 추가
+        for (Article article : articles) {
+            for (Interest interest : interests) {
+                article.addInterest(interest);
+            }
+        }
+
+        // 기사 저장
+        List<Article> savedArticles = articleRepository.saveAll(articles);
+        log.info("{}개의 기사 저장 완료", savedArticles.size());
+
+        return savedArticles;
     }
 }
