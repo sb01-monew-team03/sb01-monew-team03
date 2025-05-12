@@ -34,13 +34,8 @@ public class Article extends BaseDeletableEntity {
     @Column(nullable = false, columnDefinition = "bigint default 0")
     private long viewCount = 0;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "article_interest",
-        joinColumns = @JoinColumn(name = "article_id"),
-        inverseJoinColumns = @JoinColumn(name = "interest_id")
-    )
-    private Set<Interest> interests = new HashSet<>();
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ArticleInterest> interests = new HashSet<>();
 
     public Article(String source, String originalLink, String title, String summary,
         LocalDateTime publishedAt) {
@@ -55,9 +50,30 @@ public class Article extends BaseDeletableEntity {
         this.viewCount++;
     }
 
-    public void updateInterests(Set<Interest> newInterests) {
-        this.interests.clear();
-        this.interests.addAll(newInterests);
+    public void addInterest(Interest interest) {
+        // 이미 관심사가 있는지 확인
+        boolean exists = this.interests.stream()
+            .anyMatch(ai -> ai.getInterest().getId().equals(interest.getId()));
+
+        if (!exists) {
+            ArticleInterest articleInterest = new ArticleInterest(this, interest);
+            this.interests.add(articleInterest);
+        }
     }
 
+    public void removeInterest(Interest interest) {
+        this.interests.removeIf(ai -> ai.getInterest().getId().equals(interest.getId()));
+    }
+
+    public void updateInterests(Set<Interest> newInterests) {
+        // 기존 관심사 모두 제거
+        this.interests.clear();
+
+        // 새 관심사 추가
+        if (newInterests != null) {
+            for (Interest interest : newInterests) {
+                addInterest(interest);
+            }
+        }
+    }
 }

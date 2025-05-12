@@ -48,7 +48,7 @@ public class NotificationController implements NotificationApi {
 
   @Override
   @PatchMapping
-  public ResponseEntity<Void> updateAll(@RequestHeader UUID userId) {
+  public ResponseEntity<Void> updateAll(@RequestHeader("Monew-Request-User-Id") UUID userId) {
     log.info("모든 알림 확인 여부 수정 요청 - 사용자 ID: {}", userId);
 
     notificationService.readAllNotification(userId);
@@ -62,7 +62,7 @@ public class NotificationController implements NotificationApi {
   @PatchMapping("/{notificationId}")
   public ResponseEntity<Void> update(
       @PathVariable UUID notificationId,
-      @RequestHeader UUID userId) {
+      @RequestHeader("Monew-Request-User-Id") UUID userId) {
     log.info("알림 확인 여부 수정 요청 - 알림 ID: {}", notificationId);
 
     notificationService.readNotification(notificationId, userId);

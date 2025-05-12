@@ -19,6 +19,7 @@ import team03.monew.repository.article.ArticleRepository;
 import team03.monew.repository.comments.CommentLikeRepository;
 import team03.monew.repository.comments.CommentRepository;
 import team03.monew.repository.user.UserRepository;
+import team03.monew.service.notification.NotificationService;
 import team03.monew.util.exception.comments.*;
 import team03.monew.util.exception.user.UserNotFoundException;
 
@@ -37,6 +38,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
+    private final NotificationService notificationService;
     private final CommentMapper commentMapper;
     private final JPAQueryFactory queryFactory;  // QueryDSL
 
@@ -114,6 +116,22 @@ public class CommentServiceImpl implements CommentService {
         CommentLike savedLike = commentLikeRepository.save(new CommentLike(comment, user, comment.getArticle()));
         comment.increaseLikeCount();
         log.info("댓글 좋아요 등록 완료: likeId={}", savedLike.getId());
+
+        // 여기서 알림 생성 서비스 호출 추가
+        try {
+            // 자신의 댓글에 좋아요를 누른 경우 알림 생성하지 않음
+            if (!comment.getUser().getId().equals(userId)) {
+                notificationService.createCommentLikeNotification(comment, user);
+                log.info("댓글 좋아요 알림 생성 시도: commentId={}, likerId={}, commentOwnerId={}",
+                    commentId, userId, comment.getUser().getId());
+            } else {
+                log.info("자신의 댓글에 좋아요를 누름: 알림 생성 생략");
+            }
+        } catch (Exception e) {
+            // 알림 생성에 실패해도 좋아요 기능은 정상 동작하도록 예외 로깅만 함
+            log.error("댓글 좋아요 알림 생성 중 오류 발생: {}", e.getMessage(), e);
+        }
+
         return commentMapper.toLikeDto(savedLike);
     }
 
