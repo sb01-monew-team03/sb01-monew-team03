@@ -6,6 +6,9 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -14,12 +17,18 @@ import org.springframework.stereotype.Repository;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.article.QArticle;
 import team03.monew.entity.comments.QComment;
+import team03.monew.entity.interest.Interest;
+import team03.monew.entity.interest.Keyword;
+import team03.monew.entity.interest.QInterest;
 
 @Repository
 @RequiredArgsConstructor
 public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public List<Article> findAllByCursor(
@@ -29,8 +38,9 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
 
         QArticle article = QArticle.article;
         QComment comment = QComment.comment;
-        BooleanBuilder where = new BooleanBuilder();
+        QInterest interest = QInterest.interest;
 
+        BooleanBuilder where = new BooleanBuilder();
         where.and(article.deletedAt.isNull());
 
         if (keyword != null && !keyword.isBlank()) {
@@ -50,13 +60,32 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
             where.and(article.publishedAt.loe(publishDateTo));
         }
 
+        if (interestId != null) {
+            Interest targetInterest = em.find(Interest.class, interestId);
+            if (targetInterest != null) {
+                List<String> keywordNames = targetInterest.getKeywords().stream()
+                    .map(Keyword::getName)
+                    .toList();
+
+                BooleanBuilder keywordBuilder = new BooleanBuilder();
+                for (String k : keywordNames) {
+                    keywordBuilder.or(article.title.containsIgnoreCase(k));
+                    keywordBuilder.or(article.summary.containsIgnoreCase(k));
+                }
+                where.and(keywordBuilder);
+            }
+        }
+
         BooleanExpression cursorCondition = buildCursorCondition(article, comment, orderBy,
             direction, cursor, after);
         if (cursorCondition != null) {
             where.and(cursorCondition);
         }
 
-        JPAQuery<Article> query = queryFactory.selectFrom(article);
+        JPAQuery<Article> query = queryFactory
+            .selectFrom(article)
+            .distinct()
+            .leftJoin(article.interests, interest);
 
         if ("commentCount".equalsIgnoreCase(orderBy)) {
             query.leftJoin(comment).on(comment.article.eq(article));

@@ -4,11 +4,7 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import jakarta.transaction.Transactional;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -16,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 import team03.monew.entity.article.Article;
 import team03.monew.entity.article.ArticleInterest;
@@ -66,7 +61,6 @@ public class RssFetcherService {
 
             for (SyndEntry entry : entries) {
                 String link = entry.getLink();
-
                 if (articleRepository.existsByOriginalLink(link)) {
                     continue;
                 }
@@ -76,9 +70,8 @@ public class RssFetcherService {
                     .toLocalDateTime()
                     : LocalDateTime.now();
 
-                String summary = entry.getDescription() != null
-                    ? Jsoup.parse(entry.getDescription().getValue()).text()
-                    : "";
+                String summary =
+                    entry.getDescription() != null ? entry.getDescription().getValue() : "";
 
                 Article article = new Article(
                     source,
