@@ -4,15 +4,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -60,8 +61,15 @@ class ArticleControllerTest {
             mockMvc.perform(post("/api/articles/{articleId}/article-views", articleId)
                     .header("Monew-Request-User-Id", userId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.articleId").value(articleId.toString()))
-                .andExpect(jsonPath("$.userId").value(userId.toString()));
+                .andExpect(jsonPath("$.id").value(dto.id().toString()))
+                .andExpect(jsonPath("$.viewedBy").value(dto.viewedBy().toString()))
+                .andExpect(jsonPath("$.articleId").value(dto.articleId().toString()))
+                .andExpect(jsonPath("$.source").value("NAVER"))
+                .andExpect(jsonPath("$.sourceUrl").value("naver.com"))
+                .andExpect(jsonPath("$.articleTitle").value("title"))
+                .andExpect(jsonPath("$.articleSummary").value("summary"))
+                .andExpect(jsonPath("$.articleCommentCount").value(1))
+                .andExpect(jsonPath("$.articleViewCount").value(10));
         }
     }
 
@@ -75,16 +83,38 @@ class ArticleControllerTest {
             UUID userId = UUID.randomUUID();
             UUID articleId = UUID.randomUUID();
 
-            ArticleDto dto = mock(ArticleDto.class);
+            ArticleDto dto = new ArticleDto(
+                articleId,
+                "NAVER",
+                "naver.com",
+                "title",
+                LocalDateTime.of(2024, 5, 12, 12, 0),
+                "summary",
+                0,
+                0,
+                false
+            );
+
             CursorPageResponse<ArticleDto> response = new CursorPageResponse<>(
                 List.of(dto), null, null, 1, 10L, false);
 
             given(articleService.findArticles(any(), eq(userId))).willReturn(response);
 
             mockMvc.perform(get("/api/articles")
+                    .param("orderBy", "publishDate")
+                    .param("direction", "DESC")
+                    .param("limit", "10")
                     .header("Monew-Request-User-Id", userId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray());
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].id").value(articleId.toString()))
+                .andExpect(jsonPath("$.content[0].source").value("NAVER"))
+                .andExpect(jsonPath("$.content[0].sourceUrl").value("naver.com"))
+                .andExpect(jsonPath("$.content[0].title").value("title"))
+                .andExpect(jsonPath("$.content[0].summary").value("summary"))
+                .andExpect(jsonPath("$.content[0].commentCount").value(0))
+                .andExpect(jsonPath("$.content[0].viewCount").value(0))
+                .andExpect(jsonPath("$.content[0].viewedByMe").value(false));
         }
     }
 
@@ -122,7 +152,8 @@ class ArticleControllerTest {
                     .param("from", from.toString())
                     .param("to", to.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].restoredCount").value(1L));
+                .andExpect(jsonPath("$[0].restoreDate").value(from.toString()))
+                .andExpect(jsonPath("$[0].restoredArticleCount").value(1));
         }
     }
 
