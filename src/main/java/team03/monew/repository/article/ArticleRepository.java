@@ -19,6 +19,8 @@ public interface ArticleRepository extends JpaRepository<Article, UUID>, Article
 
     boolean existsByOriginalLink(String originalLink);
 
+    List<Article> findAllByPublishedAtBetween(LocalDateTime start, LocalDateTime end);
+
     @Query("""
             SELECT a FROM Article a
             WHERE a.deletedAt IS NULL
