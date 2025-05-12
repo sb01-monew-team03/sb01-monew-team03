@@ -96,7 +96,7 @@ jacoco {
 }
 
 jacocoTestReport {
-    dependsOn test // 테스트가 먼저 실행되어야 리포트 생성 가능
+    dependsOn test
 
     reports {
         xml.required = true
