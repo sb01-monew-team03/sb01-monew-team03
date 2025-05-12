@@ -16,11 +16,11 @@ CREATE TABLE users
 CREATE TABLE interests
 (
     id               UUID PRIMARY KEY,
-    name             VARCHAR(60) COLLATE  "ko_KR.utf8" NOT NULL UNIQUE,
-    subscriber_count INTEGER     NOT NULL DEFAULT 0,
-    created_at       TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    name             VARCHAR(60) COLLATE "ko_KR.utf8" NOT NULL UNIQUE,
+    subscriber_count INTEGER                          NOT NULL DEFAULT 0,
+    created_at       TIMESTAMPTZ                      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMPTZ,
-    version          INTEGER     NOT NULL DEFAULT 0
+    version          INTEGER                          NOT NULL DEFAULT 0
 );
 
 
@@ -70,7 +70,8 @@ CREATE TABLE articles
     views         INT         NOT NULL DEFAULT 0,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMPTZ NULL,
-    deleted_at    TIMESTAMPTZ NULL
+    deleted_at    TIMESTAMPTZ NULL,
+    view_count    bigint               default 0
 );
 
 -- articles 테이블 제약 조건 추가
@@ -192,7 +193,8 @@ ALTER TABLE article_view
     ADD CONSTRAINT fk_article_view_articles
         FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE;
 
-ALTER TABLE article_view ADD CONSTRAINT unique_article_user UNIQUE (article_id, user_id);
+ALTER TABLE article_view
+    ADD CONSTRAINT unique_article_user UNIQUE (article_id, user_id);
 
 -- notification 테이블 생성
 CREATE TABLE notification
@@ -204,7 +206,8 @@ CREATE TABLE notification
     message_id        UUID,
     notification_type VARCHAR(50)  NOT NULL CHECK ( notification_type IN ('INTEREST', 'COMMENT') ),
     created_at        TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMPTZ
+    updated_at        TIMESTAMPTZ,
+    resource_id       UUID         NOT NULL
 );
 
 -- notification 제약 조건 추가
@@ -215,3 +218,13 @@ ALTER TABLE notification
 ALTER TABLE notification
     ADD CONSTRAINT chk_notification_content
         CHECK (length(trim(content)) > 0);
+
+-- article_interest 테이블 생성
+CREATE TABLE article_interest
+(
+    id          UUID PRIMARY KEY,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMPTZ,
+    article_id  UUID        NOT NULL,
+    interest_id UUID        NOT NULL
+);
