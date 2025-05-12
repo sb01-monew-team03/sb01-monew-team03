@@ -6,5 +6,7 @@ import team03.monew.entity.article.Article;
 
 public interface CsvService {
 
-    Path exportArticlesToCsv(Path filePath, List<Article> articles);
+    void exportArticlesToCsv(Path filePath, List<Article> articles);
+
+    List<Article> importArticlesFromCsv(Path filePath);
 }

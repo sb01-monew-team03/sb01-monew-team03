@@ -21,6 +21,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import team03.monew.entity.article.Article;
 import team03.monew.repository.article.ArticleRepository;
 import team03.monew.service.csv.CsvService;
+import team03.monew.service.s3.S3Service;
 
 @Slf4j
 @Configuration

@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import team03.monew.dto.article.ArticleRestoreDto;
+import team03.monew.service.article.ArticleRestoreService;
 
 @Slf4j
 @Configuration
@@ -44,7 +46,7 @@ public class RestoreJobConfig {
 
                 log.info("\uD83D\uDD04 복구 작업 시작 - 기간: {} ~ {}", fromDate, toDate);
 
-                ArticleRestoreResultDto result = articleRestoreService.restore(fromDate, toDate);
+                ArticleRestoreDto result = articleRestoreService.restore(fromDate, toDate);
                 log.info("\u2705 복구 완료 - 날짜: {}, 복구된 기사 수: {}", result.restoreDate(),
                     result.restoredArticleCount());
 

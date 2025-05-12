@@ -63,6 +63,7 @@ dependencies {
 
     // CSV Reader/Writer
     implementation 'org.apache.commons:commons-csv:1.10.0'
+    implementation 'com.opencsv:opencsv:5.9'
 
     // QueryDSL - 수정된 부분
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
