@@ -74,8 +74,8 @@ public class ArticleController implements ArticleApi {
     @Override
     @GetMapping("/restore")
     public ResponseEntity<List<ArticleRestoreDto>> restore(
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to
+        @RequestParam Instant from,
+        @RequestParam Instant to
     ) {
         log.info("뉴스 복구 요청: from={}, to={}", from, to);
         List<ArticleRestoreDto> results = articleService.restore(from, to);

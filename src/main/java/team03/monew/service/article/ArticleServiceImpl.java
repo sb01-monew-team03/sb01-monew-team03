@@ -1,6 +1,7 @@
 package team03.monew.service.article;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -41,6 +42,8 @@ public class ArticleServiceImpl implements ArticleService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final InterestRepository interestRepository;
+
+    private final ArticleRestoreService articleRestoreService;
 
     @Override
     @Transactional(readOnly = true)
@@ -111,7 +114,10 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleRestoreDto> restore(Instant from, Instant to) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        LocalDate fromDate = from.atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate toDate = to.atZone(ZoneId.systemDefault()).toLocalDate();
+        ArticleRestoreDto dto = articleRestoreService.restore(fromDate, toDate);
+        return List.of(dto);
     }
 
     @Override
