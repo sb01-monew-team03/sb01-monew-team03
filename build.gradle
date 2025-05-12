@@ -102,6 +102,22 @@ jacocoTestReport {
         xml.required = true
         html.required = true
     }
+
+    afterEvaluate {// 테스트 제외
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, exclude: [
+                            '**/config/**',
+                            '**/dto/**',
+                            '**/entity/**',
+                            '**/mapper/**',
+                            '**/util/exception/**',
+                            '**/util/interest/**',
+                            '**/MonewApplication.class'
+                    ])
+                })
+        )
+    }
 }
 
 clean {
