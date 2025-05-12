@@ -142,7 +142,7 @@ public class InterestServiceImpl implements InterestService {
         paginationDto.content(),
         paginationDto.nextCursor(),
         paginationDto.nextAfter(),
-        paginationDto.size(),
+        request.limit(),
         interestRepository.totalCountInterest(request),
         paginationDto.hasNext()
     );
@@ -234,7 +234,7 @@ public class InterestServiceImpl implements InterestService {
 
     // 다음 페이지가 없는 경우
     if (interestList.size() <= request.limit()) {
-      return new PaginationDto(toDtoList(interestList, subscribedInterestIds), null, null, false, interestList.size());
+      return new PaginationDto(toDtoList(interestList, subscribedInterestIds), null, null, false);
     }
 
     // 다음 페이지가 있는 경우
@@ -247,7 +247,7 @@ public class InterestServiceImpl implements InterestService {
 
     List<InterestDto> content = toDtoList(paginatedList, subscribedInterestIds);
 
-    return new PaginationDto(content, nextCursor, nextAfter, hasNext, paginatedList.size());
+    return new PaginationDto(content, nextCursor, nextAfter, hasNext);
   }
 
   // dto 변환
