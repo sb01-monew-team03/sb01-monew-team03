@@ -21,7 +21,7 @@ import team03.monew.entity.article.Article;
 public class CsvServiceImpl implements CsvService {
 
     @Override
-    public Path exportArticlesToCsv(Path filePath, List<Article> articles) {
+    public void exportArticlesToCsv(Path filePath, List<Article> articles) {
         try (BufferedWriter writer = Files.newBufferedWriter(filePath);
             CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT
                 .withHeader("id", "source", "title", "summary", "sourceUrl", "publishDate",
@@ -44,7 +44,6 @@ public class CsvServiceImpl implements CsvService {
         }
 
         log.info("CSV 파일 성공적으로 생성됨 - 경로: {}", filePath);
-        return filePath;
     }
 
     @Override

@@ -27,18 +27,19 @@ import team03.monew.service.notification.NotificationService;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class RssFetcherService {
 
     private final ArticleRepository articleRepository;
     private final InterestMatchingService interestMatchingService;
     private final NotificationService notificationService;
 
+    @Transactional
     public void fetchAll() {
         List<Article> allSavedArticles = new ArrayList<>();
 
         allSavedArticles.addAll(fetchFrom("https://www.hankyung.com/feed/all-news", "HANKYUNG"));
-        allSavedArticles.addAll(fetchFrom("https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml", "CHOSUN"));
+        allSavedArticles.addAll(
+            fetchFrom("https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml", "CHOSUN"));
         //allSavedArticles.addAll(fetchFrom("http://www.yonhapnewstv.co.kr/browse/feed/", "YONHAP"));
 
         // 모든 기사가 저장된 후 알림 생성
@@ -109,7 +110,8 @@ public class RssFetcherService {
                     if (!interests.isEmpty()) {
                         for (Interest interest : interests) {
                             // ArticleInterest 관계 생성 및 추가
-                            ArticleInterest articleInterest = new ArticleInterest(article, interest);
+                            ArticleInterest articleInterest = new ArticleInterest(article,
+                                interest);
                             article.getInterests().add(articleInterest);
                             totalInterestsAttached++;
                         }
