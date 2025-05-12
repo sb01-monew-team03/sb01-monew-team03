@@ -1,5 +1,6 @@
 package team03.monew.service.article;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import jakarta.transaction.Transactional;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -32,11 +33,16 @@ public class ArticleRestoreServiceImpl implements ArticleRestoreService {
         List<Article> allRestoredArticles = new ArrayList<>();
 
         for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
-            Path csvPath = s3Service.download(date);
-            List<Article> articlesFromCsv = csvService.importArticlesFromCsv(csvPath);
-
-            log.info("{} 날짜의 CSV에서 {}개의 기사 로드됨", date, articlesFromCsv.size());
-            allRestoredArticles.addAll(articlesFromCsv);
+            try {
+                Path csvPath = s3Service.download(date);
+                List<Article> articlesFromCsv = csvService.importArticlesFromCsv(csvPath);
+                log.info("{} 날짜의 CSV에서 {}개의 기사 로드됨", date, articlesFromCsv.size());
+                allRestoredArticles.addAll(articlesFromCsv);
+            } catch (AmazonS3Exception e) {
+                log.warn("{} 날짜의 CSV 파일이 존재하지 않음, 건너뜀: {}", date, e.getMessage());
+            } catch (Exception e) {
+                log.error("{} 날짜의 CSV 처리 중 예외 발생: {}", date, e.getMessage(), e);
+            }
         }
 
         Map<String, Article> existingMap = articleRepository.findAll().stream()
