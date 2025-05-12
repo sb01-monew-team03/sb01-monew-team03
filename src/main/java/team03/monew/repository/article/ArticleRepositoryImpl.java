@@ -84,7 +84,8 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
 
         JPAQuery<Article> query = queryFactory
             .selectFrom(article)
-            .leftJoin(article.interests, interest);
+            .distinct()
+            .leftJoin(article.interests);
 
         if ("commentCount".equalsIgnoreCase(orderBy)) {
             query.leftJoin(comment).on(comment.article.eq(article));
