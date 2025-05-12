@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +32,6 @@ import team03.monew.dto.common.CursorPageResponse;
 import team03.monew.dto.notification.NotificationDto;
 import team03.monew.dto.notification.ResourceType;
 import team03.monew.entity.article.Article;
-import team03.monew.entity.article.ArticleInterest;
 import team03.monew.entity.comments.Comment;
 import team03.monew.entity.interest.Interest;
 import team03.monew.entity.interest.Subscription;
@@ -42,6 +40,7 @@ import team03.monew.entity.user.User;
 import team03.monew.entity.user.User.Role;
 import team03.monew.mapper.notification.NotificationMapper;
 import team03.monew.repository.comments.CommentRepository;
+import team03.monew.repository.interest.interest.InterestRepository;
 import team03.monew.repository.notification.NotificationRepository;
 import team03.monew.repository.interest.subscription.SubscriptionRepository;
 import team03.monew.repository.user.UserRepository;
@@ -67,6 +66,9 @@ class NotificationServiceImplTest {
     @Mock
     private SubscriptionRepository subscriptionRepository;
 
+    @Mock
+    private InterestRepository interestRepository;
+
     @InjectMocks
     private NotificationServiceImpl notificationService;
 
@@ -79,48 +81,76 @@ class NotificationServiceImplTest {
     private Subscription subscription;
     private List<Article> articles;
     private List<Subscription> subscriptions;
-    private List<Interest> interests;
+    private Set<Interest> interests;
 
     @BeforeEach
     void setUp() {
         user = new User("test", "test@test.com", "qwer1234", Role.USER);
 
-        article = new Article("NAVER", "https://test.com", "test", "test summary",
-            LocalDateTime.now());
-        articles = Arrays.asList(article);
-
-        subscription = new Subscription(user, interest);
-        subscriptions = List.of(subscription);
-
         String name = "test";
         List<String> keywords = List.of("java", "spring");
         interest = new Interest(name);
         interest.updateKeywords(keywords);
-        interests = new ArrayList<>();
+
+        // interest에 ID 설정 (ReflectionTestUtils 사용)
+        UUID interestId = UUID.randomUUID();
+        ReflectionTestUtils.setField(interest, "id", interestId);
+
+        subscription = new Subscription(user, interest);
+        subscriptions = List.of(subscription);
+
+        article = new Article("NAVER", "https://test.com", "test", "test summary",
+            LocalDateTime.now());
+        articles = Arrays.asList(article);
+
+        interests = new HashSet<>();
         interests.add(interest);
-        ArticleInterest articleInterest = new ArticleInterest(article, interest);
-        Set<ArticleInterest> interestSet = new HashSet<>();
-        interestSet.add(articleInterest);
-        article.updateInterests(interestSet);
+        article.updateInterests(interests);
 
         comment = new Comment("Nice article!", user, article);
+
+        // DTO 생성 (반환될 DTO도 생성)
+        notificationDto = new NotificationDto(
+            UUID.randomUUID(),
+            Instant.now(),
+            null,
+            false,
+            user.getId() != null ? user.getId() : UUID.randomUUID(),
+            "[test] 와 관련된 기사가 1건 등록되었습니다.",
+            ResourceType.INTEREST,
+            interestId
+        );
     }
 
     @Test
     @DisplayName("구독(관심사) 알림 생성 테스트")
     void createInterestNotificationTest() {
-        given(subscriptionRepository.findAllByInterest(any(Interest.class))).willReturn(
-            subscriptions);
+        UUID interestId = interest.getId();
+        given(interestRepository.findById(interestId)).willReturn(Optional.of(interest));
 
-        notification = new Notification(user, "테스트 알림", ResourceType.INTEREST, interest.getId());
+        // ArticleInterest 관계가 필요한 경우 추가 설정
+
+        // 구독자 리스트 반환
+        given(subscriptionRepository.findAllByInterest(interest)).willReturn(subscriptions);
+
+        // 알림 생성
+        notification = new Notification(user, "[test] 와 관련된 기사가 1건 등록되었습니다.", ResourceType.INTEREST, interestId);
+        ReflectionTestUtils.setField(notification, "id", UUID.randomUUID());
+
+        // 저장 및 변환 모킹
         given(notificationRepository.save(any(Notification.class))).willReturn(notification);
+        given(notificationMapper.toDto(any(Notification.class))).willReturn(notificationDto);
 
+        // When
         List<NotificationDto> result = notificationService.createInterestNotification(articles);
 
+        // Then
         assertThat(result).isNotEmpty();
         assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(notificationDto);
 
-        verify(subscriptionRepository).findAllByInterest(any(Interest.class));
+        verify(interestRepository).findById(interestId);
+        verify(subscriptionRepository).findAllByInterest(interest);
         verify(notificationRepository).save(any(Notification.class));
         verify(notificationMapper).toDto(any(Notification.class));
     }
