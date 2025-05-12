@@ -197,10 +197,11 @@ public class NotificationServiceImpl implements NotificationService {
       throw UserNotFoundException.withId(userId);
     }
 
+    int pageSize = (limit == null || limit < 1) ? 50 : limit;
+
     try {
-      Pageable pageable = PageRequest.of(0, limit, Sort.by(Direction.ASC, "createdAt"));
-      Page<Notification> pages = notificationRepository.findPageWithCursor(userId, cursor,
-          pageable);
+      Pageable pageable = PageRequest.of(0, pageSize, Sort.by(Direction.DESC, "createdAt"));
+      Page<Notification> pages = notificationRepository.findPageWithCursor(userId, cursor, pageable);
 
       List<NotificationDto> notificationDtos = pages.getContent()
           .stream()
