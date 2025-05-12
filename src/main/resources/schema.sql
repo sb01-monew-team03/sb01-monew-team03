@@ -99,6 +99,19 @@ ALTER TABLE articles
         CHECK (updated_at >= created_at);
 
 
+-- 관심사 관련 기사 테이블 생성
+CREATE TABLE article_interest
+(
+    id          UUID                     NOT NULL PRIMARY KEY,
+    article_id  UUID                     NOT NULL,
+    interest_id UUID                     NOT NULL,
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE NULL,
+    FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE,
+    FOREIGN KEY (interest_id) REFERENCES interests (id) ON DELETE CASCADE,
+    UNIQUE (article_id, interest_id)
+);
+
 -- 댓글 테이블 생성
 CREATE TABLE comments
 (
@@ -179,10 +192,7 @@ ALTER TABLE article_view
     ADD CONSTRAINT fk_article_view_articles
         FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE;
 
-ALTER TABLE article_view
-    ADD CONSTRAINT fk_article_view_users
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL;
-
+ALTER TABLE article_view ADD CONSTRAINT unique_article_user UNIQUE (article_id, user_id);
 
 -- notification 테이블 생성
 CREATE TABLE notification
