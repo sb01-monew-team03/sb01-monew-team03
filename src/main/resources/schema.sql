@@ -70,7 +70,8 @@ CREATE TABLE articles
     views         INT         NOT NULL DEFAULT 0,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMPTZ NULL,
-    deleted_at    TIMESTAMPTZ NULL
+    deleted_at    TIMESTAMPTZ NULL,
+    view_count    bigint default 0
 );
 
 -- articles 테이블 제약 조건 추가
@@ -215,3 +216,13 @@ ALTER TABLE notification
 ALTER TABLE notification
     ADD CONSTRAINT chk_notification_content
         CHECK (length(trim(content)) > 0);
+
+-- article_interest 테이블 생성
+CREATE TABLE article_interest
+(
+    id                UUID PRIMARY KEY,
+    created_at        TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMPTZ,
+    article_id        UUID NOT NULL,
+    interest_id       UUID NOT NULL
+);
