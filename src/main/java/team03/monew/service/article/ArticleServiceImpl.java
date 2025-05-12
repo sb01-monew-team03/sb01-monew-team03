@@ -50,7 +50,7 @@ public class ArticleServiceImpl implements ArticleService {
             ? LocalDateTime.ofInstant(request.publishDateTo(), ZoneId.systemDefault())
             : null;
         LocalDateTime after = request.after() != null
-            ? LocalDateTime.parse(request.after())
+            ? LocalDateTime.ofInstant(request.after(), ZoneId.systemDefault())
             : null;
 
         List<Article> articles = articleRepository.findAllByCursor(
